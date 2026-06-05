@@ -1,0 +1,24 @@
+{
+  "//": "Compila SOLO la capa domain de forma aislada. Sin libs de RN/DOM ni @types globales: si un archivo de domain importa React Native, Expo, o cualquier API del navegador, tsc falla aquí. Es la barrera mecánica que mantiene domain puro y portable a Kotlin/Swift. Correr con: npm run typecheck:domain",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "types": [],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "paths": {
+      "@domain/*": ["./src/domain/*"]
+    }
+  },
+  "include": ["src/domain/**/*.ts"],
+  "exclude": ["src/domain/**/*.test.ts"]
+}
