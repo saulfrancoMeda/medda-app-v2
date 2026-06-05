@@ -1,46 +1,49 @@
 // @ts-check
 /**
  * Tokens del design system = FUENTE ÚNICA de verdad.
- * Este archivo es CommonJS a propósito: lo consume `tailwind.config.js` (require) Y el
- * código TS de la app (import). Así las utilidades NativeWind y los estilos imperativos
- * nunca divergen.
+ * CommonJS a propósito: lo consume `tailwind.config.js` (require) Y el código TS (import),
+ * para que utilidades NativeWind y estilos imperativos nunca diverjan.
  *
- * ⚠️ COLORES PLACEHOLDER: el scrape de https://meda.com.mx no expuso los hex/tipografías
- * reales. Reemplazar `colors.brand`, `fontFamily` y la tipografía con los valores del
- * manual de marca (o inspeccionando las variables CSS del sitio en vivo) en la Fase 0.
+ * Branding REAL extraído de meda.com.mx (estilo Binance): dorado #FCD535 sobre fondos
+ * oscuros. Regla UX: el texto sobre el dorado va en oscuro (`ink`), no blanco.
+ * Fuente de marca: "Binance Plex" (≈ IBM Plex Sans, alternativa libre) — pendiente cargar el .ttf.
  */
 
-/** Paleta. `brand` = primario; `neutral` = grises; semánticos para estados. */
 const colors = {
+  // Dorado de marca (#FCD535). 500 = primario; 600/700 = hover/pressed (de #D7A300/#C99400).
   brand: {
-    50: '#e9f9f3',
-    100: '#c9efe0',
-    200: '#97e0c5',
-    300: '#5fcaa5',
-    400: '#2faE86',
-    500: '#0f9a72', // primario (PLACEHOLDER — verde fintech)
-    600: '#0a7d5d',
-    700: '#0a634a',
-    800: '#0b4d3b',
-    900: '#0a3f31',
+    50: '#fffceb',
+    100: '#fff6c5',
+    200: '#ffec85',
+    300: '#ffde46',
+    400: '#fcd535', // primario
+    500: '#fcd535',
+    600: '#d7a300',
+    700: '#c99400',
+    800: '#a37400',
+    900: '#785400',
   },
+  // Neutros: claros arriba, oscuros de marca abajo (#929aa5 tenue, #060612 fondo más oscuro).
   neutral: {
     0: '#ffffff',
-    50: '#f7f8f8',
-    100: '#eef0f1',
-    200: '#dfe3e5',
-    300: '#c4cacd',
-    400: '#9aa3a8',
-    500: '#6f797e',
-    600: '#525b5f',
-    700: '#3c4346',
-    800: '#262b2d',
-    900: '#14181a',
+    50: '#f9fafb',
+    100: '#f5f6fa',
+    200: '#e4e7eb',
+    300: '#cbd2d9',
+    400: '#929aa5',
+    500: '#6b7280',
+    600: '#4b5563',
+    700: '#252525',
+    800: '#121212',
+    900: '#0a0f14',
+    950: '#060612',
   },
-  success: '#15a34a',
-  warning: '#d97706',
-  danger: '#dc2626',
-  info: '#2563eb',
+  // Texto/elementos oscuros sobre fondos claros o sobre el dorado.
+  ink: '#060612',
+  success: '#2e7d32',
+  warning: '#ed6c02',
+  danger: '#f44336',
+  info: '#1976d2',
 };
 
 /** Escala de espaciado 4pt. Se usa como `p-md`, `gap-lg`, etc. */
@@ -75,7 +78,7 @@ const fontSize = {
   display: ['34px', { lineHeight: '40px' }],
 };
 
-/** Familias. PLACEHOLDER: ajustar a la fuente de marca de Medá. */
+/** Familias. Marca = "Binance Plex" (≈ IBM Plex Sans). System hasta cargar el .ttf. */
 const fontFamily = {
   sans: ['System'],
 };
