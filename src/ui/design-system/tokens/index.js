@@ -4,7 +4,7 @@
  * (require) y el código TS (import).
  *
  * Paleta REAL del legacy (app/assets/commonStyles.js): dorado de marca #FCD535 + tinta #0A0F14,
- * fondos claros, link azul #3b82f6, semánticos Tailwind. Soporta light (default) y dark.
+ * fondos claros, links en DORADO (#c99400), semánticos Tailwind. Soporta light (default) y dark.
  * Color sobre el dorado = oscuro (`ink`).
  */
 
@@ -38,19 +38,12 @@ const colors = {
     950: '#060612',
   },
   ink: '#0a0f14', // texto sobre el dorado / texto principal en light
-  link: '#3b82f6', // "Recuperar contraseña", "Registrarme"
+  // Rebrand: links/acentos en DORADO (no azul). Sin morado ni azul en toda la app.
+  link: '#c99400', // "Recuperar contraseña", "Registrarme", teléfono, CONDUSEF
   success: '#10b981',
   warning: '#f59e0b',
   danger: '#ef4444',
-  info: '#3b82f6',
-  // Acentos del legacy (por feature)
-  orange: '#ff9222', // monto Mi billetera
-  orangeStrong: '#ff7d00', // círculo Mi billetera
-  violet: '#6330d3', // monto/círculo Mis gastos, historial
-  violetStrong: '#8428da', // card Pago de servicios
-  violetSoft: '#efeafb', // fondo historial de aclaraciones
-  blueAccent: '#1468c5', // card Chatea con nosotros
-  blueLink: '#47a3e0', // Mi QR / teléfono
+  info: '#c99400',
 };
 
 const spacing = {

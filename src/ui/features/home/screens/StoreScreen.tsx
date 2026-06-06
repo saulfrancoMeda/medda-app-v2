@@ -24,6 +24,7 @@ const formatLastLogin = (iso?: string): string => {
 function AmountRow({
   icon,
   circle,
+  iconColor,
   label,
   amountClass,
   value,
@@ -31,6 +32,7 @@ function AmountRow({
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   circle: string;
+  iconColor: string;
   label: string;
   amountClass: string;
   value?: number;
@@ -43,7 +45,7 @@ function AmountRow({
       className="flex-row items-center gap-md border-b border-neutral-100 py-md dark:border-neutral-800"
     >
       <View className={`h-12 w-12 items-center justify-center rounded-pill ${circle}`}>
-        <Ionicons name={icon} size={22} color="#ffffff" />
+        <Ionicons name={icon} size={22} color={iconColor} />
       </View>
       <View className="flex-1">
         <Text variant="body" tone="muted">
@@ -86,8 +88,8 @@ export function StoreScreen() {
             {p ? `${p.firstName} ${p.lastName}` : 'Bienvenido'}
           </Text>
           <Pressable className="items-center" accessibilityRole="button">
-            <Ionicons name="qr-code-outline" size={26} color="#47a3e0" />
-            <Text variant="caption" className="text-blueLink">
+            <Ionicons name="qr-code-outline" size={26} color="#c99400" />
+            <Text variant="caption" tone="link">
               Mi QR
             </Text>
           </Pressable>
@@ -97,17 +99,19 @@ export function StoreScreen() {
         <View>
           <AmountRow
             icon="cash-outline"
-            circle="bg-orangeStrong"
+            circle="bg-brand-500"
+            iconColor="#0a0f14"
             label="Mi billetera"
-            amountClass="text-orange"
+            amountClass="text-brand-700"
             value={balance.data}
             onPress={() => tabNav.navigate('Wallet')}
           />
           <AmountRow
             icon="receipt-outline"
-            circle="bg-violet"
+            circle="bg-neutral-800"
+            iconColor="#ffffff"
             label="Mis gastos"
-            amountClass="text-violet"
+            amountClass="text-neutral-900 dark:text-neutral-50"
             value={salesTotal.data}
             onPress={() => tabNav.navigate('Sales')}
           />
@@ -117,10 +121,10 @@ export function StoreScreen() {
         <Pressable
           onPress={() => stackNav.navigate('ServicePayments')}
           accessibilityRole="button"
-          className="flex-row items-center justify-between overflow-hidden rounded-card bg-violetStrong p-lg"
+          className="flex-row items-center justify-between overflow-hidden rounded-card bg-brand-500 p-lg"
         >
-          <Text variant="h2" className="flex-1 text-neutral-0">
-            Pago de servicios
+          <Text variant="h2" className="flex-1 text-ink">
+            Pago de servicios, tiempo aire y recargas
           </Text>
           <Image source={pagoIllustration} style={{ width: 72, height: 72 }} resizeMode="contain" />
         </Pressable>

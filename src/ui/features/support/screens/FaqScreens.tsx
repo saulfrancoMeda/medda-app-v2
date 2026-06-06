@@ -43,18 +43,18 @@ export function FaqListScreen({ navigation }: ListProps) {
             <Pressable
               onPress={() => navigation.navigate('Chat')}
               accessibilityRole="button"
-              className="flex-row items-center gap-md rounded-card bg-blueAccent p-lg"
+              className="flex-row items-center gap-md rounded-card bg-brand-500 p-lg"
             >
-              <Ionicons name="chatbubbles" size={26} color="#ffffff" />
+              <Ionicons name="chatbubbles" size={26} color="#0a0f14" />
               <View className="flex-1">
-                <Text variant="body" className="font-semibold text-neutral-0">
+                <Text variant="body" className="font-semibold text-ink">
                   Chatea con nosotros
                 </Text>
-                <Text variant="caption" className="text-neutral-0">
+                <Text variant="caption" className="text-ink">
                   Para aclarar tus dudas
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#ffffff" />
+              <Ionicons name="chevron-forward" size={20} color="#0a0f14" />
             </Pressable>
             <Text variant="h2">Preguntas frecuentes</Text>
           </View>
@@ -85,19 +85,19 @@ export function FaqListScreen({ navigation }: ListProps) {
             <Pressable
               onPress={() => navigation.navigate('Clarifications')}
               accessibilityRole="button"
-              className="flex-row items-center justify-between rounded-card bg-violetSoft p-lg"
+              className="flex-row items-center justify-between rounded-card bg-brand-50 p-lg"
             >
-              <Text variant="body" className="font-semibold text-violet">
+              <Text variant="body" className="font-semibold text-brand-700">
                 Ver historial de aclaraciones
               </Text>
-              <Ionicons name="chevron-forward" size={20} color="#6330d3" />
+              <Ionicons name="chevron-forward" size={20} color="#c99400" />
             </Pressable>
             {config.supportPhone ? (
               <Text variant="caption" tone="muted" center>
                 Contacta al Centro de Atención llamando al{' '}
                 <Text
                   variant="caption"
-                  className="text-blueLink"
+                  tone="link"
                   onPress={() => Linking.openURL(`tel:${config.supportPhone}`)}
                 >
                   {config.supportPhone}

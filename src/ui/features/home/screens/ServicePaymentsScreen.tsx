@@ -21,7 +21,7 @@ export function ServicePaymentsScreen() {
             accessibilityRole="button"
             className="w-[30%] items-center gap-sm rounded-card border border-neutral-200 p-md dark:border-neutral-800"
           >
-            <Ionicons name="flash-outline" size={26} color="#8428da" />
+            <Ionicons name="flash-outline" size={26} color="#d7a300" />
             <Text variant="caption" center>
               {c.name}
             </Text>

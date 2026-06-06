@@ -60,7 +60,7 @@ export function CashOutMethodsScreen({ navigation }: MethodsProps) {
       </Text>
       <MethodRow
         icon="person-circle"
-        iconColor="#47a3e0"
+        iconColor="#d7a300"
         title="Envía a un usuario Medá"
         onPress={() =>
           Alert.alert('Próximamente', 'El envío a usuarios Medá (QR) estará disponible pronto.')
@@ -68,7 +68,7 @@ export function CashOutMethodsScreen({ navigation }: MethodsProps) {
       />
       <MethodRow
         icon="paper-plane"
-        iconColor="#47a3e0"
+        iconColor="#d7a300"
         title="Transferencia SPEI a Terceros"
         onPress={() => navigation.navigate('CashOutSpeiForm')}
       />
