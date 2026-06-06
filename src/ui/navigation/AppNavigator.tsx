@@ -5,7 +5,7 @@ import { useColorScheme } from 'nativewind';
 import { WalletStackNavigator } from '@ui/navigation/WalletStackNavigator';
 import { SectionsStackNavigator } from '@ui/navigation/SectionsStackNavigator';
 import { FaqStackNavigator } from '@ui/navigation/FaqStackNavigator';
-import { StoreScreen } from '@ui/features/home/screens/StoreScreen';
+import { StoreStackNavigator } from '@ui/navigation/StoreStackNavigator';
 import { SalesScreen } from '@ui/features/wallet/screens/SalesScreen';
 import { DrawerContent } from '@ui/navigation/DrawerContent';
 import type { AppDrawerParamList, AppTabsParamList } from '@ui/navigation/types';
@@ -35,7 +35,7 @@ function MainTabs() {
         },
       })}
     >
-      <Tabs.Screen name="Store" component={StoreScreen} options={{ title: 'Inicio' }} />
+      <Tabs.Screen name="Store" component={StoreStackNavigator} options={{ title: 'Inicio' }} />
       <Tabs.Screen name="Sales" component={SalesScreen} options={{ title: 'Mis gastos' }} />
       <Tabs.Screen name="Wallet" component={WalletStackNavigator} options={{ title: 'Mi Billetera' }} />
       <Tabs.Screen name="Faq" component={FaqStackNavigator} options={{ title: 'Ayuda' }} />

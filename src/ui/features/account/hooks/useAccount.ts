@@ -13,6 +13,18 @@ export function useProfile() {
   });
 }
 
+export function useBeneficiaries() {
+  const { accountRepository } = useContainer();
+  return useQuery({
+    queryKey: ['account', 'beneficiaries'],
+    queryFn: async () => {
+      const res = await accountRepository.getBeneficiaries();
+      if (!res.ok) throw res.error;
+      return res.value;
+    },
+  });
+}
+
 export function useStatements() {
   const { accountRepository } = useContainer();
   return useQuery({

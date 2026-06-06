@@ -30,19 +30,28 @@ export type AppTabsParamList = {
   Sections: NavigatorScreenParams<SectionsStackParamList>;
 };
 
+export type StoreStackParamList = {
+  StoreHome: undefined;
+  ServicePayments: undefined;
+};
+
 export type FaqStackParamList = {
   FaqList: undefined;
   FaqDetail: { item: FaqItem };
   Chat: undefined;
+  Clarifications: undefined;
 };
 
 export type SectionsStackParamList = {
   Profile: undefined;
   Legal: undefined;
   Statements: undefined;
+  Beneficiaries: undefined;
   Security: undefined;
   ChangePassword: undefined;
   ChangeNip: undefined;
+  ChangeEmail: undefined;
+  ChangeNumber: undefined;
 };
 
 export type AppDrawerParamList = {

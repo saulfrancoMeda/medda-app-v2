@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView } from 'react-native';
+import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { isValidNip } from '@domain/wallet/entities/Transfer';
@@ -19,17 +19,32 @@ const accountErrorMessage = (e: AccountError): string =>
       : e.message || 'No se pudo completar la operación';
 
 // --- Menú de seguridad ------------------------------------------------------
-function Row({ icon, title, onPress }: { icon: keyof typeof Ionicons.glyphMap; title: string; onPress: () => void }) {
+function Row({
+  icon,
+  title,
+  subtitle,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  subtitle: string;
+  onPress: () => void;
+}) {
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      className="flex-row items-center gap-md rounded-card border border-neutral-200 p-lg dark:border-neutral-800"
+      className="flex-row items-center gap-md border-b border-neutral-100 py-lg dark:border-neutral-800"
     >
-      <Ionicons name={icon} size={22} color="#d7a300" />
-      <Text variant="body" className="flex-1">
-        {title}
-      </Text>
+      <Ionicons name={icon} size={24} color="#d7a300" />
+      <View className="flex-1">
+        <Text variant="body" className="font-semibold">
+          {title}
+        </Text>
+        <Text variant="caption" tone="muted">
+          {subtitle}
+        </Text>
+      </View>
       <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
     </Pressable>
   );
@@ -39,9 +54,31 @@ type SecurityProps = NativeStackScreenProps<SectionsStackParamList, 'Security'>;
 
 export function SecurityScreen({ navigation }: SecurityProps) {
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
-      <Row icon="lock-closed-outline" title="Cambiar mi contraseña" onPress={() => navigation.navigate('ChangePassword')} />
-      <Row icon="keypad-outline" title="Cambiar mi NIP" onPress={() => navigation.navigate('ChangeNip')} />
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="p-lg">
+      <Row
+        icon="lock-closed-outline"
+        title="Cambiar mi contraseña"
+        subtitle="Usas esta contraseña para iniciar sesión"
+        onPress={() => navigation.navigate('ChangePassword')}
+      />
+      <Row
+        icon="keypad-outline"
+        title="Cambiar mi NIP"
+        subtitle="Usas este NIP para autorizar transacciones"
+        onPress={() => navigation.navigate('ChangeNip')}
+      />
+      <Row
+        icon="call-outline"
+        title="Cambiar mi número"
+        subtitle="Usas este número como identificador de tu cuenta"
+        onPress={() => navigation.navigate('ChangeNumber')}
+      />
+      <Row
+        icon="mail-outline"
+        title="Cambiar mi correo"
+        subtitle="Usas este correo para recibir toda la información de tu cuenta"
+        onPress={() => navigation.navigate('ChangeEmail')}
+      />
     </ScrollView>
   );
 }
@@ -149,6 +186,141 @@ export function ChangeNipScreen({ navigation }: ChangeNipProps) {
         error={confirm.length > 0 && confirm !== newNip ? 'No coincide' : error}
       />
       <Button title="Guardar" full loading={loading} disabled={!valid} onPress={onSave} />
+    </ScrollView>
+  );
+}
+
+// --- Cambiar correo ---------------------------------------------------------
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+type ChangeEmailProps = NativeStackScreenProps<SectionsStackParamList, 'ChangeEmail'>;
+
+export function ChangeEmailScreen({ navigation }: ChangeEmailProps) {
+  const { accountRepository } = useContainer();
+  const [email, setEmail] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [nipVisible, setNipVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [nipError, setNipError] = useState<string | undefined>(undefined);
+  const valid = EMAIL_RE.test(email) && email === confirm;
+
+  const authorize = async (nip: string) => {
+    setLoading(true);
+    setNipError(undefined);
+    const res = await accountRepository.changeEmail(email, nip);
+    setLoading(false);
+    if (!res.ok) {
+      setNipError(accountErrorMessage(res.error));
+      return;
+    }
+    setNipVisible(false);
+    Alert.alert('Listo', 'Tu correo se actualizó correctamente.');
+    navigation.goBack();
+  };
+
+  return (
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
+      <Input label="Nuevo correo" keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} />
+      <Input
+        label="Confirmar correo"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        value={confirm}
+        onChangeText={setConfirm}
+        error={confirm.length > 0 && confirm !== email ? 'No coincide' : undefined}
+      />
+      <Button title="Guardar" full disabled={!valid} onPress={() => setNipVisible(true)} />
+      <NipModal
+        visible={nipVisible}
+        loading={loading}
+        error={nipError}
+        onSubmit={authorize}
+        onClose={() => setNipVisible(false)}
+      />
+    </ScrollView>
+  );
+}
+
+// --- Cambiar número (nuevo número + NIP -> código SMS -> confirmar) ----------
+type ChangeNumberProps = NativeStackScreenProps<SectionsStackParamList, 'ChangeNumber'>;
+
+export function ChangeNumberScreen({ navigation }: ChangeNumberProps) {
+  const { accountRepository } = useContainer();
+  const [phone, setPhone] = useState('');
+  const [code, setCode] = useState('');
+  const [nip, setNip] = useState('');
+  const [sent, setSent] = useState(false);
+  const [nipVisible, setNipVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  const sendCode = async (enteredNip: string) => {
+    setLoading(true);
+    setError(undefined);
+    const res = await accountRepository.sendNumberChangeCode(phone, enteredNip);
+    setLoading(false);
+    if (!res.ok) {
+      setError(accountErrorMessage(res.error));
+      return;
+    }
+    setNip(enteredNip);
+    setNipVisible(false);
+    setSent(true);
+  };
+
+  const confirm = async () => {
+    setLoading(true);
+    setError(undefined);
+    const res = await accountRepository.setNumber(phone, code, nip);
+    setLoading(false);
+    if (!res.ok) {
+      setError(accountErrorMessage(res.error));
+      return;
+    }
+    Alert.alert('Listo', 'Tu número se actualizó. Vuelve a iniciar sesión con el nuevo número.');
+    navigation.goBack();
+  };
+
+  return (
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
+      {!sent ? (
+        <>
+          <Input
+            label="Nuevo número (10 dígitos)"
+            keyboardType="number-pad"
+            maxLength={10}
+            value={phone}
+            onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, ''))}
+          />
+          <Button
+            title="Enviar código"
+            full
+            disabled={phone.length !== 10}
+            onPress={() => setNipVisible(true)}
+          />
+        </>
+      ) : (
+        <>
+          <Text variant="body" tone="muted">
+            Ingresa el código que enviamos por SMS al {phone}.
+          </Text>
+          <Input
+            label="Código"
+            keyboardType="number-pad"
+            maxLength={6}
+            value={code}
+            onChangeText={(t) => setCode(t.replace(/[^0-9]/g, ''))}
+            error={error}
+          />
+          <Button title="Confirmar" full loading={loading} disabled={code.length < 4} onPress={confirm} />
+        </>
+      )}
+      <NipModal
+        visible={nipVisible}
+        loading={loading}
+        error={error}
+        onSubmit={sendCode}
+        onClose={() => setNipVisible(false)}
+      />
     </ScrollView>
   );
 }

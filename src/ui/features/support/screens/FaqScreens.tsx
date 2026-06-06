@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { config } from '@config/env';
 import { AppHeader } from '@ui/navigation/AppHeader';
-import { Button, Input, Text } from '@ui/design-system/components';
+import { Input, Text } from '@ui/design-system/components';
 import { useFaqs } from '@ui/features/support/hooks/useSupport';
 import type { FaqStackParamList } from '@ui/navigation/types';
 
@@ -43,18 +43,20 @@ export function FaqListScreen({ navigation }: ListProps) {
             <Pressable
               onPress={() => navigation.navigate('Chat')}
               accessibilityRole="button"
-              className="flex-row items-center gap-md rounded-card bg-brand-500 p-lg"
+              className="flex-row items-center gap-md rounded-card bg-blueAccent p-lg"
             >
-              <Ionicons name="chatbubbles" size={24} color="#0a0f14" />
+              <Ionicons name="chatbubbles" size={26} color="#ffffff" />
               <View className="flex-1">
-                <Text variant="body" className="font-semibold text-ink">
+                <Text variant="body" className="font-semibold text-neutral-0">
                   Chatea con nosotros
                 </Text>
-                <Text variant="caption" className="text-ink">
+                <Text variant="caption" className="text-neutral-0">
                   Para aclarar tus dudas
                 </Text>
               </View>
+              <Ionicons name="chevron-forward" size={20} color="#ffffff" />
             </Pressable>
+            <Text variant="h2">Preguntas frecuentes</Text>
           </View>
         }
         renderItem={({ item }) => (
@@ -79,15 +81,30 @@ export function FaqListScreen({ navigation }: ListProps) {
           )
         }
         ListFooterComponent={
-          config.supportPhone ? (
-            <Button
-              title={`Llamar al Centro de Atención`}
-              variant="outline"
-              full
-              className="mt-lg"
-              onPress={() => Linking.openURL(`tel:${config.supportPhone}`)}
-            />
-          ) : null
+          <View className="mt-lg gap-md">
+            <Pressable
+              onPress={() => navigation.navigate('Clarifications')}
+              accessibilityRole="button"
+              className="flex-row items-center justify-between rounded-card bg-violetSoft p-lg"
+            >
+              <Text variant="body" className="font-semibold text-violet">
+                Ver historial de aclaraciones
+              </Text>
+              <Ionicons name="chevron-forward" size={20} color="#6330d3" />
+            </Pressable>
+            {config.supportPhone ? (
+              <Text variant="caption" tone="muted" center>
+                Contacta al Centro de Atención llamando al{' '}
+                <Text
+                  variant="caption"
+                  className="text-blueLink"
+                  onPress={() => Linking.openURL(`tel:${config.supportPhone}`)}
+                >
+                  {config.supportPhone}
+                </Text>
+              </Text>
+            ) : null}
+          </View>
         }
       />
     </SafeAreaView>
@@ -113,6 +130,19 @@ export function FaqDetailScreen({ route }: DetailProps) {
         source={{ html: htmlDocument(item.response) }}
         style={{ flex: 1, backgroundColor: 'transparent' }}
       />
+    </View>
+  );
+}
+
+export function ClarificationsScreen() {
+  return (
+    <View className="flex-1 items-center justify-center bg-neutral-0 px-lg dark:bg-neutral-950">
+      <Text variant="h2" center>
+        Historial de aclaraciones
+      </Text>
+      <Text variant="body" tone="muted" center>
+        Aquí verás tus aclaraciones. Próximamente.
+      </Text>
     </View>
   );
 }

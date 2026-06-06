@@ -1,9 +1,15 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useColorScheme } from 'nativewind';
 import { ProfileScreen } from '@ui/features/account/screens/AccountScreens';
-import { LegalScreen, StatementsScreen } from '@ui/features/account/screens/LegalScreens';
 import {
+  BeneficiariesScreen,
+  LegalScreen,
+  StatementsScreen,
+} from '@ui/features/account/screens/LegalScreens';
+import {
+  ChangeEmailScreen,
   ChangeNipScreen,
+  ChangeNumberScreen,
   ChangePasswordScreen,
   SecurityScreen,
 } from '@ui/features/account/screens/SecurityScreens';
@@ -28,9 +34,12 @@ export function SectionsStackNavigator() {
       <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Mi perfil' }} />
       <Stack.Screen name="Legal" component={LegalScreen} options={{ title: 'Legales y Estado de cuenta' }} />
       <Stack.Screen name="Statements" component={StatementsScreen} options={{ title: 'Estado de cuenta' }} />
+      <Stack.Screen name="Beneficiaries" component={BeneficiariesScreen} options={{ title: 'Mis beneficiarios' }} />
       <Stack.Screen name="Security" component={SecurityScreen} options={{ title: 'Seguridad' }} />
       <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ title: 'Cambiar contraseña' }} />
       <Stack.Screen name="ChangeNip" component={ChangeNipScreen} options={{ title: 'Cambiar NIP' }} />
+      <Stack.Screen name="ChangeEmail" component={ChangeEmailScreen} options={{ title: 'Cambiar correo' }} />
+      <Stack.Screen name="ChangeNumber" component={ChangeNumberScreen} options={{ title: 'Cambiar número' }} />
     </Stack.Navigator>
   );
 }

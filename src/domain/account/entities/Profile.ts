@@ -16,6 +16,7 @@ export interface UserProfile {
   readonly birthDate?: string;
   readonly rfc?: string;
   readonly curp?: string;
+  readonly lastLogin?: string;
   readonly homeAddress?: HomeAddress;
 }
 
@@ -28,3 +29,15 @@ export interface AccountStatement {
 
 export const fullName = (p: UserProfile): string =>
   [p.firstName, p.lastName, p.lastName2].filter(Boolean).join(' ').trim();
+
+/** Beneficiario (/beneficiaries/list). */
+export interface Beneficiary {
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly lastName2?: string;
+  readonly percent?: number;
+  readonly birthDate?: string;
+}
+
+export const beneficiaryName = (b: Beneficiary): string =>
+  [b.firstName, b.lastName, b.lastName2].filter(Boolean).join(' ').trim();

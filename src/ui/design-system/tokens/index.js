@@ -43,6 +43,14 @@ const colors = {
   warning: '#f59e0b',
   danger: '#ef4444',
   info: '#3b82f6',
+  // Acentos del legacy (por feature)
+  orange: '#ff9222', // monto Mi billetera
+  orangeStrong: '#ff7d00', // círculo Mi billetera
+  violet: '#6330d3', // monto/círculo Mis gastos, historial
+  violetStrong: '#8428da', // card Pago de servicios
+  violetSoft: '#efeafb', // fondo historial de aclaraciones
+  blueAccent: '#1468c5', // card Chatea con nosotros
+  blueLink: '#47a3e0', // Mi QR / teléfono
 };
 
 const spacing = {

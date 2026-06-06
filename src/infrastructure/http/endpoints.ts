@@ -46,6 +46,20 @@ export const endpoints = {
   faqs: { path: '/public/agents/faqs', method: 'GET', auth: 'public' },
   walletCategories: { path: '/wallet/categories/list', method: 'GET', auth: 'user' },
   salesTotal: { path: '/balances/sales/total', method: 'GET', auth: 'user' },
+  emailChange: { path: '/user/email/change', method: 'PATCH', auth: 'user' },
+  credentialsCheck: { path: '/user/credentials/check', method: 'POST', auth: 'user' },
+  usernameChangeCodeSend: {
+    path: '/user/username/change/verificationcode/send',
+    method: 'POST',
+    auth: 'user',
+  },
+  usernameChangeCodeValidate: {
+    path: '/user/username/change/verificationcode/validate',
+    method: 'POST',
+    auth: 'user',
+  },
+  usernameChangeSet: { path: '/user/username/change/set', method: 'POST', auth: 'user' },
+  beneficiariesList: { path: '/beneficiaries/list', method: 'GET', auth: 'user' },
 } as const satisfies Record<string, Endpoint>;
 
 export type EndpointName = keyof typeof endpoints;

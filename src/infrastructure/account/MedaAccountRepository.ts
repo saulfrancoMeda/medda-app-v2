@@ -1,5 +1,5 @@
 import { err, ok, type Result } from '@domain/shared/result';
-import type { AccountStatement, UserProfile } from '@domain/account/entities/Profile';
+import type { AccountStatement, Beneficiary, UserProfile } from '@domain/account/entities/Profile';
 import type {
   AccountError,
   AccountRepository,
@@ -19,6 +19,7 @@ interface RawProfileFields {
   birthDate?: string;
   rfc?: string;
   curp?: string;
+  lastLogin?: string;
   homeAddress?: { street?: string; colony?: string; postalCode?: string; reference?: string };
 }
 
@@ -52,6 +53,7 @@ export class MedaAccountRepository implements AccountRepository {
       birthDate: p.birthDate,
       rfc: p.rfc,
       curp: p.curp,
+      lastLogin: p.lastLogin,
       homeAddress: p.homeAddress,
     });
   }
@@ -96,4 +98,46 @@ export class MedaAccountRepository implements AccountRepository {
     if (!res.value.location) return err({ type: 'unknown', message: 'No se obtuvo el PDF' });
     return ok(res.value.location);
   }
+
+  async changeEmail(email: string, nip: string): Promise<Result<true, AccountError>> {
+    const res = await this.http.request<unknown>(endpoints.emailChange, { body: { email, nip } });
+    if (!res.ok) return err(toAccountError(res.error));
+    return ok(true);
+  }
+
+  async sendNumberChangeCode(phone: string, nip: string): Promise<Result<true, AccountError>> {
+    const res = await this.http.request<unknown>(endpoints.usernameChangeCodeSend, {
+      body: { phone, nip },
+    });
+    if (!res.ok) return err(toAccountError(res.error));
+    return ok(true);
+  }
+
+  async setNumber(phone: string, code: string, nip: string): Promise<Result<true, AccountError>> {
+    const validate = await this.http.request<unknown>(endpoints.usernameChangeCodeValidate, {
+      body: { code },
+    });
+    if (!validate.ok) return err(toAccountError(validate.error));
+    const res = await this.http.request<unknown>(endpoints.usernameChangeSet, {
+      body: { username: phone, code, nip },
+    });
+    if (!res.ok) return err(toAccountError(res.error));
+    return ok(true);
+  }
+
+  async getBeneficiaries(): Promise<Result<readonly Beneficiary[], AccountError>> {
+    const res = await this.http.request<{
+      beneficiaries?: { firstName?: string; lastName?: string; lastName2?: string; percent?: number; birthDate?: string }[];
+    }>(endpoints.beneficiariesList);
+    if (!res.ok) return err(toAccountError(res.error));
+    const beneficiaries: Beneficiary[] = (res.value.beneficiaries ?? []).map((b) => ({
+      firstName: b.firstName ?? '',
+      lastName: b.lastName ?? '',
+      lastName2: b.lastName2,
+      percent: b.percent,
+      birthDate: b.birthDate,
+    }));
+    return ok(beneficiaries);
+  }
 }
+

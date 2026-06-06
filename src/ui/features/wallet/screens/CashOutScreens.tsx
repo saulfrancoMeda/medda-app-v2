@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FlatList, Modal, Pressable, ScrollView, View } from 'react-native';
+import { Alert, FlatList, Modal, Pressable, ScrollView, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { formatCurrency } from '@domain/shared/money';
@@ -14,28 +14,64 @@ import type { WalletStackParamList } from '@ui/navigation/types';
 // --- Métodos de envío -------------------------------------------------------
 type MethodsProps = NativeStackScreenProps<WalletStackParamList, 'CashOutMethods'>;
 
+function MethodRow({
+  icon,
+  iconColor,
+  title,
+  subtitle,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  iconColor: string;
+  title: string;
+  subtitle?: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      className="flex-row items-center gap-md border-b border-neutral-100 py-lg dark:border-neutral-800"
+    >
+      <View className="h-10 w-10 items-center justify-center rounded-pill bg-neutral-100 dark:bg-neutral-800">
+        <Ionicons name={icon} size={22} color={iconColor} />
+      </View>
+      <View className="flex-1">
+        <Text variant="body" className="font-semibold">
+          {title}
+        </Text>
+        {subtitle ? (
+          <Text variant="caption" tone="muted">
+            {subtitle}
+          </Text>
+        ) : null}
+      </View>
+      <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+    </Pressable>
+  );
+}
+
 export function CashOutMethodsScreen({ navigation }: MethodsProps) {
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
-      <Text variant="body" tone="muted">
-        Elige cómo quieres enviar dinero.
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-sm p-lg">
+      <Text variant="h1">Envía dinero</Text>
+      <Text variant="body" tone="muted" className="pb-md">
+        Paga a tus amigos, tus clientes, otros usuarios.
       </Text>
-      <Pressable
+      <MethodRow
+        icon="person-circle"
+        iconColor="#47a3e0"
+        title="Envía a un usuario Medá"
+        onPress={() =>
+          Alert.alert('Próximamente', 'El envío a usuarios Medá (QR) estará disponible pronto.')
+        }
+      />
+      <MethodRow
+        icon="paper-plane"
+        iconColor="#47a3e0"
+        title="Transferencia SPEI a Terceros"
         onPress={() => navigation.navigate('CashOutSpeiForm')}
-        accessibilityRole="button"
-        className="flex-row items-center gap-md rounded-card border border-neutral-200 p-lg dark:border-neutral-800"
-      >
-        <Ionicons name="business-outline" size={24} color="#d7a300" />
-        <View className="flex-1">
-          <Text variant="body" className="font-semibold">
-            Transferencia SPEI a terceros
-          </Text>
-          <Text variant="caption" tone="muted">
-            Envía a cualquier cuenta CLABE
-          </Text>
-        </View>
-        <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
-      </Pressable>
+      />
     </ScrollView>
   );
 }

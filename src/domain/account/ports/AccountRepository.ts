@@ -1,5 +1,9 @@
 import type { Result } from '@domain/shared/result';
-import type { AccountStatement, UserProfile } from '@domain/account/entities/Profile';
+import type {
+  AccountStatement,
+  Beneficiary,
+  UserProfile,
+} from '@domain/account/entities/Profile';
 
 export type AccountError =
   | { readonly type: 'unauthorized' }
@@ -25,4 +29,10 @@ export interface AccountRepository {
   listStatements(): Promise<Result<readonly AccountStatement[], AccountError>>;
   /** Devuelve la URL del PDF del estado de cuenta (requiere NIP). */
   getStatementPdfUrl(statementId: string, nip: string): Promise<Result<string, AccountError>>;
+  changeEmail(email: string, nip: string): Promise<Result<true, AccountError>>;
+  /** Cambio de número: envía código al nuevo teléfono (requiere NIP). */
+  sendNumberChangeCode(phone: string, nip: string): Promise<Result<true, AccountError>>;
+  /** Cambio de número: valida el código y fija el nuevo número. */
+  setNumber(phone: string, code: string, nip: string): Promise<Result<true, AccountError>>;
+  getBeneficiaries(): Promise<Result<readonly Beneficiary[], AccountError>>;
 }
