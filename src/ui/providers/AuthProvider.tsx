@@ -9,6 +9,7 @@ import {
 import type { Result } from '@domain/shared/result';
 import type { Session } from '@domain/auth/entities/Session';
 import type { AuthError, Credentials } from '@domain/auth/ports/AuthGateway';
+import type { LookupError } from '@domain/auth/ports/UserDirectory';
 import { createAuthContainer } from '@composition/authContainer';
 
 type AuthStatus = 'signedOut' | 'signedIn';
@@ -18,6 +19,8 @@ interface AuthContextValue {
   readonly session: Session | null;
   readonly signIn: (credentials: Credentials) => Promise<Result<Session, AuthError>>;
   readonly signOut: () => Promise<void>;
+  /** Paso 1: valida el teléfono y devuelve el nombre (enmascarado por el backend). */
+  readonly lookupName: (phone: string) => Promise<Result<string, LookupError>>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -47,9 +50,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
   }, [container, session]);
 
+  const lookupName = useCallback(
+    (phone: string) => container.lookupUserName(phone),
+    [container],
+  );
+
   const value = useMemo<AuthContextValue>(
-    () => ({ status, session, signIn, signOut }),
-    [status, session, signIn, signOut],
+    () => ({ status, session, signIn, signOut, lookupName }),
+    [status, session, signIn, signOut, lookupName],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

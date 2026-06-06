@@ -6,7 +6,6 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Button, Input, Logo, Text } from '@ui/design-system/components';
 import { useAuth } from '@ui/providers/AuthProvider';
 import { authErrorMessage } from '@ui/features/auth/authMessages';
-import { maskName } from '@ui/features/auth/maskName';
 import type { AuthStackParamList } from '@ui/navigation/types';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'LoginPassword'>;
@@ -46,7 +45,7 @@ export function LoginPasswordScreen({ route, navigation }: Props) {
           <View className="gap-xs">
             <Text variant="h1">Bienvenido,</Text>
             <Text variant="body" tone="muted">
-              {maskName(name)}
+              {name}
             </Text>
           </View>
 
