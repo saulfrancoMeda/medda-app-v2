@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { AppState, Modal, View } from 'react-native';
+import { Modal, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import NetInfo from '@react-native-community/netinfo';
-import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import { Button, Text } from '@ui/design-system/components';
 import { useAuth } from '@ui/providers/AuthProvider';
@@ -21,14 +20,12 @@ export function SecurityMonitor({ children }: { children: ReactNode }) {
 
   const signedIn = useRef(false);
   const lastNetType = useRef<string | null>(null);
-  const locationEnabled = useRef<boolean | null>(null);
 
   useEffect(() => {
     signedIn.current = status === 'signedIn';
     if (status === 'signedIn') {
-      // Reinicia las líneas base al (re)iniciar sesión para no expirar de inmediato.
+      // Reinicia la línea base al (re)iniciar sesión para no expirar de inmediato.
       lastNetType.current = null;
-      locationEnabled.current = null;
     }
   }, [status]);
 
@@ -38,7 +35,8 @@ export function SecurityMonitor({ children }: { children: ReactNode }) {
     void signOut();
   }, [signOut]);
 
-  // 1 + 3: conectividad y tipo de red.
+  // Conectividad y tipo de red (cambio wifi<->datos -> expira; sin conexión -> banner).
+  // (La ubicación obligatoria se maneja en LocationGate.)
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
       setOffline(state.isConnected === false);
@@ -51,30 +49,6 @@ export function SecurityMonitor({ children }: { children: ReactNode }) {
       }
     });
     return unsubscribe;
-  }, [expire]);
-
-  // 2: geolocalización (servicios del dispositivo). Se revisa al volver al foreground y cada 6s.
-  useEffect(() => {
-    const check = async () => {
-      try {
-        const enabled = await Location.hasServicesEnabledAsync();
-        if (signedIn.current && locationEnabled.current === true && !enabled) {
-          expire();
-        }
-        locationEnabled.current = enabled;
-      } catch {
-        /* ignorar */
-      }
-    };
-    void check();
-    const interval = setInterval(() => void check(), 6000);
-    const sub = AppState.addEventListener('change', (s) => {
-      if (s === 'active') void check();
-    });
-    return () => {
-      clearInterval(interval);
-      sub.remove();
-    };
   }, [expire]);
 
   return (

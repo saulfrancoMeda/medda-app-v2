@@ -52,6 +52,9 @@ export class HttpClient {
       const parsed: unknown = text ? JSON.parse(text) : null;
 
       if (!response.ok) {
+        // Por ahora se loguea TODO (status + cuerpo) para que el equipo de backend sepa por qué
+        // falla el servicio. Más adelante, dejar solo el status code.
+        console.warn(`[API] ${endpoint.method} ${endpoint.path} -> ${response.status}`, parsed);
         return err({
           kind: 'http',
           status: response.status,
@@ -61,6 +64,7 @@ export class HttpClient {
       }
       return ok(parsed as T);
     } catch (e) {
+      console.warn(`[API] ${endpoint.method} ${endpoint.path} -> network error`, e);
       return err({
         kind: 'network',
         status: 0,

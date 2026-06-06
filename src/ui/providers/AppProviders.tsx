@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ContainerProvider } from '@ui/providers/ContainerProvider';
 import { AuthProvider } from '@ui/providers/AuthProvider';
 import { SecurityMonitor } from '@ui/providers/SecurityMonitor';
+import { LocationGate } from '@ui/providers/LocationGate';
 
 const queryClient = new QueryClient();
 
@@ -16,7 +17,9 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <SafeAreaProvider>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
-            <SecurityMonitor>{children}</SecurityMonitor>
+            <SecurityMonitor>
+              <LocationGate>{children}</LocationGate>
+            </SecurityMonitor>
           </AuthProvider>
           </QueryClientProvider>
         </SafeAreaProvider>

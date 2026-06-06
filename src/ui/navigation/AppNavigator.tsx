@@ -24,7 +24,7 @@ function MainTabs() {
   const { colorScheme } = useColorScheme();
   return (
     <Tabs.Navigator
-      initialRouteName="Wallet"
+      initialRouteName="Store"
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: '#d7a300',
