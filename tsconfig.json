@@ -17,6 +17,9 @@
       "@infrastructure/*": [
         "./src/infrastructure/*"
       ],
+      "@composition/*": [
+        "./src/composition/*"
+      ],
       "@ui/*": [
         "./src/ui/*"
       ],

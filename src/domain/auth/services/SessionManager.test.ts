@@ -1,31 +1,40 @@
 import { describe, expect, it } from '@jest/globals';
-import type { Session } from '@domain/auth/entities/Session';
+import type { AnonymousToken, Session } from '@domain/auth/entities/Session';
 import {
+  anonymousAuthorizationHeader,
   authorizationHeader,
-  isOAuthExpired,
-  oauthNeedsRefresh,
+  isSessionExpired,
   REFRESH_SKEW_MS,
+  sessionNeedsRefresh,
 } from '@domain/auth/services/SessionManager';
 
 const NOW = 1_000_000;
 
 const sessionExpiringAt = (expiresAt: number): Session => ({
-  username: 'agente@meda.com.mx',
-  oauth: { accessToken: 'tok', refreshToken: 'ref', tokenType: 'Bearer', expiresAt },
+  username: '5512345678',
+  accessToken: 'jwt-access',
+  idToken: 'jwt-id',
+  refreshToken: 'refresh',
+  expiresAt,
 });
 
 describe('SessionManager', () => {
-  it('detecta cuando el token OAuth está expirado', () => {
-    expect(isOAuthExpired(sessionExpiringAt(NOW - 1).oauth, NOW)).toBe(true);
-    expect(isOAuthExpired(sessionExpiringAt(NOW + 1).oauth, NOW)).toBe(false);
+  it('detecta cuando la sesión está expirada', () => {
+    expect(isSessionExpired(sessionExpiringAt(NOW - 1), NOW)).toBe(true);
+    expect(isSessionExpired(sessionExpiringAt(NOW + 1), NOW)).toBe(false);
   });
 
   it('necesita refresh dentro del margen (skew) antes de expirar', () => {
-    expect(oauthNeedsRefresh(sessionExpiringAt(NOW + REFRESH_SKEW_MS - 1).oauth, NOW)).toBe(true);
-    expect(oauthNeedsRefresh(sessionExpiringAt(NOW + REFRESH_SKEW_MS + 1).oauth, NOW)).toBe(false);
+    expect(sessionNeedsRefresh(sessionExpiringAt(NOW + REFRESH_SKEW_MS - 1), NOW)).toBe(true);
+    expect(sessionNeedsRefresh(sessionExpiringAt(NOW + REFRESH_SKEW_MS + 1), NOW)).toBe(false);
   });
 
-  it('arma el header Authorization con el tipo de token', () => {
-    expect(authorizationHeader(sessionExpiringAt(NOW))).toBe('Bearer tok');
+  it('usa el JWT de Cognito tal cual como Authorization autenticado', () => {
+    expect(authorizationHeader(sessionExpiringAt(NOW))).toBe('jwt-access');
+  });
+
+  it('usa Bearer para el token anónimo (llamadas públicas)', () => {
+    const anon: AnonymousToken = { accessToken: 'anon', tokenType: 'Bearer', expiresAt: NOW };
+    expect(anonymousAuthorizationHeader(anon)).toBe('Bearer anon');
   });
 });

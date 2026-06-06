@@ -2,7 +2,8 @@ import type { Result } from '@domain/shared/result';
 import type { Session } from '@domain/auth/entities/Session';
 
 export interface Credentials {
-  readonly username: string;
+  /** Teléfono de 10 dígitos (sin +52). La infraestructura antepone +52 para Cognito. */
+  readonly phone: string;
   readonly password: string;
 }
 

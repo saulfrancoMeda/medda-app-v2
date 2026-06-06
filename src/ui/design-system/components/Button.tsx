@@ -17,18 +17,26 @@ const button = cva('flex-row items-center justify-center gap-sm rounded-pill', {
       md: 'h-12 px-lg',
       lg: 'h-14 px-xl',
     },
-    disabled: { true: 'opacity-40' },
+    disabled: { true: '' },
     full: { true: 'w-full' },
   },
+  // Deshabilitado + sólido: gris (como el legacy), no dorado tenue.
+  compoundVariants: [
+    { variant: 'solid', disabled: true, class: 'bg-neutral-200 dark:bg-neutral-800' },
+    { variant: ['outline', 'ghost', 'link'], disabled: true, class: 'opacity-40' },
+  ],
   defaultVariants: { variant: 'solid', size: 'md' },
 });
 
 type ButtonVariants = VariantProps<typeof button>;
 
-// El color del label se decide vía el `tone` del Text (fuente única de color), no por className.
-// solid (fondo dorado) -> texto oscuro; outline/ghost/link -> texto dorado.
-const labelTone = (variant: ButtonProps['variant']) =>
-  variant === 'outline' || variant === 'ghost' || variant === 'link' ? 'brand' : 'default';
+// El color del label se decide vía el `tone` del Text. solid -> oscuro; outline/ghost/link -> dorado.
+const labelTone = (variant: ButtonProps['variant'], disabled: boolean) => {
+  if (disabled && (variant === 'solid' || !variant)) return 'muted' as const;
+  return variant === 'outline' || variant === 'ghost' || variant === 'link'
+    ? ('brand' as const)
+    : ('default' as const);
+};
 
 export interface ButtonProps
   extends Omit<PressableProps, 'disabled' | 'children'>,
@@ -52,10 +60,10 @@ export const Button = forwardRef<View, ButtonProps>(
         {...rest}
       >
         {loading ? (
-          <ActivityIndicator color={isSolid ? '#060612' : '#fcd535'} />
+          <ActivityIndicator color={isSolid ? '#0a0f14' : '#fcd535'} />
         ) : (
           <Text
-            tone={labelTone(variant)}
+            tone={labelTone(variant, isDisabled)}
             className={cn('font-semibold', variant === 'link' && 'underline')}
           >
             {title}

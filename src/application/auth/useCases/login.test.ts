@@ -6,10 +6,13 @@ import type { Session } from '@domain/auth/entities/Session';
 import { err, ok } from '@domain/shared/result';
 
 const session: Session = {
-  username: 'agente@meda.com.mx',
-  oauth: { accessToken: 'tok', refreshToken: 'ref', tokenType: 'Bearer', expiresAt: 1 },
+  username: '5512345678',
+  accessToken: 'jwt-access',
+  idToken: 'jwt-id',
+  refreshToken: 'ref',
+  expiresAt: 1,
 };
-const creds: Credentials = { username: 'agente@meda.com.mx', password: 'secreto' };
+const creds: Credentials = { phone: '5512345678', password: 'secreto' };
 
 const makeStore = () => {
   const writes: Session[] = [];

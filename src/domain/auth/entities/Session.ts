@@ -1,29 +1,26 @@
 /**
- * Modelo de sesión. La app legacy maneja DOS tokens en paralelo (ver
- * app/src/AppConfig/apiBase.js del proyecto legacy): un Bearer de OAuth2 (password-grant)
- * y los tokens de Cognito (JWT). Ambos se modelan explícitos aquí; el SessionManager
- * decide cuál usar y cuándo refrescar.
+ * Sesión de usuario. En el legacy el login es Cognito-primario (Auth.signIn con
+ * '+52'+phone); la sesión = tokens de Cognito. El `accessToken` (JWT) es el que va en el
+ * header Authorization de las llamadas autenticadas.
  */
-export interface OAuthTokens {
-  readonly accessToken: string;
-  readonly refreshToken: string;
-  /** Normalmente "Bearer". */
-  readonly tokenType: string;
-  /** Epoch en milisegundos en que expira el accessToken. */
-  readonly expiresAt: number;
-}
-
-export interface CognitoTokens {
-  readonly idToken: string;
-  readonly accessToken: string;
-  readonly refreshToken: string;
-  /** Epoch en milisegundos en que expira. */
-  readonly expiresAt: number;
-}
-
 export interface Session {
+  /** Teléfono de 10 dígitos (sin +52) o username de Cognito. */
   readonly username: string;
-  readonly oauth: OAuthTokens;
-  /** Opcional: algunos flujos solo usan OAuth hasta completar el alta. */
-  readonly cognito?: CognitoTokens;
+  /** JWT de Cognito que se manda como Authorization en llamadas autenticadas. */
+  readonly accessToken: string;
+  readonly idToken: string;
+  readonly refreshToken: string;
+  /** Epoch en ms en que expira el accessToken. */
+  readonly expiresAt: number;
+}
+
+/**
+ * Token anónimo para endpoints PÚBLICOS (no autenticados). Se obtiene del endpoint OAuth
+ * con grant_type=client_credentials y se manda como `Bearer <token>`. Es independiente de
+ * la sesión del usuario; lo gestiona la capa de infraestructura.
+ */
+export interface AnonymousToken {
+  readonly accessToken: string;
+  readonly tokenType: string; // "Bearer"
+  readonly expiresAt: number; // epoch ms
 }

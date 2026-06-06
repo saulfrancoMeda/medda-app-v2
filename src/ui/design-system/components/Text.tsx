@@ -3,10 +3,9 @@ import { Text as RNText, type TextProps as RNTextProps } from 'react-native';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@ui/lib/cn';
 
-// IMPORTANTE: el color SOLO lo define `tone` (una única clase de color por Text). No ponemos
-// color en `base` ni en `variant`, porque sin tailwind-merge dos clases `text-*` de color
-// no resuelven de forma determinista en NativeWind. `variant` controla tamaño/peso; `tone`, color.
-const text = cva('', {
+// El color SOLO lo define `tone` (una clase de color por modo). Las variantes `dark:` no
+// chocan con las de light porque son condicionales. `variant` controla tamaño/peso.
+const text = cva('font-sans', {
   variants: {
     variant: {
       display: 'text-display font-bold',
@@ -16,9 +15,10 @@ const text = cva('', {
       caption: 'text-caption',
     },
     tone: {
-      default: 'text-neutral-900',
-      muted: 'text-neutral-400',
-      brand: 'text-brand-700',
+      default: 'text-neutral-900 dark:text-neutral-50',
+      muted: 'text-neutral-500 dark:text-neutral-400',
+      brand: 'text-brand-700 dark:text-brand-400',
+      link: 'text-link',
       danger: 'text-danger',
       inverse: 'text-neutral-0',
     },
