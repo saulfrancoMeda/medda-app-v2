@@ -18,7 +18,7 @@ const ProfileScreen = () => <PlaceholderScreen title="Mi perfil" />;
 const LegalScreen = () => <PlaceholderScreen title="Legales y Estado de cuenta" />;
 const SecurityScreen = () => <PlaceholderScreen title="Seguridad" />;
 
-const TAB_ICON: Record<keyof AppTabsParamList, keyof typeof Ionicons.glyphMap> = {
+const TAB_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   Store: 'home-outline',
   Sales: 'receipt-outline',
   Wallet: 'wallet-outline',
@@ -34,15 +34,32 @@ function MainTabs() {
         headerShown: false,
         tabBarActiveTintColor: '#d7a300',
         tabBarInactiveTintColor: colorScheme === 'dark' ? '#9ca3af' : '#6b7280',
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name={TAB_ICON[route.name]} size={size} color={color} />
-        ),
+        tabBarIcon: ({ color, size }) => {
+          const name = TAB_ICON[route.name];
+          return name ? <Ionicons name={name} size={size} color={color} /> : null;
+        },
       })}
     >
       <Tabs.Screen name="Store" component={StoreScreen} options={{ title: 'Inicio' }} />
       <Tabs.Screen name="Sales" component={SalesScreen} options={{ title: 'Mis gastos' }} />
       <Tabs.Screen name="Wallet" component={WalletScreen} options={{ title: 'Mi Billetera' }} />
       <Tabs.Screen name="Faq" component={FaqScreen} options={{ title: 'Ayuda' }} />
+      {/* Accesibles desde el drawer pero ocultas de la barra: conservan el bottom tab visible. */}
+      <Tabs.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ tabBarButton: () => null, tabBarItemStyle: { display: 'none' } }}
+      />
+      <Tabs.Screen
+        name="Legal"
+        component={LegalScreen}
+        options={{ tabBarButton: () => null, tabBarItemStyle: { display: 'none' } }}
+      />
+      <Tabs.Screen
+        name="Security"
+        component={SecurityScreen}
+        options={{ tabBarButton: () => null, tabBarItemStyle: { display: 'none' } }}
+      />
     </Tabs.Navigator>
   );
 }
@@ -54,9 +71,6 @@ export function AppNavigator() {
       screenOptions={{ headerShown: false }}
     >
       <Drawer.Screen name="MainTabs" component={MainTabs} />
-      <Drawer.Screen name="Profile" component={ProfileScreen} options={{ title: 'Mi perfil' }} />
-      <Drawer.Screen name="Legal" component={LegalScreen} options={{ title: 'Legales' }} />
-      <Drawer.Screen name="Security" component={SecurityScreen} options={{ title: 'Seguridad' }} />
     </Drawer.Navigator>
   );
 }
