@@ -41,6 +41,18 @@ export function useStpAccount() {
   });
 }
 
+export function useSpeiBanks() {
+  const { walletRepository } = useContainer();
+  return useQuery({
+    queryKey: ['wallet', 'banks'],
+    queryFn: async () => {
+      const res = await walletRepository.getSpeiBanks();
+      if (!res.ok) throw res.error;
+      return res.value;
+    },
+  });
+}
+
 export function useMovements(accountId: string | undefined) {
   const { walletRepository } = useContainer();
   return useQuery({

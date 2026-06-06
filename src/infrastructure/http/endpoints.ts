@@ -35,6 +35,9 @@ export const endpoints = {
   walletBalance: { path: '/wallet/accounts/balance', method: 'POST', auth: 'user' },
   walletStpAccount: { path: '/wallet/stp/account', method: 'GET', auth: 'user' },
   walletMovements: { path: '/wallet/movements/list', method: 'GET', auth: 'user' },
+  walletStpBanks: { path: '/wallet/stp/banks', method: 'GET', auth: 'user' },
+  walletSpeiSend: { path: '/wallet/transactions/spei/send', method: 'POST', auth: 'user' },
+  nipValidate: { path: '/user/nip/validate', method: 'POST', auth: 'user' },
 } as const satisfies Record<string, Endpoint>;
 
 export type EndpointName = keyof typeof endpoints;

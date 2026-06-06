@@ -2,11 +2,14 @@ import { ActivityIndicator, FlatList, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { formatCurrency } from '@domain/shared/money';
 import { isCredit, signedAmount, type Movement } from '@domain/wallet/entities/Movement';
 import { AppHeader } from '@ui/navigation/AppHeader';
 import { Button, Text } from '@ui/design-system/components';
 import { useBalance, useDefaultAccount, useMovements, useStpAccount } from '@ui/features/wallet/hooks/useWallet';
+import type { WalletStackParamList } from '@ui/navigation/types';
 
 const formatMovementDate = (iso: string): string => {
   if (!iso) return '';
@@ -62,6 +65,7 @@ function MovementRow({ movement }: { movement: Movement }) {
 // Pantalla "Mi Billetera" (paridad con Wallet/Screens/Wallet del legacy): saldo, CLABE/cuenta,
 // botones de mover dinero y lista de movimientos.
 export function WalletScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<WalletStackParamList>>();
   const account = useDefaultAccount();
   const balance = useBalance(account.data?.id);
   const stp = useStpAccount();
@@ -86,8 +90,19 @@ export function WalletScreen() {
       </View>
 
       <View className="flex-row gap-md">
-        <Button title="Abonar dinero" variant="outline" full className="flex-1" />
-        <Button title="Enviar dinero" full className="flex-1" />
+        <Button
+          title="Abonar dinero"
+          variant="outline"
+          full
+          className="flex-1"
+          onPress={() => navigation.navigate('CashInMethods')}
+        />
+        <Button
+          title="Enviar dinero"
+          full
+          className="flex-1"
+          onPress={() => navigation.navigate('CashOutMethods')}
+        />
       </View>
 
       <Text variant="h2">Tus movimientos</Text>

@@ -2,7 +2,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from 'nativewind';
-import { WalletScreen } from '@ui/features/wallet/screens/WalletScreen';
+import { WalletStackNavigator } from '@ui/navigation/WalletStackNavigator';
 import { PlaceholderScreen } from '@ui/features/common/PlaceholderScreen';
 import { DrawerContent } from '@ui/navigation/DrawerContent';
 import type { AppDrawerParamList, AppTabsParamList } from '@ui/navigation/types';
@@ -42,7 +42,7 @@ function MainTabs() {
     >
       <Tabs.Screen name="Store" component={StoreScreen} options={{ title: 'Inicio' }} />
       <Tabs.Screen name="Sales" component={SalesScreen} options={{ title: 'Mis gastos' }} />
-      <Tabs.Screen name="Wallet" component={WalletScreen} options={{ title: 'Mi Billetera' }} />
+      <Tabs.Screen name="Wallet" component={WalletStackNavigator} options={{ title: 'Mi Billetera' }} />
       <Tabs.Screen name="Faq" component={FaqScreen} options={{ title: 'Ayuda' }} />
       {/* Accesibles desde el drawer pero ocultas de la barra: conservan el bottom tab visible. */}
       <Tabs.Screen

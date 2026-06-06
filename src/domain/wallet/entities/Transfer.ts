@@ -1,0 +1,34 @@
+/** Banco para SPEI (/wallet/stp/banks): code = institucionContraparte. */
+export interface Bank {
+  readonly code: string;
+  readonly name: string;
+}
+
+/** Datos para enviar un SPEI a terceros (/wallet/transactions/spei/send). Paridad con el legacy. */
+export interface SpeiSendInput {
+  readonly cuentaBeneficiario: string; // CLABE 18 dígitos
+  readonly institucionContraparte: string; // code del banco
+  readonly nombreBeneficiario: string;
+  readonly emailBeneficiario?: string;
+  readonly monto: string; // "100.00"
+  readonly comment?: string;
+  readonly nip: string; // 6 dígitos (texto plano, como el legacy)
+  readonly location: { readonly latitude: number; readonly longitude: number };
+}
+
+/** Resultado de una transacción de envío. */
+export interface TransactionResult {
+  readonly id: string;
+  readonly claveRastreo?: string;
+  readonly date?: string;
+}
+
+/** CLABE válida = 18 dígitos. */
+export const isValidClabe = (clabe: string): boolean => /^[0-9]{18}$/.test(clabe);
+
+/** NIP válido = 6 dígitos. */
+export const isValidNip = (nip: string): boolean => /^[0-9]{6}$/.test(nip);
+
+/** Monto válido = número con hasta 2 decimales y > 0. */
+export const isValidAmount = (amount: string): boolean =>
+  /^\d*\.?\d{1,2}$/.test(amount) && Number(amount) > 0;

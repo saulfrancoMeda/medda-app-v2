@@ -6,6 +6,7 @@ import type {
   WalletError,
   WalletRepository,
 } from '@domain/wallet/ports/WalletRepository';
+import type { Bank, SpeiSendInput, TransactionResult } from '@domain/wallet/entities/Transfer';
 import type { HttpClient, HttpError } from '@infrastructure/http/HttpClient';
 import { endpoints } from '@infrastructure/http/endpoints';
 
@@ -81,5 +82,39 @@ export class MedaWalletRepository implements WalletRepository {
       referenceLabel: m.properties?.referenceLabel,
     }));
     return ok({ movements, page: res.value.page ?? page, lastPage: res.value.lastPage ?? page });
+  }
+
+  async getSpeiBanks(): Promise<Result<readonly Bank[], WalletError>> {
+    // El backend devuelve un mapa { code: name } (como en el legacy), no un array.
+    // Aceptamos tanto { banks: {..} } como el objeto en la raíz.
+    const res = await this.http.request<{ banks?: Record<string, unknown> }>(
+      endpoints.walletStpBanks,
+    );
+    if (!res.ok) return err(toWalletError(res.error));
+    const raw = (res.value.banks ?? res.value) as Record<string, unknown>;
+    const banks: Bank[] = Object.entries(raw)
+      .filter(([, name]) => typeof name === 'string')
+      .map(([code, name]) => ({ code, name: String(name) }));
+    return ok(banks);
+  }
+
+  async validateNip(nip: string): Promise<Result<true, WalletError>> {
+    const res = await this.http.request<unknown>(endpoints.nipValidate, { body: { nip } });
+    if (!res.ok) return err(toWalletError(res.error));
+    return ok(true);
+  }
+
+  async sendSpei(input: SpeiSendInput): Promise<Result<TransactionResult, WalletError>> {
+    const res = await this.http.request<{
+      id?: string;
+      date?: string;
+      properties?: { claveRastreo?: string };
+    }>(endpoints.walletSpeiSend, { body: input });
+    if (!res.ok) return err(toWalletError(res.error));
+    return ok({
+      id: res.value.id ?? '',
+      claveRastreo: res.value.properties?.claveRastreo,
+      date: res.value.date,
+    });
   }
 }
