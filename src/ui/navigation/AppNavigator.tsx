@@ -3,6 +3,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from 'nativewind';
 import { WalletStackNavigator } from '@ui/navigation/WalletStackNavigator';
+import { SectionsStackNavigator } from '@ui/navigation/SectionsStackNavigator';
 import { PlaceholderScreen } from '@ui/features/common/PlaceholderScreen';
 import { DrawerContent } from '@ui/navigation/DrawerContent';
 import type { AppDrawerParamList, AppTabsParamList } from '@ui/navigation/types';
@@ -10,13 +11,9 @@ import type { AppDrawerParamList, AppTabsParamList } from '@ui/navigation/types'
 const Tabs = createBottomTabNavigator<AppTabsParamList>();
 const Drawer = createDrawerNavigator<AppDrawerParamList>();
 
-// Pantallas placeholder (paridad de estructura; contenido en fases siguientes).
 const StoreScreen = () => <PlaceholderScreen title="Inicio" subtitle="Tu actividad — próximamente" />;
 const SalesScreen = () => <PlaceholderScreen title="Mis gastos" subtitle="Próximamente" />;
 const FaqScreen = () => <PlaceholderScreen title="Ayuda" subtitle="Preguntas frecuentes — próximamente" />;
-const ProfileScreen = () => <PlaceholderScreen title="Mi perfil" />;
-const LegalScreen = () => <PlaceholderScreen title="Legales y Estado de cuenta" />;
-const SecurityScreen = () => <PlaceholderScreen title="Seguridad" />;
 
 const TAB_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   Store: 'home-outline',
@@ -44,20 +41,10 @@ function MainTabs() {
       <Tabs.Screen name="Sales" component={SalesScreen} options={{ title: 'Mis gastos' }} />
       <Tabs.Screen name="Wallet" component={WalletStackNavigator} options={{ title: 'Mi Billetera' }} />
       <Tabs.Screen name="Faq" component={FaqScreen} options={{ title: 'Ayuda' }} />
-      {/* Accesibles desde el drawer pero ocultas de la barra: conservan el bottom tab visible. */}
+      {/* Tab oculto: secciones del drawer (Perfil/Legales/Seguridad). Mantiene el bottom tab. */}
       <Tabs.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{ tabBarButton: () => null, tabBarItemStyle: { display: 'none' } }}
-      />
-      <Tabs.Screen
-        name="Legal"
-        component={LegalScreen}
-        options={{ tabBarButton: () => null, tabBarItemStyle: { display: 'none' } }}
-      />
-      <Tabs.Screen
-        name="Security"
-        component={SecurityScreen}
+        name="Sections"
+        component={SectionsStackNavigator}
         options={{ tabBarButton: () => null, tabBarItemStyle: { display: 'none' } }}
       />
     </Tabs.Navigator>

@@ -7,9 +7,11 @@ import { SessionHolder } from '@infrastructure/auth/SessionHolder';
 import { InMemorySessionStore } from '@infrastructure/storage/InMemorySessionStore';
 import { HttpClient } from '@infrastructure/http/HttpClient';
 import { MedaWalletRepository } from '@infrastructure/wallet/MedaWalletRepository';
+import { MedaAccountRepository } from '@infrastructure/account/MedaAccountRepository';
 import type { AuthGateway } from '@domain/auth/ports/AuthGateway';
 import type { SessionStore } from '@domain/auth/ports/SessionStore';
 import type { WalletRepository } from '@domain/wallet/ports/WalletRepository';
+import type { AccountRepository } from '@domain/account/ports/AccountRepository';
 
 export interface AppContainer {
   readonly gateway: AuthGateway;
@@ -18,6 +20,7 @@ export interface AppContainer {
   readonly login: ReturnType<typeof makeLogin>;
   readonly lookupUserName: ReturnType<typeof makeLookupUserName>;
   readonly walletRepository: WalletRepository;
+  readonly accountRepository: AccountRepository;
 }
 
 /**
@@ -45,6 +48,7 @@ export const createAppContainer = (): AppContainer => {
 
   const directory = new MedaUserDirectory(http);
   const walletRepository = new MedaWalletRepository(http);
+  const accountRepository = new MedaAccountRepository(http);
 
   return {
     gateway,
@@ -53,5 +57,6 @@ export const createAppContainer = (): AppContainer => {
     login: makeLogin({ auth: gateway, store }),
     lookupUserName: makeLookupUserName({ directory }),
     walletRepository,
+    accountRepository,
   };
 };

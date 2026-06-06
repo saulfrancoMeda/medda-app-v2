@@ -19,16 +19,23 @@ export type WalletStackParamList = {
   TransactionSuccess: { result: TransactionResult; draft: SpeiDraft };
 };
 
-// Tabs visibles + pantallas accesibles desde el drawer (ocultas de la barra) para que el
-// bottom tab SIEMPRE permanezca visible al navegar a Perfil/Legales/Seguridad.
+// Tabs visibles + un tab oculto "Sections" (stack) con las pantallas del drawer, para que el
+// bottom tab SIEMPRE permanezca visible y las subpantallas tengan push/back nativo.
 export type AppTabsParamList = {
   Store: undefined;
   Sales: undefined;
   Wallet: undefined;
   Faq: undefined;
+  Sections: NavigatorScreenParams<SectionsStackParamList>;
+};
+
+export type SectionsStackParamList = {
   Profile: undefined;
   Legal: undefined;
+  Statements: undefined;
   Security: undefined;
+  ChangePassword: undefined;
+  ChangeNip: undefined;
 };
 
 export type AppDrawerParamList = {

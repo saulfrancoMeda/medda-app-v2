@@ -17,6 +17,12 @@ export interface AppConfig {
   };
   readonly appVersion: string;
   readonly xAuthToken: string;
+  readonly legal: {
+    readonly privacyAdvice: string;
+    readonly termsAndConditions: string;
+    readonly commissions: string;
+    readonly adhesionContract: string;
+  };
 }
 
 export const config: AppConfig = {
@@ -31,6 +37,12 @@ export const config: AppConfig = {
   },
   appVersion: process.env.EXPO_PUBLIC_APP_VERSION ?? '0.0.1',
   xAuthToken: process.env.EXPO_PUBLIC_X_AUTH_TOKEN ?? 'asdf46asdg16f7h0y',
+  legal: {
+    privacyAdvice: process.env.EXPO_PUBLIC_LEGAL_PRIVACY ?? '',
+    termsAndConditions: process.env.EXPO_PUBLIC_LEGAL_TERMS ?? '',
+    commissions: process.env.EXPO_PUBLIC_LEGAL_COMMISSIONS ?? '',
+    adhesionContract: process.env.EXPO_PUBLIC_LEGAL_CONTRACT ?? '',
+  },
 };
 
 /**

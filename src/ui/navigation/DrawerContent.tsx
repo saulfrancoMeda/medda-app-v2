@@ -8,11 +8,11 @@ import { useColorScheme } from 'nativewind';
 import { config } from '@config/env';
 import { Logo, Text } from '@ui/design-system/components';
 import { useAuth } from '@ui/providers/AuthProvider';
-import type { AppTabsParamList } from '@ui/navigation/types';
+import type { SectionsStackParamList } from '@ui/navigation/types';
 
 type IoniconName = keyof typeof Ionicons.glyphMap;
 
-const ITEMS: { label: string; icon: IoniconName; route: keyof AppTabsParamList }[] = [
+const ITEMS: { label: string; icon: IoniconName; route: keyof SectionsStackParamList }[] = [
   { label: 'Ver mi perfil', icon: 'person-outline', route: 'Profile' },
   { label: 'Legales y Estado de cuenta', icon: 'document-text-outline', route: 'Legal' },
   { label: 'Seguridad', icon: 'shield-checkmark-outline', route: 'Security' },
@@ -41,7 +41,12 @@ export function DrawerContent(props: DrawerContentComponentProps) {
             <Pressable
               key={item.route}
               className="flex-row items-center gap-md rounded-md py-md"
-              onPress={() => props.navigation.navigate('MainTabs', { screen: item.route })}
+              onPress={() =>
+                props.navigation.navigate('MainTabs', {
+                  screen: 'Sections',
+                  params: { screen: item.route },
+                })
+              }
               accessibilityRole="button"
             >
               <Ionicons name={item.icon} size={22} color={iconColor} />
