@@ -42,6 +42,10 @@ export const endpoints = {
   nipChange: { path: '/user/nip/change', method: 'PUT', auth: 'user' },
   accountStatementsList: { path: '/account-statements/list', method: 'GET', auth: 'user' },
   accountStatementPdf: { path: '/account-statements/pdf', method: 'POST', auth: 'user' },
+  // Inicio / Mis gastos / Ayuda
+  faqs: { path: '/public/agents/faqs', method: 'GET', auth: 'public' },
+  walletCategories: { path: '/wallet/categories/list', method: 'GET', auth: 'user' },
+  salesTotal: { path: '/balances/sales/total', method: 'GET', auth: 'user' },
 } as const satisfies Record<string, Endpoint>;
 
 export type EndpointName = keyof typeof endpoints;

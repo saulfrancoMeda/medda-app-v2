@@ -1,5 +1,6 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { SpeiSendInput, TransactionResult } from '@domain/wallet/entities/Transfer';
+import type { FaqItem } from '@domain/support/entities/Faq';
 
 export type AuthStackParamList = {
   LoginPhone: undefined;
@@ -27,6 +28,12 @@ export type AppTabsParamList = {
   Wallet: undefined;
   Faq: undefined;
   Sections: NavigatorScreenParams<SectionsStackParamList>;
+};
+
+export type FaqStackParamList = {
+  FaqList: undefined;
+  FaqDetail: { item: FaqItem };
+  Chat: undefined;
 };
 
 export type SectionsStackParamList = {

@@ -53,13 +53,37 @@ export function useSpeiBanks() {
   });
 }
 
-export function useMovements(accountId: string | undefined) {
+export function useMovements(accountId: string | undefined, channels?: readonly string[]) {
   const { walletRepository } = useContainer();
   return useQuery({
-    queryKey: ['wallet', 'movements', accountId],
+    queryKey: ['wallet', 'movements', accountId, channels ?? 'transactional'],
     enabled: Boolean(accountId),
     queryFn: async () => {
-      const res = await walletRepository.getMovements(accountId as string, 0);
+      const res = await walletRepository.getMovements(accountId as string, 0, channels);
+      if (!res.ok) throw res.error;
+      return res.value;
+    },
+  });
+}
+
+export function useCategories() {
+  const { walletRepository } = useContainer();
+  return useQuery({
+    queryKey: ['wallet', 'categories'],
+    queryFn: async () => {
+      const res = await walletRepository.getCategories();
+      if (!res.ok) throw res.error;
+      return res.value;
+    },
+  });
+}
+
+export function useSalesTotal() {
+  const { walletRepository } = useContainer();
+  return useQuery({
+    queryKey: ['wallet', 'salesTotal'],
+    queryFn: async () => {
+      const res = await walletRepository.getSalesTotal();
       if (!res.ok) throw res.error;
       return res.value;
     },

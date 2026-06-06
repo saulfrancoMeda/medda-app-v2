@@ -1,10 +1,3 @@
-/**
- * Configuración por entorno. Los valores vienen de variables EXPO_PUBLIC_* (en `.env` local o
- * en EAS por perfil). NUNCA se commitean secretos: ver `.env.example`.
- *
- * IMPORTANTE: hay que referenciar `process.env.EXPO_PUBLIC_*` de forma LITERAL (sin alias ni
- * destructuring); así el transformer de Expo reemplaza el texto por el valor al bundlear.
- */
 export interface AppConfig {
   readonly apiBaseUrl: string;
   readonly apiAltUrl: string;
@@ -17,6 +10,9 @@ export interface AppConfig {
   };
   readonly appVersion: string;
   readonly xAuthToken: string;
+  readonly chatUri: string;
+  readonly supportPhone: string;
+  readonly walletProvider: string;
   readonly legal: {
     readonly privacyAdvice: string;
     readonly termsAndConditions: string;
@@ -37,6 +33,9 @@ export const config: AppConfig = {
   },
   appVersion: process.env.EXPO_PUBLIC_APP_VERSION ?? '0.0.1',
   xAuthToken: process.env.EXPO_PUBLIC_X_AUTH_TOKEN ?? 'asdf46asdg16f7h0y',
+  chatUri: process.env.EXPO_PUBLIC_CHAT_URI ?? '',
+  supportPhone: process.env.EXPO_PUBLIC_SUPPORT_PHONE ?? '',
+  walletProvider: process.env.EXPO_PUBLIC_WALLET_PROVIDER ?? 'meda',
   legal: {
     privacyAdvice: process.env.EXPO_PUBLIC_LEGAL_PRIVACY ?? '',
     termsAndConditions: process.env.EXPO_PUBLIC_LEGAL_TERMS ?? '',
@@ -45,10 +44,6 @@ export const config: AppConfig = {
   },
 };
 
-/**
- * ¿Hay backend real configurado? Si NO, la app usa gateways stub (modo demo). Al llenar las
- * EXPO_PUBLIC_* de Cognito, se activa el gateway real.
- */
 export const isBackendConfigured = (): boolean =>
   config.apiBaseUrl !== '' &&
   config.cognito.userPoolId !== '' &&

@@ -7,6 +7,7 @@ import type {
   WalletRepository,
 } from '@domain/wallet/ports/WalletRepository';
 import type { Bank, SpeiSendInput, TransactionResult } from '@domain/wallet/entities/Transfer';
+import type { Category } from '@domain/wallet/entities/Category';
 import type { HttpClient, HttpError } from '@infrastructure/http/HttpClient';
 import { endpoints } from '@infrastructure/http/endpoints';
 
@@ -66,10 +67,13 @@ export class MedaWalletRepository implements WalletRepository {
     return ok({ clabe: res.value.account?.accountNumber ?? '' });
   }
 
-  async getMovements(accountId: string, page: number): Promise<Result<MovementsPage, WalletError>> {
-    // TODO: verificar nombre exacto de params (channels/page/limit) y shape con datos reales.
+  async getMovements(
+    accountId: string,
+    page: number,
+    channels: readonly string[] = ['transactional'],
+  ): Promise<Result<MovementsPage, WalletError>> {
     const res = await this.http.request<RawMovements>(endpoints.walletMovements, {
-      query: { account: accountId, channels: 'transactional', page },
+      query: { account: accountId, channels: channels.join(','), page },
     });
     if (!res.ok) return err(toWalletError(res.error));
     const movements: Movement[] = (res.value.movements ?? []).map((m) => ({
@@ -102,6 +106,26 @@ export class MedaWalletRepository implements WalletRepository {
     const res = await this.http.request<unknown>(endpoints.nipValidate, { body: { nip } });
     if (!res.ok) return err(toWalletError(res.error));
     return ok(true);
+  }
+
+  async getCategories(): Promise<Result<readonly Category[], WalletError>> {
+    const res = await this.http.request<{
+      categories?: { id?: string; name?: string; image?: string; properties?: { color?: string } }[];
+    }>(endpoints.walletCategories);
+    if (!res.ok) return err(toWalletError(res.error));
+    const categories: Category[] = (res.value.categories ?? []).map((c) => ({
+      id: c.id ?? '',
+      name: c.name ?? '',
+      image: c.image,
+      color: c.properties?.color,
+    }));
+    return ok(categories);
+  }
+
+  async getSalesTotal(): Promise<Result<number, WalletError>> {
+    const res = await this.http.request<{ total?: number }>(endpoints.salesTotal);
+    if (!res.ok) return err(toWalletError(res.error));
+    return ok(res.value.total ?? 0);
   }
 
   async sendSpei(input: SpeiSendInput): Promise<Result<TransactionResult, WalletError>> {

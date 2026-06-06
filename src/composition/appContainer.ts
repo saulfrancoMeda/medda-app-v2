@@ -4,14 +4,16 @@ import { createAuthGateway } from '@infrastructure/auth/createAuthGateway';
 import { AnonymousTokenProvider } from '@infrastructure/auth/AnonymousTokenProvider';
 import { MedaUserDirectory } from '@infrastructure/auth/MedaUserDirectory';
 import { SessionHolder } from '@infrastructure/auth/SessionHolder';
-import { InMemorySessionStore } from '@infrastructure/storage/InMemorySessionStore';
+import { SecureSessionStore } from '@infrastructure/storage/SecureSessionStore';
 import { HttpClient } from '@infrastructure/http/HttpClient';
 import { MedaWalletRepository } from '@infrastructure/wallet/MedaWalletRepository';
 import { MedaAccountRepository } from '@infrastructure/account/MedaAccountRepository';
+import { MedaSupportRepository } from '@infrastructure/support/MedaSupportRepository';
 import type { AuthGateway } from '@domain/auth/ports/AuthGateway';
 import type { SessionStore } from '@domain/auth/ports/SessionStore';
 import type { WalletRepository } from '@domain/wallet/ports/WalletRepository';
 import type { AccountRepository } from '@domain/account/ports/AccountRepository';
+import type { SupportRepository } from '@domain/support/ports/SupportRepository';
 
 export interface AppContainer {
   readonly gateway: AuthGateway;
@@ -21,17 +23,12 @@ export interface AppContainer {
   readonly lookupUserName: ReturnType<typeof makeLookupUserName>;
   readonly walletRepository: WalletRepository;
   readonly accountRepository: AccountRepository;
+  readonly supportRepository: SupportRepository;
 }
 
-/**
- * Composition root de la app: ÚNICO lugar donde se eligen e instancian implementaciones de
- * infraestructura y se cablean los casos de uso. Un solo HttpClient resuelve el Authorization:
- *  - 'public' -> Bearer del token anónimo (client_credentials)
- *  - 'user'   -> JWT de Cognito de la sesión (vía SessionHolder)
- */
 export const createAppContainer = (): AppContainer => {
   const gateway = createAuthGateway();
-  const store = new InMemorySessionStore();
+  const store = new SecureSessionStore();
   const sessionHolder = new SessionHolder();
 
   const anonymous = new AnonymousTokenProvider();
@@ -49,6 +46,7 @@ export const createAppContainer = (): AppContainer => {
   const directory = new MedaUserDirectory(http);
   const walletRepository = new MedaWalletRepository(http);
   const accountRepository = new MedaAccountRepository(http);
+  const supportRepository = new MedaSupportRepository(http);
 
   return {
     gateway,
@@ -58,5 +56,6 @@ export const createAppContainer = (): AppContainer => {
     lookupUserName: makeLookupUserName({ directory }),
     walletRepository,
     accountRepository,
+    supportRepository,
   };
 };

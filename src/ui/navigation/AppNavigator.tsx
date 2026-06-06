@@ -4,16 +4,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from 'nativewind';
 import { WalletStackNavigator } from '@ui/navigation/WalletStackNavigator';
 import { SectionsStackNavigator } from '@ui/navigation/SectionsStackNavigator';
-import { PlaceholderScreen } from '@ui/features/common/PlaceholderScreen';
+import { FaqStackNavigator } from '@ui/navigation/FaqStackNavigator';
+import { StoreScreen } from '@ui/features/home/screens/StoreScreen';
+import { SalesScreen } from '@ui/features/wallet/screens/SalesScreen';
 import { DrawerContent } from '@ui/navigation/DrawerContent';
 import type { AppDrawerParamList, AppTabsParamList } from '@ui/navigation/types';
 
 const Tabs = createBottomTabNavigator<AppTabsParamList>();
 const Drawer = createDrawerNavigator<AppDrawerParamList>();
-
-const StoreScreen = () => <PlaceholderScreen title="Inicio" subtitle="Tu actividad — próximamente" />;
-const SalesScreen = () => <PlaceholderScreen title="Mis gastos" subtitle="Próximamente" />;
-const FaqScreen = () => <PlaceholderScreen title="Ayuda" subtitle="Preguntas frecuentes — próximamente" />;
 
 const TAB_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   Store: 'home-outline',
@@ -40,7 +38,7 @@ function MainTabs() {
       <Tabs.Screen name="Store" component={StoreScreen} options={{ title: 'Inicio' }} />
       <Tabs.Screen name="Sales" component={SalesScreen} options={{ title: 'Mis gastos' }} />
       <Tabs.Screen name="Wallet" component={WalletStackNavigator} options={{ title: 'Mi Billetera' }} />
-      <Tabs.Screen name="Faq" component={FaqScreen} options={{ title: 'Ayuda' }} />
+      <Tabs.Screen name="Faq" component={FaqStackNavigator} options={{ title: 'Ayuda' }} />
       {/* Tab oculto: secciones del drawer (Perfil/Legales/Seguridad). Mantiene el bottom tab. */}
       <Tabs.Screen
         name="Sections"

@@ -1,3 +1,4 @@
+import { ActivityIndicator, View } from 'react-native';
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useColorScheme } from 'nativewind';
@@ -31,6 +32,14 @@ export function RootNavigator() {
       primary: '#fcd535',
     },
   };
+
+  if (status === 'loading') {
+    return (
+      <View className="flex-1 items-center justify-center bg-neutral-0 dark:bg-neutral-950">
+        <ActivityIndicator color="#fcd535" />
+      </View>
+    );
+  }
 
   return (
     <NavigationContainer theme={navTheme}>

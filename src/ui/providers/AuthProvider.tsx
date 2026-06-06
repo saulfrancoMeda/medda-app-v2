@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -10,16 +11,16 @@ import type { Result } from '@domain/shared/result';
 import type { Session } from '@domain/auth/entities/Session';
 import type { AuthError, Credentials } from '@domain/auth/ports/AuthGateway';
 import type { LookupError } from '@domain/auth/ports/UserDirectory';
+import { isSessionExpired } from '@domain/auth/services/SessionManager';
 import { useContainer } from '@ui/providers/ContainerProvider';
 
-type AuthStatus = 'signedOut' | 'signedIn';
+type AuthStatus = 'loading' | 'signedOut' | 'signedIn';
 
 interface AuthContextValue {
   readonly status: AuthStatus;
   readonly session: Session | null;
   readonly signIn: (credentials: Credentials) => Promise<Result<Session, AuthError>>;
   readonly signOut: () => Promise<void>;
-  /** Paso 1: valida el teléfono y devuelve el nombre (enmascarado por el backend). */
   readonly lookupName: (phone: string) => Promise<Result<string, LookupError>>;
 }
 
@@ -28,19 +29,53 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const container = useContainer();
   const [session, setSession] = useState<Session | null>(null);
-  const status: AuthStatus = session ? 'signedIn' : 'signedOut';
+  const [restoring, setRestoring] = useState(true);
+
+  const applySession = useCallback(
+    (s: Session) => {
+      container.sessionHolder.set(s.accessToken);
+      setSession(s);
+    },
+    [container],
+  );
+
+  // Restaura la sesión guardada al abrir; si expiró, intenta refrescarla.
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const stored = await container.store.read();
+      if (!active) return;
+      if (stored && !isSessionExpired(stored, Date.now())) {
+        applySession(stored);
+      } else if (stored?.refreshToken) {
+        const refreshed = await container.gateway.refresh(stored);
+        if (active && refreshed.ok) {
+          await container.store.write(refreshed.value);
+          applySession(refreshed.value);
+        } else if (active) {
+          await container.store.clear();
+        }
+      }
+      if (active) setRestoring(false);
+    })().catch(() => {
+      if (active) setRestoring(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, [container, applySession]);
+
+  const status: AuthStatus = restoring ? 'loading' : session ? 'signedIn' : 'signedOut';
 
   const signIn = useCallback(
     async (credentials: Credentials) => {
       const result = await container.login(credentials);
       if (result.ok) {
-        // Deja el JWT disponible para las llamadas autenticadas (wallet, perfil, etc.).
-        container.sessionHolder.set(result.value.accessToken);
-        setSession(result.value);
+        applySession(result.value);
       }
       return result;
     },
-    [container],
+    [container, applySession],
   );
 
   const signOut = useCallback(async () => {
