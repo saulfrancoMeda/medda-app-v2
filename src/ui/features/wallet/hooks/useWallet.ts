@@ -1,0 +1,55 @@
+import { useQuery } from '@tanstack/react-query';
+import { useContainer } from '@ui/providers/ContainerProvider';
+
+// Hooks de datos de billetera. Cada uno llama al WalletRepository (puerto de dominio) y
+// lanza el error si el Result es err para que TanStack Query lo maneje (loading/error/data).
+
+export function useDefaultAccount() {
+  const { walletRepository } = useContainer();
+  return useQuery({
+    queryKey: ['wallet', 'defaultAccount'],
+    queryFn: async () => {
+      const res = await walletRepository.getDefaultAccount();
+      if (!res.ok) throw res.error;
+      return res.value;
+    },
+  });
+}
+
+export function useBalance(accountId: string | undefined) {
+  const { walletRepository } = useContainer();
+  return useQuery({
+    queryKey: ['wallet', 'balance', accountId],
+    enabled: Boolean(accountId),
+    queryFn: async () => {
+      const res = await walletRepository.getBalance(accountId as string);
+      if (!res.ok) throw res.error;
+      return res.value;
+    },
+  });
+}
+
+export function useStpAccount() {
+  const { walletRepository } = useContainer();
+  return useQuery({
+    queryKey: ['wallet', 'stp'],
+    queryFn: async () => {
+      const res = await walletRepository.getStpAccount();
+      if (!res.ok) throw res.error;
+      return res.value;
+    },
+  });
+}
+
+export function useMovements(accountId: string | undefined) {
+  const { walletRepository } = useContainer();
+  return useQuery({
+    queryKey: ['wallet', 'movements', accountId],
+    enabled: Boolean(accountId),
+    queryFn: async () => {
+      const res = await walletRepository.getMovements(accountId as string, 0);
+      if (!res.ok) throw res.error;
+      return res.value;
+    },
+  });
+}

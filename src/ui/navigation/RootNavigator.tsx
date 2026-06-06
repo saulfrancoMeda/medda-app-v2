@@ -4,11 +4,10 @@ import { useColorScheme } from 'nativewind';
 import { useAuth } from '@ui/providers/AuthProvider';
 import { LoginPhoneScreen } from '@ui/features/auth/screens/LoginPhoneScreen';
 import { LoginPasswordScreen } from '@ui/features/auth/screens/LoginPasswordScreen';
-import { HomeScreen } from '@ui/features/home/screens/HomeScreen';
-import type { AppStackParamList, AuthStackParamList } from '@ui/navigation/types';
+import { AppNavigator } from '@ui/navigation/AppNavigator';
+import type { AuthStackParamList } from '@ui/navigation/types';
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
-const AppStack = createNativeStackNavigator<AppStackParamList>();
 
 function AuthNavigator() {
   return (
@@ -16,14 +15,6 @@ function AuthNavigator() {
       <AuthStack.Screen name="LoginPhone" component={LoginPhoneScreen} />
       <AuthStack.Screen name="LoginPassword" component={LoginPasswordScreen} />
     </AuthStack.Navigator>
-  );
-}
-
-function AppNavigator() {
-  return (
-    <AppStack.Navigator screenOptions={{ headerShown: false }}>
-      <AppStack.Screen name="Home" component={HomeScreen} />
-    </AppStack.Navigator>
   );
 }
 

@@ -30,6 +30,11 @@ export const endpoints = {
   checkUserLock: { path: '/public/user/lock/check', method: 'POST', auth: 'public' },
   changePasswordAuthenticated: { path: '/security/password/change', method: 'POST', auth: 'user' },
   pushTokenSync: { path: '/user/notifications/pushtoken/sync', method: 'POST', auth: 'user' },
+  // Wallet (autenticadas con JWT de Cognito)
+  walletDefaultAccount: { path: '/wallet/accounts/default', method: 'GET', auth: 'user' },
+  walletBalance: { path: '/wallet/accounts/balance', method: 'POST', auth: 'user' },
+  walletStpAccount: { path: '/wallet/stp/account', method: 'GET', auth: 'user' },
+  walletMovements: { path: '/wallet/movements/list', method: 'GET', auth: 'user' },
 } as const satisfies Record<string, Endpoint>;
 
 export type EndpointName = keyof typeof endpoints;

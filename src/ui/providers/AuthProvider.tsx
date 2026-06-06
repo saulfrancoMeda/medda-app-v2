@@ -10,7 +10,7 @@ import type { Result } from '@domain/shared/result';
 import type { Session } from '@domain/auth/entities/Session';
 import type { AuthError, Credentials } from '@domain/auth/ports/AuthGateway';
 import type { LookupError } from '@domain/auth/ports/UserDirectory';
-import { createAuthContainer } from '@composition/authContainer';
+import { useContainer } from '@ui/providers/ContainerProvider';
 
 type AuthStatus = 'signedOut' | 'signedIn';
 
@@ -26,8 +26,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Contenedor (gateway + store + caso de uso) creado UNA sola vez vía inicializador lazy.
-  const [container] = useState(createAuthContainer);
+  const container = useContainer();
   const [session, setSession] = useState<Session | null>(null);
   const status: AuthStatus = session ? 'signedIn' : 'signedOut';
 
@@ -35,6 +34,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (credentials: Credentials) => {
       const result = await container.login(credentials);
       if (result.ok) {
+        // Deja el JWT disponible para las llamadas autenticadas (wallet, perfil, etc.).
+        container.sessionHolder.set(result.value.accessToken);
         setSession(result.value);
       }
       return result;
@@ -47,13 +48,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await container.gateway.logout(session);
     }
     await container.store.clear();
+    container.sessionHolder.set(null);
     setSession(null);
   }, [container, session]);
 
-  const lookupName = useCallback(
-    (phone: string) => container.lookupUserName(phone),
-    [container],
-  );
+  const lookupName = useCallback((phone: string) => container.lookupUserName(phone), [container]);
 
   const value = useMemo<AuthContextValue>(
     () => ({ status, session, signIn, signOut, lookupName }),
