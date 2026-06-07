@@ -73,7 +73,12 @@ export function LoginPasswordScreen({ route, navigation }: Props) {
           />
 
           <View className="items-end">
-            <Text variant="caption" tone="link" className="font-semibold">
+            <Text
+              variant="caption"
+              tone="link"
+              className="font-semibold"
+              onPress={() => navigation.navigate('RecoverPhone')}
+            >
               Recuperar contraseña
             </Text>
           </View>

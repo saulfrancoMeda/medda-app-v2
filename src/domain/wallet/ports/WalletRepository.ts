@@ -3,6 +3,7 @@ import type { Account, StpAccount } from '@domain/wallet/entities/Account';
 import type { Movement } from '@domain/wallet/entities/Movement';
 import type { Bank, SpeiSendInput, TransactionResult } from '@domain/wallet/entities/Transfer';
 import type { Category } from '@domain/wallet/entities/Category';
+import type { Service, ServicePaymentInput } from '@domain/wallet/entities/Service';
 
 export type WalletError =
   | { readonly type: 'unauthorized' }
@@ -29,6 +30,8 @@ export interface WalletRepository {
   getCategories(): Promise<Result<readonly Category[], WalletError>>;
   /** Total de gastos del agente (/balances/sales/total). */
   getSalesTotal(): Promise<Result<number, WalletError>>;
+  getServices(categoryId: string): Promise<Result<readonly Service[], WalletError>>;
+  payService(input: ServicePaymentInput): Promise<Result<TransactionResult, WalletError>>;
   getSpeiBanks(): Promise<Result<readonly Bank[], WalletError>>;
   /** Valida el NIP del usuario antes de autorizar una transacción (/user/nip/validate). */
   validateNip(nip: string): Promise<Result<true, WalletError>>;

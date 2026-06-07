@@ -78,6 +78,18 @@ export function useCategories() {
   });
 }
 
+export function useServices(categoryId: string) {
+  const { walletRepository } = useContainer();
+  return useQuery({
+    queryKey: ['wallet', 'services', categoryId],
+    queryFn: async () => {
+      const res = await walletRepository.getServices(categoryId);
+      if (!res.ok) throw res.error;
+      return res.value;
+    },
+  });
+}
+
 export function useSalesTotal() {
   const { walletRepository } = useContainer();
   return useQuery({

@@ -8,6 +8,7 @@ import type {
 } from '@domain/wallet/ports/WalletRepository';
 import type { Bank, SpeiSendInput, TransactionResult } from '@domain/wallet/entities/Transfer';
 import type { Category } from '@domain/wallet/entities/Category';
+import type { Service, ServicePaymentInput } from '@domain/wallet/entities/Service';
 import type { HttpClient, HttpError } from '@infrastructure/http/HttpClient';
 import { endpoints } from '@infrastructure/http/endpoints';
 
@@ -126,6 +127,28 @@ export class MedaWalletRepository implements WalletRepository {
     const res = await this.http.request<{ total?: number }>(endpoints.salesTotal);
     if (!res.ok) return err(toWalletError(res.error));
     return ok(res.value.total ?? 0);
+  }
+
+  async getServices(categoryId: string): Promise<Result<readonly Service[], WalletError>> {
+    const res = await this.http.request<{
+      services?: { id?: string; name?: string; image?: string }[];
+    }>(endpoints.walletServices, { query: { category: categoryId } });
+    if (!res.ok) return err(toWalletError(res.error));
+    const services: Service[] = (res.value.services ?? []).map((s) => ({
+      id: s.id ?? '',
+      name: s.name ?? '',
+      image: s.image,
+    }));
+    return ok(services);
+  }
+
+  async payService(input: ServicePaymentInput): Promise<Result<TransactionResult, WalletError>> {
+    const res = await this.http.request<{ id?: string; date?: string }>(
+      endpoints.servicePaymentProcess,
+      { body: input },
+    );
+    if (!res.ok) return err(toWalletError(res.error));
+    return ok({ id: res.value.id ?? '', date: res.value.date });
   }
 
   async sendSpei(input: SpeiSendInput): Promise<Result<TransactionResult, WalletError>> {

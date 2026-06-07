@@ -9,7 +9,9 @@ import { HttpClient } from '@infrastructure/http/HttpClient';
 import { MedaWalletRepository } from '@infrastructure/wallet/MedaWalletRepository';
 import { MedaAccountRepository } from '@infrastructure/account/MedaAccountRepository';
 import { MedaSupportRepository } from '@infrastructure/support/MedaSupportRepository';
+import { MedaPasswordRecovery } from '@infrastructure/auth/MedaPasswordRecovery';
 import type { AuthGateway } from '@domain/auth/ports/AuthGateway';
+import type { PasswordRecovery } from '@domain/auth/ports/PasswordRecovery';
 import type { SessionStore } from '@domain/auth/ports/SessionStore';
 import type { WalletRepository } from '@domain/wallet/ports/WalletRepository';
 import type { AccountRepository } from '@domain/account/ports/AccountRepository';
@@ -24,6 +26,7 @@ export interface AppContainer {
   readonly walletRepository: WalletRepository;
   readonly accountRepository: AccountRepository;
   readonly supportRepository: SupportRepository;
+  readonly passwordRecovery: PasswordRecovery;
 }
 
 export const createAppContainer = (): AppContainer => {
@@ -47,6 +50,7 @@ export const createAppContainer = (): AppContainer => {
   const walletRepository = new MedaWalletRepository(http);
   const accountRepository = new MedaAccountRepository(http);
   const supportRepository = new MedaSupportRepository(http);
+  const passwordRecovery = new MedaPasswordRecovery(http);
 
   return {
     gateway,
@@ -57,5 +61,6 @@ export const createAppContainer = (): AppContainer => {
     walletRepository,
     accountRepository,
     supportRepository,
+    passwordRecovery,
   };
 };

@@ -5,6 +5,9 @@ import type { FaqItem } from '@domain/support/entities/Faq';
 export type AuthStackParamList = {
   LoginPhone: undefined;
   LoginPassword: { phone: string; name: string };
+  RecoverPhone: undefined;
+  RecoverCode: { phone: string };
+  RecoverNewPassword: { phone: string; code: string };
 };
 
 // Datos del SPEI recolectados antes de confirmar (sin nip ni location, que se agregan al enviar).
@@ -33,6 +36,8 @@ export type AppTabsParamList = {
 export type StoreStackParamList = {
   StoreHome: undefined;
   ServicePayments: undefined;
+  ServiceList: { categoryId: string; categoryName: string };
+  ServicePay: { serviceId: string; serviceName: string };
 };
 
 export type FaqStackParamList = {

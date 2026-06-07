@@ -5,6 +5,11 @@ import { useColorScheme } from 'nativewind';
 import { useAuth } from '@ui/providers/AuthProvider';
 import { LoginPhoneScreen } from '@ui/features/auth/screens/LoginPhoneScreen';
 import { LoginPasswordScreen } from '@ui/features/auth/screens/LoginPasswordScreen';
+import {
+  RecoverCodeScreen,
+  RecoverNewPasswordScreen,
+  RecoverPhoneScreen,
+} from '@ui/features/auth/screens/RecoverScreens';
 import { AppNavigator } from '@ui/navigation/AppNavigator';
 import type { AuthStackParamList } from '@ui/navigation/types';
 
@@ -15,6 +20,21 @@ function AuthNavigator() {
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>
       <AuthStack.Screen name="LoginPhone" component={LoginPhoneScreen} />
       <AuthStack.Screen name="LoginPassword" component={LoginPasswordScreen} />
+      <AuthStack.Screen
+        name="RecoverPhone"
+        component={RecoverPhoneScreen}
+        options={{ headerShown: true, title: 'Recuperar contraseña' }}
+      />
+      <AuthStack.Screen
+        name="RecoverCode"
+        component={RecoverCodeScreen}
+        options={{ headerShown: true, title: 'Código' }}
+      />
+      <AuthStack.Screen
+        name="RecoverNewPassword"
+        component={RecoverNewPasswordScreen}
+        options={{ headerShown: true, title: 'Nueva contraseña' }}
+      />
     </AuthStack.Navigator>
   );
 }

@@ -45,6 +45,8 @@ export const endpoints = {
   // Inicio / Mis gastos / Ayuda
   faqs: { path: '/public/agents/faqs', method: 'GET', auth: 'public' },
   walletCategories: { path: '/wallet/categories/list', method: 'GET', auth: 'user' },
+  walletServices: { path: '/wallet/services/list', method: 'GET', auth: 'user' },
+  servicePaymentProcess: { path: '/wallet/services/payments/process', method: 'POST', auth: 'user' },
   salesTotal: { path: '/balances/sales/total', method: 'GET', auth: 'user' },
   emailChange: { path: '/user/email/change', method: 'PATCH', auth: 'user' },
   credentialsCheck: { path: '/user/credentials/check', method: 'POST', auth: 'user' },

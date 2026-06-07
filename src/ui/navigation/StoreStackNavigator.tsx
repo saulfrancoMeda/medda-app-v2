@@ -1,7 +1,11 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useColorScheme } from 'nativewind';
 import { StoreScreen } from '@ui/features/home/screens/StoreScreen';
-import { ServicePaymentsScreen } from '@ui/features/home/screens/ServicePaymentsScreen';
+import {
+  ServiceListScreen,
+  ServicePayScreen,
+  ServicePaymentsScreen,
+} from '@ui/features/home/screens/ServicePaymentsScreen';
 import type { StoreStackParamList } from '@ui/navigation/types';
 
 const Stack = createNativeStackNavigator<StoreStackParamList>();
@@ -23,6 +27,16 @@ export function StoreStackNavigator() {
         name="ServicePayments"
         component={ServicePaymentsScreen}
         options={{ title: 'Pago de servicios' }}
+      />
+      <Stack.Screen
+        name="ServiceList"
+        component={ServiceListScreen}
+        options={({ route }) => ({ title: route.params.categoryName })}
+      />
+      <Stack.Screen
+        name="ServicePay"
+        component={ServicePayScreen}
+        options={{ title: 'Realizar pago' }}
       />
     </Stack.Navigator>
   );
