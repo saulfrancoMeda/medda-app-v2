@@ -1,7 +1,12 @@
 import type { Result } from '@domain/shared/result';
 import type { Account, StpAccount } from '@domain/wallet/entities/Account';
 import type { Movement } from '@domain/wallet/entities/Movement';
-import type { Bank, SpeiSendInput, TransactionResult } from '@domain/wallet/entities/Transfer';
+import type {
+  Bank,
+  MedaTransferInput,
+  SpeiSendInput,
+  TransactionResult,
+} from '@domain/wallet/entities/Transfer';
 import type { Category } from '@domain/wallet/entities/Category';
 import type { Service, ServicePaymentInput } from '@domain/wallet/entities/Service';
 
@@ -37,4 +42,6 @@ export interface WalletRepository {
   validateNip(nip: string): Promise<Result<true, WalletError>>;
   /** Envía un SPEI a terceros (/wallet/transactions/spei/send). */
   sendSpei(input: SpeiSendInput): Promise<Result<TransactionResult, WalletError>>;
+  /** Transfiere a un usuario Medá (/wallet/accounts/transfer/toResource). */
+  transferToUser(input: MedaTransferInput): Promise<Result<TransactionResult, WalletError>>;
 }

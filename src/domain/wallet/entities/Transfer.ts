@@ -16,6 +16,15 @@ export interface SpeiSendInput {
   readonly location: { readonly latitude: number; readonly longitude: number };
 }
 
+/** Datos para transferir a un usuario Medá (/wallet/accounts/transfer/toResource). */
+export interface MedaTransferInput {
+  readonly originAccount: string;
+  readonly resource: string; // identificador del destinatario (del QR escaneado)
+  readonly amount: string;
+  readonly nip: string;
+  readonly comment?: string;
+}
+
 /** Resultado de una transacción de envío. */
 export interface TransactionResult {
   readonly id: string;

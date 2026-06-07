@@ -6,7 +6,12 @@ import type {
   WalletError,
   WalletRepository,
 } from '@domain/wallet/ports/WalletRepository';
-import type { Bank, SpeiSendInput, TransactionResult } from '@domain/wallet/entities/Transfer';
+import type {
+  Bank,
+  MedaTransferInput,
+  SpeiSendInput,
+  TransactionResult,
+} from '@domain/wallet/entities/Transfer';
 import type { Category } from '@domain/wallet/entities/Category';
 import type { Service, ServicePaymentInput } from '@domain/wallet/entities/Service';
 import type { HttpClient, HttpError } from '@infrastructure/http/HttpClient';
@@ -37,7 +42,7 @@ interface RawMovements {
 
 const toWalletError = (e: HttpError): WalletError => {
   if (e.kind === 'network') return { type: 'network' };
-  if (e.status === 401) return { type: 'unauthorized' };
+  // Surfacea el mensaje real del servicio (incluye 401) para diagnóstico.
   return { type: 'unknown', message: e.message };
 };
 
@@ -163,5 +168,22 @@ export class MedaWalletRepository implements WalletRepository {
       claveRastreo: res.value.properties?.claveRastreo,
       date: res.value.date,
     });
+  }
+
+  async transferToUser(input: MedaTransferInput): Promise<Result<TransactionResult, WalletError>> {
+    const res = await this.http.request<{ id?: string; date?: string }>(
+      endpoints.walletTransferToResource,
+      {
+        body: {
+          origin: input.originAccount,
+          resource: input.resource,
+          amount: input.amount,
+          nip: input.nip,
+          comment: input.comment,
+        },
+      },
+    );
+    if (!res.ok) return err(toWalletError(res.error));
+    return ok({ id: res.value.id ?? '', date: res.value.date });
   }
 }

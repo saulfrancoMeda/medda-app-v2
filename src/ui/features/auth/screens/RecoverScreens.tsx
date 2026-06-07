@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Alert, View } from 'react-native';
+import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RecoveryError } from '@domain/auth/ports/PasswordRecovery';
 import { Button, Input, Text } from '@ui/design-system/components';
 import { useContainer } from '@ui/providers/ContainerProvider';
+import { useToast } from '@ui/providers/ToastProvider';
 import type { AuthStackParamList } from '@ui/navigation/types';
 
 const MIN_PASSWORD = 6;
@@ -112,6 +113,7 @@ type NewProps = NativeStackScreenProps<AuthStackParamList, 'RecoverNewPassword'>
 export function RecoverNewPasswordScreen({ route, navigation }: NewProps) {
   const { phone, code } = route.params;
   const { passwordRecovery } = useContainer();
+  const toast = useToast();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
@@ -125,10 +127,12 @@ export function RecoverNewPasswordScreen({ route, navigation }: NewProps) {
     const res = await passwordRecovery.resetPassword(phone, code, password);
     setLoading(false);
     if (!res.ok) {
-      setError(recoveryErrorMessage(res.error));
+      const msg = recoveryErrorMessage(res.error);
+      setError(msg);
+      toast.error(msg);
       return;
     }
-    Alert.alert('Listo', 'Tu contraseña se actualizó. Inicia sesión con la nueva.');
+    toast.success('Tu contraseña se actualizó. Inicia sesión con la nueva.');
     navigation.popToTop();
   };
 

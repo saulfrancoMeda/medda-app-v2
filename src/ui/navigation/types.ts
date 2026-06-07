@@ -21,6 +21,8 @@ export type WalletStackParamList = {
   CashOutSpeiForm: undefined;
   CashOutConfirm: { draft: SpeiDraft };
   TransactionSuccess: { result: TransactionResult; draft: SpeiDraft };
+  CashOutMedaScan: undefined;
+  CashOutMedaAmount: { resource: string };
 };
 
 // Tabs visibles + un tab oculto "Sections" (stack) con las pantallas del drawer, para que el
@@ -38,6 +40,7 @@ export type StoreStackParamList = {
   ServicePayments: undefined;
   ServiceList: { categoryId: string; categoryName: string };
   ServicePay: { serviceId: string; serviceName: string };
+  MyQr: undefined;
 };
 
 export type FaqStackParamList = {

@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useColorScheme } from 'nativewind';
 import { StoreScreen } from '@ui/features/home/screens/StoreScreen';
+import { MyQrScreen } from '@ui/features/home/screens/MyQrScreen';
 import {
   ServiceListScreen,
   ServicePayScreen,
@@ -38,6 +39,7 @@ export function StoreStackNavigator() {
         component={ServicePayScreen}
         options={{ title: 'Realizar pago' }}
       />
+      <Stack.Screen name="MyQr" component={MyQrScreen} options={{ title: 'Mi QR' }} />
     </Stack.Navigator>
   );
 }

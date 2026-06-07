@@ -87,7 +87,11 @@ export function StoreScreen() {
           <Text variant="h2" className="flex-1">
             {p ? `${p.firstName} ${p.lastName}` : 'Bienvenido'}
           </Text>
-          <Pressable className="items-center" accessibilityRole="button">
+          <Pressable
+            className="items-center"
+            accessibilityRole="button"
+            onPress={() => stackNav.navigate('MyQr')}
+          >
             <Ionicons name="qr-code-outline" size={26} color="#c99400" />
             <Text variant="caption" tone="link">
               Mi QR

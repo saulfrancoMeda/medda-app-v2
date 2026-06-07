@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { isValidNip } from '@domain/wallet/entities/Transfer';
@@ -7,6 +7,7 @@ import type { AccountError } from '@domain/account/ports/AccountRepository';
 import { Button, Input, Text } from '@ui/design-system/components';
 import { NipModal } from '@ui/features/wallet/components/NipModal';
 import { useContainer } from '@ui/providers/ContainerProvider';
+import { useToast } from '@ui/providers/ToastProvider';
 import type { SectionsStackParamList } from '@ui/navigation/types';
 
 const MIN_PASSWORD = 6;
@@ -88,6 +89,7 @@ type ChangePwdProps = NativeStackScreenProps<SectionsStackParamList, 'ChangePass
 
 export function ChangePasswordScreen({ navigation }: ChangePwdProps) {
   const { accountRepository } = useContainer();
+  const toast = useToast();
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -106,11 +108,13 @@ export function ChangePasswordScreen({ navigation }: ChangePwdProps) {
     const res = await accountRepository.changePassword({ oldPassword, newPassword, nip });
     setLoading(false);
     if (!res.ok) {
-      setNipError(accountErrorMessage(res.error));
+      const msg = accountErrorMessage(res.error);
+      setNipError(msg);
+      toast.error(msg);
       return;
     }
     setNipVisible(false);
-    Alert.alert('Listo', 'Tu contraseña se actualizó correctamente.');
+    toast.success('Tu contraseña se actualizó correctamente.');
     navigation.goBack();
   };
 
@@ -142,6 +146,7 @@ type ChangeNipProps = NativeStackScreenProps<SectionsStackParamList, 'ChangeNip'
 
 export function ChangeNipScreen({ navigation }: ChangeNipProps) {
   const { accountRepository } = useContainer();
+  const toast = useToast();
   const [password, setPassword] = useState('');
   const [oldNip, setOldNip] = useState('');
   const [newNip, setNewNip] = useState('');
@@ -162,10 +167,12 @@ export function ChangeNipScreen({ navigation }: ChangeNipProps) {
     const res = await accountRepository.changeNip({ password, oldNip, newNip });
     setLoading(false);
     if (!res.ok) {
-      setError(accountErrorMessage(res.error));
+      const msg = accountErrorMessage(res.error);
+      setError(msg);
+      toast.error(msg);
       return;
     }
-    Alert.alert('Listo', 'Tu NIP se actualizó correctamente.');
+    toast.success('Tu NIP se actualizó correctamente.');
     navigation.goBack();
   };
 
@@ -196,6 +203,7 @@ type ChangeEmailProps = NativeStackScreenProps<SectionsStackParamList, 'ChangeEm
 
 export function ChangeEmailScreen({ navigation }: ChangeEmailProps) {
   const { accountRepository } = useContainer();
+  const toast = useToast();
   const [email, setEmail] = useState('');
   const [confirm, setConfirm] = useState('');
   const [nipVisible, setNipVisible] = useState(false);
@@ -209,11 +217,13 @@ export function ChangeEmailScreen({ navigation }: ChangeEmailProps) {
     const res = await accountRepository.changeEmail(email, nip);
     setLoading(false);
     if (!res.ok) {
-      setNipError(accountErrorMessage(res.error));
+      const msg = accountErrorMessage(res.error);
+      setNipError(msg);
+      toast.error(msg);
       return;
     }
     setNipVisible(false);
-    Alert.alert('Listo', 'Tu correo se actualizó correctamente.');
+    toast.success('Tu correo se actualizó correctamente.');
     navigation.goBack();
   };
 
@@ -245,6 +255,7 @@ type ChangeNumberProps = NativeStackScreenProps<SectionsStackParamList, 'ChangeN
 
 export function ChangeNumberScreen({ navigation }: ChangeNumberProps) {
   const { accountRepository } = useContainer();
+  const toast = useToast();
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [nip, setNip] = useState('');
@@ -259,12 +270,15 @@ export function ChangeNumberScreen({ navigation }: ChangeNumberProps) {
     const res = await accountRepository.sendNumberChangeCode(phone, enteredNip);
     setLoading(false);
     if (!res.ok) {
-      setError(accountErrorMessage(res.error));
+      const msg = accountErrorMessage(res.error);
+      setError(msg);
+      toast.error(msg);
       return;
     }
     setNip(enteredNip);
     setNipVisible(false);
     setSent(true);
+    toast.success('Te enviamos un código por SMS.');
   };
 
   const confirm = async () => {
@@ -273,10 +287,12 @@ export function ChangeNumberScreen({ navigation }: ChangeNumberProps) {
     const res = await accountRepository.setNumber(phone, code, nip);
     setLoading(false);
     if (!res.ok) {
-      setError(accountErrorMessage(res.error));
+      const msg = accountErrorMessage(res.error);
+      setError(msg);
+      toast.error(msg);
       return;
     }
-    Alert.alert('Listo', 'Tu número se actualizó. Vuelve a iniciar sesión con el nuevo número.');
+    toast.success('Tu número se actualizó. Vuelve a iniciar sesión con el nuevo número.');
     navigation.goBack();
   };
 

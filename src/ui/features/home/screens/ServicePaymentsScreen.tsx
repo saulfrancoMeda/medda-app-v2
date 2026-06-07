@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, ScrollView, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { WalletError } from '@domain/wallet/ports/WalletRepository';
@@ -8,6 +8,7 @@ import { Button, Input, Text } from '@ui/design-system/components';
 import { NipModal } from '@ui/features/wallet/components/NipModal';
 import { useCategories, useDefaultAccount, useServices } from '@ui/features/wallet/hooks/useWallet';
 import { useContainer } from '@ui/providers/ContainerProvider';
+import { useToast } from '@ui/providers/ToastProvider';
 import type { StoreStackParamList } from '@ui/navigation/types';
 
 const walletErrorMessage = (e: WalletError): string =>
@@ -93,6 +94,7 @@ export function ServicePayScreen({ route, navigation }: PayProps) {
   const { serviceId, serviceName } = route.params;
   const account = useDefaultAccount();
   const { walletRepository } = useContainer();
+  const toast = useToast();
   const [reference, setReference] = useState('');
   const [amount, setAmount] = useState('');
   const [nipVisible, setNipVisible] = useState(false);
@@ -113,11 +115,13 @@ export function ServicePayScreen({ route, navigation }: PayProps) {
     });
     setLoading(false);
     if (!res.ok) {
-      setNipError(walletErrorMessage(res.error));
+      const msg = walletErrorMessage(res.error);
+      setNipError(msg);
+      toast.error(msg);
       return;
     }
     setNipVisible(false);
-    Alert.alert('Pago exitoso', `Tu pago de ${serviceName} se procesó correctamente.`);
+    toast.success(`Tu pago de ${serviceName} se procesó correctamente.`);
     navigation.popToTop();
   };
 

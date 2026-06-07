@@ -1,6 +1,7 @@
 import { config } from '@config/env';
 import { err, ok, type Result } from '@domain/shared/result';
 import type { Endpoint } from '@infrastructure/http/endpoints';
+import { extractApiMessage } from '@infrastructure/http/apiError';
 
 export interface HttpError {
   readonly kind: 'http' | 'network';
@@ -59,7 +60,8 @@ export class HttpClient {
           kind: 'http',
           status: response.status,
           body: parsed,
-          message: `HTTP ${response.status}`,
+          // Mensaje real del backend si lo hay; si no, el status. (Más adelante: solo status.)
+          message: extractApiMessage(parsed) ?? `Error ${response.status}`,
         });
       }
       return ok(parsed as T);

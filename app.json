@@ -47,7 +47,13 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Medá usa la cámara para escanear el código QR de otros usuarios."
+        }
+      ]
     ]
   }
 }

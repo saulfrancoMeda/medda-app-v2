@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Alert, FlatList, Modal, Pressable, ScrollView, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { FlatList, Modal, Pressable, ScrollView, View } from 'react-native';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { formatCurrency } from '@domain/shared/money';
@@ -7,8 +8,9 @@ import { isValidAmount, isValidClabe, type Bank } from '@domain/wallet/entities/
 import type { WalletError } from '@domain/wallet/ports/WalletRepository';
 import { Button, Input, Text } from '@ui/design-system/components';
 import { NipModal } from '@ui/features/wallet/components/NipModal';
-import { useSpeiBanks } from '@ui/features/wallet/hooks/useWallet';
+import { useDefaultAccount, useSpeiBanks } from '@ui/features/wallet/hooks/useWallet';
 import { useContainer } from '@ui/providers/ContainerProvider';
+import { useToast } from '@ui/providers/ToastProvider';
 import type { WalletStackParamList } from '@ui/navigation/types';
 
 // --- Métodos de envío -------------------------------------------------------
@@ -62,9 +64,8 @@ export function CashOutMethodsScreen({ navigation }: MethodsProps) {
         icon="person-circle"
         iconColor="#d7a300"
         title="Envía a un usuario Medá"
-        onPress={() =>
-          Alert.alert('Próximamente', 'El envío a usuarios Medá (QR) estará disponible pronto.')
-        }
+        subtitle="Escanea el QR del destinatario"
+        onPress={() => navigation.navigate('CashOutMedaScan')}
       />
       <MethodRow
         icon="paper-plane"
@@ -212,6 +213,7 @@ type ConfirmProps = NativeStackScreenProps<WalletStackParamList, 'CashOutConfirm
 export function CashOutConfirmScreen({ route, navigation }: ConfirmProps) {
   const { draft } = route.params;
   const { walletRepository } = useContainer();
+  const toast = useToast();
   const [nipVisible, setNipVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [nipError, setNipError] = useState<string | undefined>(undefined);
@@ -222,7 +224,9 @@ export function CashOutConfirmScreen({ route, navigation }: ConfirmProps) {
     const nipRes = await walletRepository.validateNip(nip);
     if (!nipRes.ok) {
       setLoading(false);
-      setNipError(walletErrorMessage(nipRes.error));
+      const msg = walletErrorMessage(nipRes.error);
+      setNipError(msg);
+      toast.error(msg);
       return;
     }
     // TODO: obtener ubicación real (expo-location); el legacy la manda en el envío.
@@ -233,10 +237,13 @@ export function CashOutConfirmScreen({ route, navigation }: ConfirmProps) {
     });
     setLoading(false);
     if (!sendRes.ok) {
-      setNipError(walletErrorMessage(sendRes.error));
+      const msg = walletErrorMessage(sendRes.error);
+      setNipError(msg);
+      toast.error(msg);
       return;
     }
     setNipVisible(false);
+    toast.success('Transferencia enviada correctamente.');
     navigation.navigate('TransactionSuccess', { result: sendRes.value, draft });
   };
 
@@ -295,6 +302,114 @@ export function TransactionSuccessScreen({ route, navigation }: SuccessProps) {
       </View>
 
       <Button title="Volver a Mi Billetera" full onPress={() => navigation.popToTop()} />
+    </ScrollView>
+  );
+}
+
+// --- Medá a Medá: escáner QR ------------------------------------------------
+type ScanProps = NativeStackScreenProps<WalletStackParamList, 'CashOutMedaScan'>;
+
+export function CashOutMedaScanScreen({ navigation }: ScanProps) {
+  const [permission, requestPermission] = useCameraPermissions();
+  const scanned = useRef(false);
+
+  if (!permission) {
+    return <View className="flex-1 bg-neutral-950" />;
+  }
+  if (!permission.granted) {
+    return (
+      <View className="flex-1 items-center justify-center gap-md bg-neutral-0 px-lg dark:bg-neutral-950">
+        <Ionicons name="camera-outline" size={48} color="#d7a300" />
+        <Text variant="h2" center>
+          Permite la cámara
+        </Text>
+        <Text variant="body" tone="muted" center>
+          Necesitamos la cámara para escanear el QR del usuario Medá.
+        </Text>
+        <Button title="Permitir cámara" full onPress={() => void requestPermission()} />
+      </View>
+    );
+  }
+
+  return (
+    <View className="flex-1 bg-black">
+      <CameraView
+        style={{ flex: 1 }}
+        barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+        onBarcodeScanned={({ data }) => {
+          if (scanned.current || !data) return;
+          scanned.current = true;
+          navigation.replace('CashOutMedaAmount', { resource: data });
+        }}
+      />
+      <View className="absolute inset-x-0 bottom-2xl items-center">
+        <Text variant="body" className="rounded-pill bg-black/60 px-lg py-sm text-neutral-0">
+          Apunta al código QR del destinatario
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+// --- Medá a Medá: monto + NIP -----------------------------------------------
+type MedaAmountProps = NativeStackScreenProps<WalletStackParamList, 'CashOutMedaAmount'>;
+
+export function CashOutMedaAmountScreen({ route, navigation }: MedaAmountProps) {
+  const { resource } = route.params;
+  const account = useDefaultAccount();
+  const { walletRepository } = useContainer();
+  const toast = useToast();
+  const [amount, setAmount] = useState('');
+  const [comment, setComment] = useState('');
+  const [nipVisible, setNipVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [nipError, setNipError] = useState<string | undefined>(undefined);
+  const valid = isValidAmount(amount) && Boolean(account.data);
+
+  const authorize = async (nip: string) => {
+    if (!account.data) return;
+    setLoading(true);
+    setNipError(undefined);
+    const res = await walletRepository.transferToUser({
+      originAccount: account.data.id,
+      resource,
+      amount: Number(amount).toFixed(2),
+      nip,
+      comment: comment.trim() || undefined,
+    });
+    setLoading(false);
+    if (!res.ok) {
+      const msg = walletErrorMessage(res.error);
+      setNipError(msg);
+      toast.error(msg);
+      return;
+    }
+    setNipVisible(false);
+    toast.success('Envío realizado correctamente.');
+    navigation.popToTop();
+  };
+
+  return (
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
+      <Text variant="body" tone="muted">
+        Destinatario: {resource}
+      </Text>
+      <Input
+        label="Monto"
+        keyboardType="decimal-pad"
+        value={amount}
+        onChangeText={(t) => setAmount(t.replace(/[^0-9.]/g, ''))}
+        error={amount.length > 0 && !isValidAmount(amount) ? 'Monto inválido' : undefined}
+      />
+      <Input label="Concepto (opcional)" maxLength={25} value={comment} onChangeText={setComment} />
+      <Button title="Enviar" full disabled={!valid} onPress={() => setNipVisible(true)} />
+      <NipModal
+        visible={nipVisible}
+        loading={loading}
+        error={nipError}
+        onSubmit={authorize}
+        onClose={() => setNipVisible(false)}
+      />
     </ScrollView>
   );
 }

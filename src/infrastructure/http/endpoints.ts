@@ -37,6 +37,7 @@ export const endpoints = {
   walletMovements: { path: '/wallet/movements/list', method: 'GET', auth: 'user' },
   walletStpBanks: { path: '/wallet/stp/banks', method: 'GET', auth: 'user' },
   walletSpeiSend: { path: '/wallet/transactions/spei/send', method: 'POST', auth: 'user' },
+  walletTransferToResource: { path: '/wallet/accounts/transfer/toResource', method: 'POST', auth: 'user' },
   nipValidate: { path: '/user/nip/validate', method: 'POST', auth: 'user' },
   // Cuenta / seguridad
   nipChange: { path: '/user/nip/change', method: 'PUT', auth: 'user' },

@@ -4,6 +4,8 @@ import { WalletScreen } from '@ui/features/wallet/screens/WalletScreen';
 import { CashInMethodsScreen, CashInSpeiScreen } from '@ui/features/wallet/screens/CashInScreens';
 import {
   CashOutConfirmScreen,
+  CashOutMedaAmountScreen,
+  CashOutMedaScanScreen,
   CashOutMethodsScreen,
   CashOutSpeiFormScreen,
   TransactionSuccessScreen,
@@ -31,6 +33,8 @@ export function WalletStackNavigator() {
       <Stack.Screen name="CashOutMethods" component={CashOutMethodsScreen} options={{ title: 'Enviar dinero' }} />
       <Stack.Screen name="CashOutSpeiForm" component={CashOutSpeiFormScreen} options={{ title: 'SPEI a terceros' }} />
       <Stack.Screen name="CashOutConfirm" component={CashOutConfirmScreen} options={{ title: 'Confirmar envío' }} />
+      <Stack.Screen name="CashOutMedaScan" component={CashOutMedaScanScreen} options={{ title: 'Escanear QR' }} />
+      <Stack.Screen name="CashOutMedaAmount" component={CashOutMedaAmountScreen} options={{ title: 'Enviar a usuario Medá' }} />
       <Stack.Screen
         name="TransactionSuccess"
         component={TransactionSuccessScreen}

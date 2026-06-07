@@ -6,6 +6,7 @@ import { ContainerProvider } from '@ui/providers/ContainerProvider';
 import { AuthProvider } from '@ui/providers/AuthProvider';
 import { SecurityMonitor } from '@ui/providers/SecurityMonitor';
 import { LocationGate } from '@ui/providers/LocationGate';
+import { ToastProvider } from '@ui/providers/ToastProvider';
 
 const queryClient = new QueryClient();
 
@@ -15,13 +16,15 @@ export function AppProviders({ children }: { children: ReactNode }) {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ContainerProvider>
         <SafeAreaProvider>
-          <QueryClientProvider client={queryClient}>
-            <AuthProvider>
-            <SecurityMonitor>
-              <LocationGate>{children}</LocationGate>
-            </SecurityMonitor>
-          </AuthProvider>
-          </QueryClientProvider>
+          <ToastProvider>
+            <QueryClientProvider client={queryClient}>
+              <AuthProvider>
+                <SecurityMonitor>
+                  <LocationGate>{children}</LocationGate>
+                </SecurityMonitor>
+              </AuthProvider>
+            </QueryClientProvider>
+          </ToastProvider>
         </SafeAreaProvider>
       </ContainerProvider>
     </GestureHandlerRootView>

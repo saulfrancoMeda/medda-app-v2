@@ -32,7 +32,7 @@ interface RawProfile extends RawProfileFields {
 
 const toAccountError = (e: HttpError): AccountError => {
   if (e.kind === 'network') return { type: 'network' };
-  if (e.status === 401) return { type: 'unauthorized' };
+  // Surfacea el mensaje real del servicio (incluye 401), para diagnóstico del usuario/backend.
   return { type: 'unknown', message: e.message };
 };
 
