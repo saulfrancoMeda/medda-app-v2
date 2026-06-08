@@ -9,6 +9,7 @@ import { HttpClient } from '@infrastructure/http/HttpClient';
 import { MedaWalletRepository } from '@infrastructure/wallet/MedaWalletRepository';
 import { MedaAccountRepository } from '@infrastructure/account/MedaAccountRepository';
 import { MedaSupportRepository } from '@infrastructure/support/MedaSupportRepository';
+import { MedaNotificationRepository } from '@infrastructure/notifications/MedaNotificationRepository';
 import { MedaPasswordRecovery } from '@infrastructure/auth/MedaPasswordRecovery';
 import type { AuthGateway } from '@domain/auth/ports/AuthGateway';
 import type { PasswordRecovery } from '@domain/auth/ports/PasswordRecovery';
@@ -16,6 +17,7 @@ import type { SessionStore } from '@domain/auth/ports/SessionStore';
 import type { WalletRepository } from '@domain/wallet/ports/WalletRepository';
 import type { AccountRepository } from '@domain/account/ports/AccountRepository';
 import type { SupportRepository } from '@domain/support/ports/SupportRepository';
+import type { NotificationRepository } from '@domain/notifications/ports/NotificationRepository';
 
 export interface AppContainer {
   readonly gateway: AuthGateway;
@@ -26,6 +28,7 @@ export interface AppContainer {
   readonly walletRepository: WalletRepository;
   readonly accountRepository: AccountRepository;
   readonly supportRepository: SupportRepository;
+  readonly notificationRepository: NotificationRepository;
   readonly passwordRecovery: PasswordRecovery;
 }
 
@@ -50,6 +53,7 @@ export const createAppContainer = (): AppContainer => {
   const walletRepository = new MedaWalletRepository(http);
   const accountRepository = new MedaAccountRepository(http);
   const supportRepository = new MedaSupportRepository(http);
+  const notificationRepository = new MedaNotificationRepository(http);
   const passwordRecovery = new MedaPasswordRecovery(http);
 
   return {
@@ -61,6 +65,7 @@ export const createAppContainer = (): AppContainer => {
     walletRepository,
     accountRepository,
     supportRepository,
+    notificationRepository,
     passwordRecovery,
   };
 };

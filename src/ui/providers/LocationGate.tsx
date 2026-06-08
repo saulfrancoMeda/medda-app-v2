@@ -42,7 +42,7 @@ export function LocationGate({ children }: { children: ReactNode }) {
       <SafeAreaView className="flex-1 items-center justify-center gap-lg bg-neutral-0 px-lg dark:bg-neutral-950">
         <Logo width={110} height={120} />
         <View className="h-20 w-20 items-center justify-center rounded-pill bg-brand-500">
-          <Ionicons name="location" size={36} color="#0a0f14" />
+          <Ionicons name="location" size={36} color="#1B1812" />
         </View>
         <Text variant="h1" center>
           Activa tu ubicación

@@ -3,7 +3,6 @@ import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Text } from '@ui/design-system/components';
-import { cn } from '@ui/lib/cn';
 
 type ToastType = 'success' | 'error';
 interface ToastState {
@@ -17,7 +16,6 @@ interface ToastApi {
 
 const ToastContext = createContext<ToastApi | null>(null);
 
-/** Notificaciones de éxito/error (banner superior, autodescarta a los 4s). */
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState<ToastState | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -25,7 +23,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const show = useCallback((message: string, type: ToastType) => {
     if (timer.current) clearTimeout(timer.current);
     setToast({ message, type });
-    timer.current = setTimeout(() => setToast(null), 4000);
+    timer.current = setTimeout(() => setToast(null), 2000);
   }, []);
 
   const api = useMemo<ToastApi>(
@@ -37,19 +35,21 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={api}>
       {children}
       {toast ? (
-        <SafeAreaView edges={['top']} className="absolute inset-x-0 top-0" pointerEvents="none">
+        <SafeAreaView
+          edges={['bottom']}
+          className="absolute inset-x-0 bottom-0"
+          pointerEvents="none"
+        >
           <View
-            className={cn(
-              'm-md flex-row items-center gap-sm rounded-card p-md',
-              toast.type === 'success' ? 'bg-success' : 'bg-danger',
-            )}
+            className="mx-5 mb-16 flex-row items-center gap-sm rounded-xl px-md py-sm"
+            style={{ backgroundColor: '#1B1812' }}
           >
             <Ionicons
               name={toast.type === 'success' ? 'checkmark-circle' : 'alert-circle'}
               size={22}
-              color="#ffffff"
+              color="#FCD535"
             />
-            <Text variant="body" className="flex-1 text-neutral-0">
+            <Text variant="body" tone="inverse" className="flex-1">
               {toast.message}
             </Text>
           </View>

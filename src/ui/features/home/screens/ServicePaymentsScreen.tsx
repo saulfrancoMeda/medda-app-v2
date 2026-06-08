@@ -23,21 +23,32 @@ type CatProps = NativeStackScreenProps<StoreStackParamList, 'ServicePayments'>;
 export function ServicePaymentsScreen({ navigation }: CatProps) {
   const categories = useCategories();
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
-      <Text variant="body" tone="muted">
-        Elige el servicio que quieres pagar.
-      </Text>
-      {categories.isPending ? <ActivityIndicator /> : null}
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
+      <View className="gap-xs">
+        <Text variant="h1">Pago de servicios</Text>
+        <Text variant="body" tone="muted">
+          Elige uno de los servicios que deseas pagar.
+        </Text>
+      </View>
+      {categories.isPending ? <ActivityIndicator color="#FCD535" /> : null}
+      {categories.isError ? (
+        <Text tone="muted">No se pudieron cargar las categorías.</Text>
+      ) : null}
       <View className="flex-row flex-wrap gap-md">
         {(categories.data ?? []).map((c) => (
           <Pressable
             key={c.id}
             accessibilityRole="button"
             onPress={() => navigation.navigate('ServiceList', { categoryId: c.id, categoryName: c.name })}
-            className="w-[30%] items-center gap-sm rounded-card border border-neutral-200 p-md dark:border-neutral-800"
+            className="w-[30%] items-center gap-sm rounded-card border border-neutral-200 bg-neutral-50 p-md dark:border-neutral-800 dark:bg-neutral-900"
           >
-            <Ionicons name="flash-outline" size={26} color="#d7a300" />
-            <Text variant="caption" center>
+            <View
+              className="h-12 w-12 items-center justify-center rounded-pill"
+              style={{ backgroundColor: (c.color ?? '#97720A') + '22' }}
+            >
+              <Ionicons name="flash-outline" size={24} color={c.color ?? '#97720A'} />
+            </View>
+            <Text variant="caption" center numberOfLines={2}>
               {c.name}
             </Text>
           </Pressable>
@@ -81,7 +92,7 @@ export function ServiceListScreen({ route, navigation }: ListProps) {
           <Text variant="body" className="flex-1">
             {item.name}
           </Text>
-          <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+          <Ionicons name="chevron-forward" size={20} color="#9A9384" />
         </Pressable>
       )}
     />
@@ -115,9 +126,7 @@ export function ServicePayScreen({ route, navigation }: PayProps) {
     });
     setLoading(false);
     if (!res.ok) {
-      const msg = walletErrorMessage(res.error);
-      setNipError(msg);
-      toast.error(msg);
+      setNipError(walletErrorMessage(res.error));
       return;
     }
     setNipVisible(false);
@@ -126,8 +135,13 @@ export function ServicePayScreen({ route, navigation }: PayProps) {
   };
 
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
-      <Text variant="h2">{serviceName}</Text>
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
+      <View className="gap-xs rounded-card bg-brand-500 p-lg">
+        <Text className="text-ink">Pago de</Text>
+        <Text variant="h2" className="text-ink">
+          {serviceName}
+        </Text>
+      </View>
       <Input
         label="Referencia / número de servicio"
         keyboardType="number-pad"
@@ -135,12 +149,15 @@ export function ServicePayScreen({ route, navigation }: PayProps) {
         onChangeText={(t) => setReference(t.replace(/[^0-9]/g, ''))}
       />
       <Input
-        label="Monto"
+        label="Monto a pagar"
         keyboardType="decimal-pad"
         value={amount}
         onChangeText={(t) => setAmount(t.replace(/[^0-9.]/g, ''))}
         error={amount.length > 0 && !isValidAmount(amount) ? 'Monto inválido' : undefined}
       />
+      <Text variant="caption" tone="muted">
+        Al continuar, autoriza el pago con tu NIP.
+      </Text>
       <Button title="Pagar" full disabled={!valid} onPress={() => setNipVisible(true)} />
       <NipModal
         visible={nipVisible}

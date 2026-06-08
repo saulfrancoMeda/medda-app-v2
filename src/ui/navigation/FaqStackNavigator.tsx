@@ -13,8 +13,8 @@ const Stack = createNativeStackNavigator<FaqStackParamList>();
 // Stack del tab Ayuda: lista (con AppHeader) + detalle (HTML) + chat (WebView), con back nativo.
 export function FaqStackNavigator() {
   const { colorScheme } = useColorScheme();
-  const tint = colorScheme === 'dark' ? '#f9fafb' : '#0a0f14';
-  const bg = colorScheme === 'dark' ? '#060612' : '#ffffff';
+  const tint = colorScheme === 'dark' ? '#FAFAF9' : '#1B1812';
+  const bg = colorScheme === 'dark' ? '#131110' : '#ffffff';
   return (
     <Stack.Navigator
       screenOptions={{

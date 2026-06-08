@@ -3,6 +3,7 @@ import type { AccountStatement, Beneficiary, UserProfile } from '@domain/account
 import type {
   AccountError,
   AccountRepository,
+  CancelAccountInput,
   ChangeNipInput,
   ChangePasswordInput,
 } from '@domain/account/ports/AccountRepository';
@@ -138,6 +139,68 @@ export class MedaAccountRepository implements AccountRepository {
       birthDate: b.birthDate,
     }));
     return ok(beneficiaries);
+  }
+
+  async validatePassword(password: string): Promise<Result<true, AccountError>> {
+    const res = await this.http.request<unknown>(endpoints.passwordValidate, {
+      body: { password },
+    });
+    if (!res.ok) return err(toAccountError(res.error));
+    return ok(true);
+  }
+
+  async setNip(password: string, nip: string): Promise<Result<true, AccountError>> {
+    const res = await this.http.request<unknown>(endpoints.nipSet, { body: { password, nip } });
+    if (!res.ok) return err(toAccountError(res.error));
+    return ok(true);
+  }
+
+  async sendEmailValidationCode(): Promise<Result<true, AccountError>> {
+    const res = await this.http.request<unknown>(endpoints.emailValidationCodeSend, { body: {} });
+    if (!res.ok) return err(toAccountError(res.error));
+    return ok(true);
+  }
+
+  async validateEmailValidationCode(code: string): Promise<Result<true, AccountError>> {
+    const res = await this.http.request<unknown>(endpoints.emailValidationCodeValidate, {
+      body: { code },
+    });
+    if (!res.ok) return err(toAccountError(res.error));
+    return ok(true);
+  }
+
+  async cancelAccount(input: CancelAccountInput): Promise<Result<true, AccountError>> {
+    const res = await this.http.request<unknown>(endpoints.cancelAccount, {
+      body: {
+        clabe: input.clabe,
+        bank: input.bank,
+        beneficiaryName: input.beneficiaryName,
+        ...(input.email ? { email: input.email } : {}),
+        nip: input.nip,
+      },
+    });
+    if (!res.ok) return err(toAccountError(res.error));
+    return ok(true);
+  }
+
+  async sendUnlockCode(cellphone: string, email: string): Promise<Result<true, AccountError>> {
+    const res = await this.http.request<unknown>(endpoints.unlockCodeSend, {
+      body: { cellphone, email },
+    });
+    if (!res.ok) return err(toAccountError(res.error));
+    return ok(true);
+  }
+
+  async validateUnlockCode(
+    cellphone: string,
+    email: string,
+    code: string,
+  ): Promise<Result<true, AccountError>> {
+    const res = await this.http.request<unknown>(endpoints.unlockCodeValidate, {
+      body: { cellphone, email, code },
+    });
+    if (!res.ok) return err(toAccountError(res.error));
+    return ok(true);
   }
 }
 

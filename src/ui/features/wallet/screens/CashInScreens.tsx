@@ -13,7 +13,7 @@ function MethodRow({ title, subtitle, onPress }: { title: string; subtitle: stri
       accessibilityRole="button"
       className="flex-row items-center gap-md rounded-card border border-neutral-200 p-lg dark:border-neutral-800"
     >
-      <Ionicons name="swap-horizontal" size={24} color="#d7a300" />
+      <Ionicons name="swap-horizontal" size={24} color="#97720A" />
       <View className="flex-1">
         <Text variant="body" className="font-semibold">
           {title}
@@ -22,7 +22,7 @@ function MethodRow({ title, subtitle, onPress }: { title: string; subtitle: stri
           {subtitle}
         </Text>
       </View>
-      <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+      <Ionicons name="chevron-forward" size={20} color="#9A9384" />
     </Pressable>
   );
 }
@@ -75,7 +75,7 @@ export function CashInSpeiScreen() {
             accessibilityRole="button"
             accessibilityLabel="Copiar CLABE"
           >
-            <Ionicons name="copy-outline" size={22} color="#9ca3af" />
+            <Ionicons name="copy-outline" size={22} color="#9A9384" />
           </Pressable>
         </View>
       </View>

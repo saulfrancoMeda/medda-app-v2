@@ -4,6 +4,7 @@ import { ProfileScreen } from '@ui/features/account/screens/AccountScreens';
 import {
   BeneficiariesScreen,
   LegalScreen,
+  PdfViewerScreen,
   StatementsScreen,
 } from '@ui/features/account/screens/LegalScreens';
 import {
@@ -12,7 +13,11 @@ import {
   ChangeNumberScreen,
   ChangePasswordScreen,
   SecurityScreen,
+  SetNipScreen,
+  ValidateEmailScreen,
 } from '@ui/features/account/screens/SecurityScreens';
+import { CancelAccountScreen } from '@ui/features/account/screens/CancelAccountScreens';
+import { NotificationsScreen } from '@ui/features/notifications/screens/NotificationsScreen';
 import type { SectionsStackParamList } from '@ui/navigation/types';
 
 const Stack = createNativeStackNavigator<SectionsStackParamList>();
@@ -21,8 +26,8 @@ const Stack = createNativeStackNavigator<SectionsStackParamList>();
 // así que el bottom tab permanece visible y las subpantallas tienen push/back nativo.
 export function SectionsStackNavigator() {
   const { colorScheme } = useColorScheme();
-  const tint = colorScheme === 'dark' ? '#f9fafb' : '#0a0f14';
-  const bg = colorScheme === 'dark' ? '#060612' : '#ffffff';
+  const tint = colorScheme === 'dark' ? '#FAFAF9' : '#1B1812';
+  const bg = colorScheme === 'dark' ? '#131110' : '#ffffff';
   return (
     <Stack.Navigator
       screenOptions={{
@@ -32,7 +37,13 @@ export function SectionsStackNavigator() {
       }}
     >
       <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Mi perfil' }} />
+      <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ title: 'Notificaciones' }} />
       <Stack.Screen name="Legal" component={LegalScreen} options={{ title: 'Legales y Estado de cuenta' }} />
+      <Stack.Screen
+        name="PdfViewer"
+        component={PdfViewerScreen}
+        options={({ route }) => ({ title: route.params.title })}
+      />
       <Stack.Screen name="Statements" component={StatementsScreen} options={{ title: 'Estado de cuenta' }} />
       <Stack.Screen name="Beneficiaries" component={BeneficiariesScreen} options={{ title: 'Mis beneficiarios' }} />
       <Stack.Screen name="Security" component={SecurityScreen} options={{ title: 'Seguridad' }} />
@@ -40,6 +51,9 @@ export function SectionsStackNavigator() {
       <Stack.Screen name="ChangeNip" component={ChangeNipScreen} options={{ title: 'Cambiar NIP' }} />
       <Stack.Screen name="ChangeEmail" component={ChangeEmailScreen} options={{ title: 'Cambiar correo' }} />
       <Stack.Screen name="ChangeNumber" component={ChangeNumberScreen} options={{ title: 'Cambiar número' }} />
+      <Stack.Screen name="SetNip" component={SetNipScreen} options={{ title: 'Establecer NIP' }} />
+      <Stack.Screen name="ValidateEmail" component={ValidateEmailScreen} options={{ title: 'Validar correo' }} />
+      <Stack.Screen name="CancelAccount" component={CancelAccountScreen} options={{ title: 'Cancelar cuenta' }} />
     </Stack.Navigator>
   );
 }

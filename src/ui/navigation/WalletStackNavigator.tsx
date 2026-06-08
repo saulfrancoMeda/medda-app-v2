@@ -17,8 +17,8 @@ const Stack = createNativeStackNavigator<WalletStackParamList>();
 // Stack DENTRO del tab Billetera: las pantallas de Abonar/Enviar conservan el bottom tab visible.
 export function WalletStackNavigator() {
   const { colorScheme } = useColorScheme();
-  const tint = colorScheme === 'dark' ? '#f9fafb' : '#0a0f14';
-  const bg = colorScheme === 'dark' ? '#060612' : '#ffffff';
+  const tint = colorScheme === 'dark' ? '#FAFAF9' : '#1B1812';
+  const bg = colorScheme === 'dark' ? '#131110' : '#ffffff';
   return (
     <Stack.Navigator
       screenOptions={{

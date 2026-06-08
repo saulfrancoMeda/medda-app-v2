@@ -41,6 +41,17 @@ export const endpoints = {
   nipValidate: { path: '/user/nip/validate', method: 'POST', auth: 'user' },
   // Cuenta / seguridad
   nipChange: { path: '/user/nip/change', method: 'PUT', auth: 'user' },
+  nipSet: { path: '/user/nip/set', method: 'PUT', auth: 'user' },
+  passwordValidate: { path: '/security/password/validate', method: 'POST', auth: 'user' },
+  emailValidationCodeSend: { path: '/user/email/validation/code/send', method: 'POST', auth: 'user' },
+  emailValidationCodeValidate: {
+    path: '/user/email/validation/code/validate',
+    method: 'POST',
+    auth: 'user',
+  },
+  cancelAccount: { path: '/user/account/cancel', method: 'POST', auth: 'user' },
+  unlockCodeSend: { path: '/public/user/unlock/code/send', method: 'POST', auth: 'public' },
+  unlockCodeValidate: { path: '/public/user/unlock/code/validate', method: 'POST', auth: 'public' },
   accountStatementsList: { path: '/account-statements/list', method: 'GET', auth: 'user' },
   accountStatementPdf: { path: '/account-statements/pdf', method: 'POST', auth: 'user' },
   // Inicio / Mis gastos / Ayuda
@@ -63,6 +74,14 @@ export const endpoints = {
   },
   usernameChangeSet: { path: '/user/username/change/set', method: 'POST', auth: 'user' },
   beneficiariesList: { path: '/beneficiaries/list', method: 'GET', auth: 'user' },
+  notificationsList: { path: '/notifications/list', method: 'GET', auth: 'user' },
 } as const satisfies Record<string, Endpoint>;
+
+/** Endpoint de marcar notificación como leída (path con parámetro `{notification}`). */
+export const notificationReadEndpoint = (id: string): Endpoint => ({
+  path: `/notifications/${id}/mark-as-read`,
+  method: 'PUT',
+  auth: 'user',
+});
 
 export type EndpointName = keyof typeof endpoints;

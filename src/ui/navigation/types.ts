@@ -8,6 +8,7 @@ export type AuthStackParamList = {
   RecoverPhone: undefined;
   RecoverCode: { phone: string };
   RecoverNewPassword: { phone: string; code: string };
+  Unlock: undefined;
 };
 
 // Datos del SPEI recolectados antes de confirmar (sin nip ni location, que se agregan al enviar).
@@ -30,7 +31,7 @@ export type WalletStackParamList = {
 export type AppTabsParamList = {
   Store: undefined;
   Sales: undefined;
-  Wallet: undefined;
+  Wallet: NavigatorScreenParams<WalletStackParamList>;
   Faq: undefined;
   Sections: NavigatorScreenParams<SectionsStackParamList>;
 };
@@ -52,7 +53,9 @@ export type FaqStackParamList = {
 
 export type SectionsStackParamList = {
   Profile: undefined;
+  Notifications: undefined;
   Legal: undefined;
+  PdfViewer: { title: string; url: string };
   Statements: undefined;
   Beneficiaries: undefined;
   Security: undefined;
@@ -60,6 +63,9 @@ export type SectionsStackParamList = {
   ChangeNip: undefined;
   ChangeEmail: undefined;
   ChangeNumber: undefined;
+  SetNip: undefined;
+  ValidateEmail: { email?: string };
+  CancelAccount: undefined;
 };
 
 export type AppDrawerParamList = {

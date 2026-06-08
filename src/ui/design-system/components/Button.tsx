@@ -8,29 +8,30 @@ const button = cva('flex-row items-center justify-center gap-sm rounded-pill', {
   variants: {
     variant: {
       solid: 'bg-brand-500',
+      soft: 'bg-brand-100',
       outline: 'border border-brand-500 bg-transparent',
       ghost: 'bg-transparent',
       link: 'bg-transparent px-none',
     },
     size: {
-      sm: 'h-9 px-md',
-      md: 'h-12 px-lg',
+      sm: 'h-10 px-md',
+      md: 'h-14 px-lg',
       lg: 'h-14 px-xl',
     },
     disabled: { true: '' },
     full: { true: 'w-full' },
   },
-  // Deshabilitado + sólido: gris (como el legacy), no dorado tenue.
+  // Deshabilitado + sólido: dorado pálido (paridad con el prototipo standalone), no gris.
   compoundVariants: [
-    { variant: 'solid', disabled: true, class: 'bg-neutral-200 dark:bg-neutral-800' },
-    { variant: ['outline', 'ghost', 'link'], disabled: true, class: 'opacity-40' },
+    { variant: 'solid', disabled: true, class: 'bg-brand-100' },
+    { variant: ['soft', 'outline', 'ghost', 'link'], disabled: true, class: 'opacity-40' },
   ],
   defaultVariants: { variant: 'solid', size: 'md' },
 });
 
 type ButtonVariants = VariantProps<typeof button>;
 
-// El color del label se decide vía el `tone` del Text. solid -> oscuro; outline/ghost/link -> dorado.
+// El color del label se decide vía el `tone` del Text. solid/soft -> tinta; outline/ghost/link -> dorado.
 const labelTone = (variant: ButtonProps['variant'], disabled: boolean) => {
   if (disabled && (variant === 'solid' || !variant)) return 'muted' as const;
   return variant === 'outline' || variant === 'ghost' || variant === 'link'
@@ -49,18 +50,24 @@ export interface ButtonProps
 export const Button = forwardRef<View, ButtonProps>(
   ({ title, variant, size, full, loading = false, disabled = false, className, ...rest }, ref) => {
     const isDisabled = disabled || loading;
-    const isSolid = variant === 'solid' || !variant;
+    const isSolid = variant === 'solid' || variant === 'soft' || !variant;
     return (
       <Pressable
         ref={ref}
         accessibilityRole="button"
         accessibilityState={{ disabled: isDisabled, busy: loading }}
         disabled={isDisabled}
+        android_ripple={
+          isDisabled || variant === 'link'
+            ? undefined
+            : { color: 'rgba(0,0,0,0.10)', borderless: false }
+        }
+        style={({ pressed }) => (pressed && !isDisabled ? { opacity: 0.85 } : undefined)}
         className={cn(button({ variant, size, full, disabled: isDisabled }), className)}
         {...rest}
       >
         {loading ? (
-          <ActivityIndicator color={isSolid ? '#0a0f14' : '#fcd535'} />
+          <ActivityIndicator color={isSolid ? '#1B1812' : '#fcd535'} />
         ) : (
           <Text
             tone={labelTone(variant, isDisabled)}

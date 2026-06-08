@@ -48,7 +48,7 @@ function MethodRow({
           </Text>
         ) : null}
       </View>
-      <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+      <Ionicons name="chevron-forward" size={20} color="#9A9384" />
     </Pressable>
   );
 }
@@ -62,14 +62,14 @@ export function CashOutMethodsScreen({ navigation }: MethodsProps) {
       </Text>
       <MethodRow
         icon="person-circle"
-        iconColor="#d7a300"
+        iconColor="#97720A"
         title="Envía a un usuario Medá"
         subtitle="Escanea el QR del destinatario"
         onPress={() => navigation.navigate('CashOutMedaScan')}
       />
       <MethodRow
         icon="paper-plane"
-        iconColor="#d7a300"
+        iconColor="#97720A"
         title="Transferencia SPEI a Terceros"
         onPress={() => navigation.navigate('CashOutSpeiForm')}
       />
@@ -89,12 +89,12 @@ function BankPicker({ value, onSelect }: { value?: Bank; onSelect: (b: Bank) => 
       <Pressable
         onPress={() => setOpen(true)}
         accessibilityRole="button"
-        className="h-12 flex-row items-center justify-between rounded-md border border-neutral-200 bg-neutral-100 px-md dark:border-neutral-700 dark:bg-neutral-800"
+        className="h-14 flex-row items-center justify-between rounded-md bg-neutral-100 px-md dark:bg-neutral-800"
       >
         <Text variant="body" tone={value ? 'default' : 'muted'}>
           {value?.name ?? 'Selecciona un banco'}
         </Text>
-        <Ionicons name="chevron-down" size={18} color="#9ca3af" />
+        <Ionicons name="chevron-down" size={18} color="#9A9384" />
       </Pressable>
       <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
         <Pressable className="flex-1 bg-black/50" onPress={() => setOpen(false)} />
@@ -224,12 +224,9 @@ export function CashOutConfirmScreen({ route, navigation }: ConfirmProps) {
     const nipRes = await walletRepository.validateNip(nip);
     if (!nipRes.ok) {
       setLoading(false);
-      const msg = walletErrorMessage(nipRes.error);
-      setNipError(msg);
-      toast.error(msg);
+      setNipError(walletErrorMessage(nipRes.error));
       return;
     }
-    // TODO: obtener ubicación real (expo-location); el legacy la manda en el envío.
     const sendRes = await walletRepository.sendSpei({
       ...draft,
       nip,
@@ -237,9 +234,7 @@ export function CashOutConfirmScreen({ route, navigation }: ConfirmProps) {
     });
     setLoading(false);
     if (!sendRes.ok) {
-      const msg = walletErrorMessage(sendRes.error);
-      setNipError(msg);
-      toast.error(msg);
+      setNipError(walletErrorMessage(sendRes.error));
       return;
     }
     setNipVisible(false);
@@ -286,7 +281,7 @@ export function TransactionSuccessScreen({ route, navigation }: SuccessProps) {
   return (
     <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="flex-1 justify-center gap-lg p-lg">
       <View className="items-center gap-sm">
-        <Ionicons name="checkmark-circle" size={72} color="#10b981" />
+        <Ionicons name="checkmark-circle" size={72} color="#2E8C6A" />
         <Text variant="h1" center>
           ¡Envío exitoso!
         </Text>
@@ -319,7 +314,7 @@ export function CashOutMedaScanScreen({ navigation }: ScanProps) {
   if (!permission.granted) {
     return (
       <View className="flex-1 items-center justify-center gap-md bg-neutral-0 px-lg dark:bg-neutral-950">
-        <Ionicons name="camera-outline" size={48} color="#d7a300" />
+        <Ionicons name="camera-outline" size={48} color="#97720A" />
         <Text variant="h2" center>
           Permite la cámara
         </Text>
@@ -379,9 +374,7 @@ export function CashOutMedaAmountScreen({ route, navigation }: MedaAmountProps) 
     });
     setLoading(false);
     if (!res.ok) {
-      const msg = walletErrorMessage(res.error);
-      setNipError(msg);
-      toast.error(msg);
+      setNipError(walletErrorMessage(res.error));
       return;
     }
     setNipVisible(false);

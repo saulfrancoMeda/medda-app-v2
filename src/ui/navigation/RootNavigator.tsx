@@ -10,6 +10,7 @@ import {
   RecoverNewPasswordScreen,
   RecoverPhoneScreen,
 } from '@ui/features/auth/screens/RecoverScreens';
+import { UnlockScreen } from '@ui/features/auth/screens/UnlockScreen';
 import { AppNavigator } from '@ui/navigation/AppNavigator';
 import type { AuthStackParamList } from '@ui/navigation/types';
 
@@ -35,6 +36,11 @@ function AuthNavigator() {
         component={RecoverNewPasswordScreen}
         options={{ headerShown: true, title: 'Nueva contraseña' }}
       />
+      <AuthStack.Screen
+        name="Unlock"
+        component={UnlockScreen}
+        options={{ headerShown: true, title: 'Desbloquear usuario' }}
+      />
     </AuthStack.Navigator>
   );
 }
@@ -47,8 +53,8 @@ export function RootNavigator() {
     ...base,
     colors: {
       ...base.colors,
-      background: colorScheme === 'dark' ? '#060612' : '#ffffff',
-      card: colorScheme === 'dark' ? '#060612' : '#ffffff',
+      background: colorScheme === 'dark' ? '#131110' : '#ffffff',
+      card: colorScheme === 'dark' ? '#131110' : '#ffffff',
       primary: '#fcd535',
     },
   };

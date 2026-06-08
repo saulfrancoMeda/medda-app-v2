@@ -16,7 +16,7 @@ export function MyQrScreen() {
         Muestra este código para recibir dinero de otro usuario Medá.
       </Text>
       <View className="rounded-card bg-neutral-0 p-lg shadow">
-        {value ? <QRCode value={value} size={220} color="#0a0f14" backgroundColor="#ffffff" /> : null}
+        {value ? <QRCode value={value} size={220} color="#1B1812" backgroundColor="#ffffff" /> : null}
       </View>
       <Text variant="body" className="font-semibold">
         {value}

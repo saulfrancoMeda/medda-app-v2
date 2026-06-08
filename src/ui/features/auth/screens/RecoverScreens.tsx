@@ -44,24 +44,34 @@ export function RecoverPhoneScreen({ navigation }: PhoneProps) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
-      <View className="flex-1 justify-center gap-lg px-lg">
+    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950" edges={['bottom']}>
+      <View className="flex-1 px-lg pt-xl">
         <View className="gap-xs">
           <Text variant="h1">Recuperar contraseña</Text>
           <Text variant="body" tone="muted">
             Ingresa tu teléfono y te enviaremos un código por SMS.
           </Text>
         </View>
-        <Input
-          label="Teléfono"
-          placeholder="10 dígitos"
-          keyboardType="number-pad"
-          maxLength={10}
-          value={phone}
-          onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, ''))}
-          error={error}
+        <View className="pt-xl">
+          <Input
+            label="Teléfono"
+            placeholder="10 dígitos"
+            keyboardType="number-pad"
+            maxLength={10}
+            value={phone}
+            onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, ''))}
+            error={error}
+          />
+        </View>
+        <View className="flex-1" />
+        <Button
+          title="Enviar código"
+          full
+          loading={loading}
+          disabled={phone.length !== 10}
+          onPress={onSend}
+          className="mb-lg"
         />
-        <Button title="Enviar código" full loading={loading} disabled={phone.length !== 10} onPress={onSend} />
       </View>
     </SafeAreaView>
   );
@@ -89,20 +99,33 @@ export function RecoverCodeScreen({ route, navigation }: CodeProps) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
-      <View className="flex-1 justify-center gap-lg px-lg">
-        <Text variant="body" tone="muted">
-          Ingresa el código que enviamos por SMS al {phone}.
-        </Text>
-        <Input
-          label="Código"
-          keyboardType="number-pad"
-          maxLength={6}
-          value={code}
-          onChangeText={(t) => setCode(t.replace(/[^0-9]/g, ''))}
-          error={error}
+    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950" edges={['bottom']}>
+      <View className="flex-1 px-lg pt-xl">
+        <View className="gap-xs">
+          <Text variant="h1">Ingresa el código</Text>
+          <Text variant="body" tone="muted">
+            Enviamos un código por SMS al {phone}.
+          </Text>
+        </View>
+        <View className="pt-xl">
+          <Input
+            label="Código"
+            keyboardType="number-pad"
+            maxLength={6}
+            value={code}
+            onChangeText={(t) => setCode(t.replace(/[^0-9]/g, ''))}
+            error={error}
+          />
+        </View>
+        <View className="flex-1" />
+        <Button
+          title="Validar"
+          full
+          loading={loading}
+          disabled={code.length < 4}
+          onPress={onValidate}
+          className="mb-lg"
         />
-        <Button title="Validar" full loading={loading} disabled={code.length < 4} onPress={onValidate} />
       </View>
     </SafeAreaView>
   );
@@ -137,20 +160,33 @@ export function RecoverNewPasswordScreen({ route, navigation }: NewProps) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
-      <View className="flex-1 justify-center gap-lg px-lg">
-        <Text variant="h1">Nueva contraseña</Text>
-        <Input label="Nueva contraseña" secureTextEntry value={password} onChangeText={setPassword} />
-        <Input
-          label="Confirmar contraseña"
-          secureTextEntry
-          value={confirm}
-          onChangeText={setConfirm}
-          error={
-            confirm.length > 0 && confirm !== password ? 'No coincide' : error
-          }
+    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950" edges={['bottom']}>
+      <View className="flex-1 px-lg pt-xl">
+        <View className="gap-xs">
+          <Text variant="h1">Nueva contraseña</Text>
+          <Text variant="body" tone="muted">
+            Crea una contraseña de al menos {MIN_PASSWORD} caracteres.
+          </Text>
+        </View>
+        <View className="gap-md pt-xl">
+          <Input label="Nueva contraseña" secureTextEntry value={password} onChangeText={setPassword} />
+          <Input
+            label="Confirmar contraseña"
+            secureTextEntry
+            value={confirm}
+            onChangeText={setConfirm}
+            error={confirm.length > 0 && confirm !== password ? 'No coincide' : error}
+          />
+        </View>
+        <View className="flex-1" />
+        <Button
+          title="Guardar"
+          full
+          loading={loading}
+          disabled={!valid}
+          onPress={onSubmit}
+          className="mb-lg"
         />
-        <Button title="Guardar" full loading={loading} disabled={!valid} onPress={onSubmit} />
       </View>
     </SafeAreaView>
   );

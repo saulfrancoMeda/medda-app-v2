@@ -38,37 +38,42 @@ export function LoginPhoneScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
-      <View className="flex-1 justify-center gap-xl px-lg">
-        <View className="items-center">
-          <Logo width={110} height={120} />
+      <View className="flex-1 px-lg pt-2xl">
+        <View className="items-center pb-2xl pt-lg">
+          <Logo width={96} height={96} />
         </View>
 
-        <View className="gap-lg rounded-xl border border-neutral-200 bg-neutral-0 p-lg dark:border-neutral-800 dark:bg-neutral-900">
-          <View className="gap-xs">
-            <Text variant="h1">Bienvenido</Text>
-            <Text variant="body" tone="muted">
-              Ingresa tu número de teléfono para continuar
-            </Text>
-          </View>
+        <Text variant="h1" className="mb-md">          
+          Bienvenido,{' '}
+          <Text variant="h1" tone="muted" className="font-normal">
+            inicia sesión
+          </Text>
+        </Text>
 
+        <View className="gap-md pt-2xl">
           <Input
-            label="Teléfono"
-            placeholder="10 dígitos"
+            label="Número de celular"
+            placeholder="Ingresa tu número de celular"
+            leftIcon="call-outline"
             keyboardType="number-pad"
             maxLength={PHONE_LENGTH}
             value={phone}
             onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, ''))}
             error={error}
           />
+        </View>
 
-          <Button title="Continuar" full disabled={!valid} loading={loading} onPress={onContinue} />
+        <View className="flex-1" />
 
-          <View className="flex-row justify-center gap-xs">
+        <View className="gap-md pb-lg">
+          <Button title="Iniciar sesión" full disabled={!valid} loading={loading} onPress={onContinue} />
+
+          <View className="flex-row justify-center gap-xs mb-2">
             <Text variant="body" tone="muted">
               No tengo cuenta.
             </Text>
             <Text variant="body" tone="link" className="font-semibold">
-              Registrarme
+              Regístrate
             </Text>
           </View>
         </View>

@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
+import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { isValidNip } from '@domain/wallet/entities/Transfer';
 import type { AccountError } from '@domain/account/ports/AccountRepository';
 import { Button, Input, Text } from '@ui/design-system/components';
+import { NipKeypad } from '@ui/features/wallet/components/NipKeypad';
 import { NipModal } from '@ui/features/wallet/components/NipModal';
+import { SuccessView } from '@ui/features/common/SuccessView';
 import { useContainer } from '@ui/providers/ContainerProvider';
 import { useToast } from '@ui/providers/ToastProvider';
 import type { SectionsStackParamList } from '@ui/navigation/types';
@@ -37,7 +40,7 @@ function Row({
       accessibilityRole="button"
       className="flex-row items-center gap-md border-b border-neutral-100 py-lg dark:border-neutral-800"
     >
-      <Ionicons name={icon} size={24} color="#d7a300" />
+      <Ionicons name={icon} size={24} color="#97720A" />
       <View className="flex-1">
         <Text variant="body" className="font-semibold">
           {title}
@@ -46,7 +49,7 @@ function Row({
           {subtitle}
         </Text>
       </View>
-      <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+      <Ionicons name="chevron-forward" size={20} color="#9A9384" />
     </Pressable>
   );
 }
@@ -80,6 +83,212 @@ export function SecurityScreen({ navigation }: SecurityProps) {
         subtitle="Usas este correo para recibir toda la información de tu cuenta"
         onPress={() => navigation.navigate('ChangeEmail')}
       />
+      <Row
+        icon="shield-checkmark-outline"
+        title="Validar mi correo"
+        subtitle="Confirma tu correo para activar todos los beneficios"
+        onPress={() => navigation.navigate('ValidateEmail', {})}
+      />
+      <Row
+        icon="key-outline"
+        title="Establecer mi NIP"
+        subtitle="Crea tu NIP de 6 dígitos para autorizar movimientos"
+        onPress={() => navigation.navigate('SetNip')}
+      />
+    </ScrollView>
+  );
+}
+
+// --- Establecer NIP inicial (confirma contraseña -> NIP -> confirmar NIP) ----
+type SetNipProps = NativeStackScreenProps<SectionsStackParamList, 'SetNip'>;
+
+export function SetNipScreen({ navigation }: SetNipProps) {
+  const { accountRepository } = useContainer();
+  const toast = useToast();
+  const [step, setStep] = useState<'password' | 'nip' | 'confirm' | 'done'>('password');
+  const [password, setPassword] = useState('');
+  const [nip, setNip] = useState('');
+  const [confirmNip, setConfirmNip] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  const confirmPassword = async () => {
+    setLoading(true);
+    setError(undefined);
+    const res = await accountRepository.validatePassword(password);
+    setLoading(false);
+    if (!res.ok) {
+      setError(accountErrorMessage(res.error));
+      return;
+    }
+    setStep('nip');
+  };
+
+  const onNipComplete = (entered: string) => {
+    setNip(entered);
+    setConfirmNip('');
+    setError(undefined);
+    setStep('confirm');
+  };
+
+  const onConfirmComplete = async (entered: string) => {
+    if (entered !== nip) {
+      setError('El NIP no coincide, inténtalo de nuevo');
+      setConfirmNip('');
+      setNip('');
+      setStep('nip');
+      return;
+    }
+    setLoading(true);
+    setError(undefined);
+    const res = await accountRepository.setNip(password, entered);
+    setLoading(false);
+    if (!res.ok) {
+      setError(accountErrorMessage(res.error));
+      setConfirmNip('');
+      setNip('');
+      setStep('nip');
+      return;
+    }
+    toast.success('Tu NIP se estableció correctamente.');
+    setStep('done');
+  };
+
+  if (step === 'done') {
+    return (
+      <SuccessView
+        title="NIP establecido"
+        description="Ya puedes autorizar tus movimientos con tu nuevo NIP."
+        onPress={() => navigation.goBack()}
+      />
+    );
+  }
+
+  if (step === 'password') {
+    return (
+      <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
+        <Text variant="h2">Confirma tu contraseña</Text>
+        <Text variant="body" tone="muted">
+          Necesitamos confirmar tu identidad para establecer tu NIP.
+        </Text>
+        <Input
+          label="Contraseña"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+          error={error}
+        />
+        <Button
+          title="Continuar"
+          full
+          loading={loading}
+          disabled={password.length < MIN_PASSWORD}
+          onPress={confirmPassword}
+        />
+      </ScrollView>
+    );
+  }
+
+  return (
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
+      <View className="gap-xs">
+        <Text variant="h2" center>
+          {step === 'nip' ? 'Crea tu NIP' : 'Confirma tu NIP'}
+        </Text>
+        <Text variant="body" tone="muted" center>
+          {step === 'nip'
+            ? 'Crea un NIP de 6 dígitos para autorizar tus movimientos.'
+            : 'Vuelve a ingresar tu NIP para confirmarlo.'}
+        </Text>
+      </View>
+      {step === 'nip' ? (
+        <NipKeypad value={nip} onChange={setNip} onComplete={onNipComplete} error={error} />
+      ) : (
+        <NipKeypad
+          value={confirmNip}
+          onChange={setConfirmNip}
+          onComplete={onConfirmComplete}
+          loading={loading}
+          error={error}
+        />
+      )}
+    </ScrollView>
+  );
+}
+
+// --- Validar correo (envía código al correo -> valida) ----------------------
+type ValidateEmailProps = NativeStackScreenProps<SectionsStackParamList, 'ValidateEmail'>;
+
+export function ValidateEmailScreen({ route, navigation }: ValidateEmailProps) {
+  const { accountRepository } = useContainer();
+  const toast = useToast();
+  const [code, setCode] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>(undefined);
+  const [done, setDone] = useState(false);
+
+  // Auto-envía el código al montar (react-query, como el resto del codebase: evita efectos manuales).
+  const codeSent = useQuery({
+    queryKey: ['account', 'emailValidationCode'],
+    queryFn: async () => {
+      const res = await accountRepository.sendEmailValidationCode();
+      if (!res.ok) throw res.error;
+      return true;
+    },
+    retry: false,
+    gcTime: 0,
+    staleTime: Infinity,
+  });
+  const sending = codeSent.isFetching;
+  const sendError = codeSent.isError
+    ? accountErrorMessage(codeSent.error as unknown as AccountError)
+    : undefined;
+
+  const validate = async () => {
+    setLoading(true);
+    setError(undefined);
+    const res = await accountRepository.validateEmailValidationCode(code);
+    setLoading(false);
+    if (!res.ok) {
+      setError(accountErrorMessage(res.error));
+      return;
+    }
+    toast.success('Tu correo se confirmó correctamente.');
+    setDone(true);
+  };
+
+  if (done) {
+    return (
+      <SuccessView
+        title="Correo confirmado"
+        description="¡Listo! Ya puedes disfrutar de todos los beneficios de tu billetera."
+        onPress={() => navigation.goBack()}
+      />
+    );
+  }
+
+  return (
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
+      <Text variant="h2">Confirma tu correo</Text>
+      <Text variant="body" tone="muted">
+        Escribe el código que enviamos a{route.params.email ? ` ${route.params.email}` : ' tu correo'}.
+      </Text>
+      <Input
+        label="Código de verificación"
+        keyboardType="number-pad"
+        maxLength={6}
+        value={code}
+        onChangeText={(t) => setCode(t.replace(/[^0-9]/g, ''))}
+        error={error ?? sendError}
+      />
+      <Button title="Confirmar" full loading={loading} disabled={code.length < 4} onPress={validate} />
+      <Button
+        title={sending ? 'Enviando código…' : 'Reenviar código'}
+        variant="ghost"
+        full
+        disabled={sending}
+        onPress={() => void codeSent.refetch()}
+      />
     </ScrollView>
   );
 }
@@ -108,9 +317,7 @@ export function ChangePasswordScreen({ navigation }: ChangePwdProps) {
     const res = await accountRepository.changePassword({ oldPassword, newPassword, nip });
     setLoading(false);
     if (!res.ok) {
-      const msg = accountErrorMessage(res.error);
-      setNipError(msg);
-      toast.error(msg);
+      setNipError(accountErrorMessage(res.error));
       return;
     }
     setNipVisible(false);
@@ -217,9 +424,7 @@ export function ChangeEmailScreen({ navigation }: ChangeEmailProps) {
     const res = await accountRepository.changeEmail(email, nip);
     setLoading(false);
     if (!res.ok) {
-      const msg = accountErrorMessage(res.error);
-      setNipError(msg);
-      toast.error(msg);
+      setNipError(accountErrorMessage(res.error));
       return;
     }
     setNipVisible(false);
@@ -270,9 +475,7 @@ export function ChangeNumberScreen({ navigation }: ChangeNumberProps) {
     const res = await accountRepository.sendNumberChangeCode(phone, enteredNip);
     setLoading(false);
     if (!res.ok) {
-      const msg = accountErrorMessage(res.error);
-      setError(msg);
-      toast.error(msg);
+      setError(accountErrorMessage(res.error));
       return;
     }
     setNip(enteredNip);

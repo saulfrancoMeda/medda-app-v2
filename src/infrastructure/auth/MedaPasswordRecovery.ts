@@ -8,18 +8,16 @@ const toRecoveryError = (e: HttpError): RecoveryError => {
   return { type: 'unknown', message: e.message };
 };
 
-// Nombres de params best-effort según el legacy; verificar contra el backend real.
+// Nombres de params alineados al legacy (RecoveryPasswordCode.js / api.js):
+//  - sendCode: getPhoneCode(phone, false) -> { phone, validate: false }
+//  - validateCode: validCode(code, phone, 0) -> { code, phone, omitUserValidation: 0 }
+//  - resetPassword: publicPasswordChange(phone, code, password) -> { phone, code, password }
 export class MedaPasswordRecovery implements PasswordRecovery {
   constructor(private readonly http: HttpClient) {}
 
   async sendCode(phone: string): Promise<Result<void, RecoveryError>> {
-    const lock = await this.http.request<{ locked?: boolean }>(endpoints.checkUserLock, {
-      body: { cellphone: phone },
-    });
-    if (lock.ok && lock.value.locked) return err({ type: 'locked' });
-
     const res = await this.http.request<unknown>(endpoints.phoneSendCode, {
-      body: { cellphone: phone },
+      body: { phone, validate: false },
     });
     if (!res.ok) return err(toRecoveryError(res.error));
     return ok(undefined);
@@ -27,7 +25,7 @@ export class MedaPasswordRecovery implements PasswordRecovery {
 
   async validateCode(phone: string, code: string): Promise<Result<void, RecoveryError>> {
     const res = await this.http.request<unknown>(endpoints.validateCode, {
-      body: { cellphone: phone, code },
+      body: { code, phone, omitUserValidation: 0 },
     });
     if (!res.ok) {
       return err(res.error.status === 400 ? { type: 'invalid_code' } : toRecoveryError(res.error));
@@ -41,7 +39,7 @@ export class MedaPasswordRecovery implements PasswordRecovery {
     newPassword: string,
   ): Promise<Result<void, RecoveryError>> {
     const res = await this.http.request<unknown>(endpoints.changePasswordPublic, {
-      body: { cellphone: phone, code, password: newPassword },
+      body: { phone, code, password: newPassword },
     });
     if (!res.ok) return err(toRecoveryError(res.error));
     return ok(undefined);

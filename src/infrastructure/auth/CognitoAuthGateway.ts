@@ -77,9 +77,15 @@ export class CognitoAuthGateway implements AuthGateway {
         body: JSON.stringify(body),
       });
       const json = (await response.json()) as InitiateAuthResponse;
-      if (!response.ok) return err(this.mapError(json));
+      if (!response.ok) {
+        // Diagnóstico (igual que el HttpClient): Cognito se llama directo, así que sin este log
+        // el motivo real no aparecería en consola. Más adelante, dejar solo el status.
+        console.warn(`[Cognito] InitiateAuth -> ${response.status}`, json.__type, json.message);
+        return err(this.mapError(json));
+      }
       return ok(json);
-    } catch {
+    } catch (e) {
+      console.warn('[Cognito] InitiateAuth -> network error', e);
       return err({ type: 'network' });
     }
   }

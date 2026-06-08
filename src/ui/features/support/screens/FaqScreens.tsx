@@ -45,7 +45,7 @@ export function FaqListScreen({ navigation }: ListProps) {
               accessibilityRole="button"
               className="flex-row items-center gap-md rounded-card bg-brand-500 p-lg"
             >
-              <Ionicons name="chatbubbles" size={26} color="#0a0f14" />
+              <Ionicons name="chatbubbles" size={26} color="#1B1812" />
               <View className="flex-1">
                 <Text variant="body" className="font-semibold text-ink">
                   Chatea con nosotros
@@ -54,7 +54,7 @@ export function FaqListScreen({ navigation }: ListProps) {
                   Para aclarar tus dudas
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#0a0f14" />
+              <Ionicons name="chevron-forward" size={20} color="#1B1812" />
             </Pressable>
             <Text variant="h2">Preguntas frecuentes</Text>
           </View>
@@ -68,7 +68,7 @@ export function FaqListScreen({ navigation }: ListProps) {
             <Text variant="body" className="flex-1">
               {item.question}
             </Text>
-            <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+            <Ionicons name="chevron-forward" size={20} color="#9A9384" />
           </Pressable>
         )}
         ListEmptyComponent={
@@ -90,7 +90,7 @@ export function FaqListScreen({ navigation }: ListProps) {
               <Text variant="body" className="font-semibold text-brand-700">
                 Ver historial de aclaraciones
               </Text>
-              <Ionicons name="chevron-forward" size={20} color="#c99400" />
+              <Ionicons name="chevron-forward" size={20} color="#97720A" />
             </Pressable>
             {config.supportPhone ? (
               <Text variant="caption" tone="muted" center>
@@ -115,7 +115,7 @@ type DetailProps = NativeStackScreenProps<FaqStackParamList, 'FaqDetail'>;
 
 const htmlDocument = (body: string) => `<!DOCTYPE html><html><head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>body{font-family:-apple-system,Roboto,sans-serif;font-size:16px;color:#0a0f14;padding:16px;line-height:1.5;}</style>
+<style>body{font-family:-apple-system,Roboto,sans-serif;font-size:16px;color:#1B1812;padding:16px;line-height:1.5;}</style>
 </head><body>${body}</body></html>`;
 
 export function FaqDetailScreen({ route }: DetailProps) {

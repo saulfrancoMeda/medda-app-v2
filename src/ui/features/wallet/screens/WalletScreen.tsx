@@ -7,7 +7,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { formatCurrency } from '@domain/shared/money';
 import { isCredit, signedAmount, type Movement } from '@domain/wallet/entities/Movement';
 import { AppHeader } from '@ui/navigation/AppHeader';
-import { Button, Text } from '@ui/design-system/components';
+import { Text } from '@ui/design-system/components';
+import { BalanceCard } from '@ui/features/wallet/components/BalanceCard';
 import { useBalance, useDefaultAccount, useMovements, useStpAccount } from '@ui/features/wallet/hooks/useWallet';
 import type { WalletStackParamList } from '@ui/navigation/types';
 
@@ -35,7 +36,7 @@ function CopyRow({ label, value }: { label: string; value: string }) {
         accessibilityRole="button"
         accessibilityLabel={`Copiar ${label}`}
       >
-        <Ionicons name="copy-outline" size={20} color="#9ca3af" />
+        <Ionicons name="copy-outline" size={20} color="#9A9384" />
       </Pressable>
     </View>
   );
@@ -73,36 +74,17 @@ export function WalletScreen() {
 
   const header = (
     <View className="gap-lg pb-md pt-lg">
-      <View className="gap-xs rounded-card bg-brand-500 p-lg">
-        <Text className="text-ink">Tu saldo</Text>
-        {balance.isPending && account.data ? (
-          <ActivityIndicator color="#0a0f14" />
-        ) : (
-          <Text variant="display" className="text-ink">
-            {balance.data !== undefined ? formatCurrency(balance.data) : '—'}
-          </Text>
-        )}
-      </View>
+      <BalanceCard
+        balance={balance.data}
+        loading={balance.isPending && Boolean(account.data)}
+        clabe={stp.data?.clabe}
+        onAbonar={() => navigation.navigate('CashInMethods')}
+        onEnviar={() => navigation.navigate('CashOutMethods')}
+      />
 
       <View className="rounded-card border border-neutral-200 px-lg dark:border-neutral-800">
         <CopyRow label="CLABE Medá" value={stp.data?.clabe ?? ''} />
         <CopyRow label="Número de cuenta" value={account.data?.accountNumber ?? ''} />
-      </View>
-
-      <View className="flex-row gap-md">
-        <Button
-          title="Abonar dinero"
-          variant="outline"
-          full
-          className="flex-1"
-          onPress={() => navigation.navigate('CashInMethods')}
-        />
-        <Button
-          title="Enviar dinero"
-          full
-          className="flex-1"
-          onPress={() => navigation.navigate('CashOutMethods')}
-        />
       </View>
 
       <Text variant="h2">Tus movimientos</Text>

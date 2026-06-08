@@ -36,19 +36,19 @@ export function LoginPasswordScreen({ route, navigation }: Props) {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
-      <View className="flex-1 justify-center gap-xl px-lg">
-        <View className="items-center">
-          <Logo width={110} height={120} />
+      <View className="flex-1 px-lg pt-2xl">
+        <View className="items-center pb-2xl pt-lg">
+          <Logo width={96} height={96} />
         </View>
 
-        <View className="gap-lg rounded-xl border border-neutral-200 bg-neutral-0 p-lg dark:border-neutral-800 dark:bg-neutral-900">
-          <View className="gap-xs">
-            <Text variant="h1">Bienvenido,</Text>
-            <Text variant="body" tone="muted">
-              {name}
-            </Text>
-          </View>
+        <View className="gap-xs">
+          <Text variant="h1">Bienvenido</Text>
+          <Text variant="h2" tone="muted" className="font-normal" numberOfLines={2}>
+            {name}
+          </Text>
+        </View>
 
+        <View className="pt-2xl">
           <Input
             label="Contraseña"
             placeholder="Ingresa tu contraseña"
@@ -66,28 +66,32 @@ export function LoginPasswordScreen({ route, navigation }: Props) {
                 <Ionicons
                   name={secure ? 'eye-outline' : 'eye-off-outline'}
                   size={22}
-                  color="#9ca3af"
+                  color="#9A9384"
                 />
               </Pressable>
             }
           />
+        </View>
 
-          <View className="items-end">
-            <Text
-              variant="caption"
-              tone="link"
-              className="font-semibold"
-              onPress={() => navigation.navigate('RecoverPhone')}
-            >
-              Recuperar contraseña
-            </Text>
-          </View>
-
-          <Text variant="caption" tone="muted">
-            Si tus iniciales no son correctas, verifica que hayas ingresado correctamente tu
-            número celular o comunícate a nuestro Centro de Atención.
+        <View className="items-end pt-md">
+          <Text
+            variant="body"
+            tone="link"
+            className="font-semibold"
+            onPress={() => navigation.navigate('RecoverPhone')}
+          >
+            Recuperar contraseña
           </Text>
+        </View>
 
+        <Text variant="caption" tone="muted" className="pt-lg">
+          Si tus iniciales no son correctas, verifica que hayas ingresado correctamente tu número
+          celular o comunícate a nuestro Centro de Atención.
+        </Text>
+
+        <View className="flex-1" />
+
+        <View className="gap-md pb-lg">
           <Button title="Iniciar sesión" full disabled={!valid} loading={loading} onPress={onSubmit} />
 
           <Pressable className="flex-row justify-center gap-xs" onPress={() => navigation.goBack()}>

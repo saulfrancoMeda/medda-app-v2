@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ActivityIndicator, FlatList, Linking, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, FlatList, Linking, Platform, Pressable, ScrollView, View } from 'react-native';
+import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { config } from '@config/env';
@@ -25,11 +26,11 @@ function Row({
       accessibilityRole="button"
       className="flex-row items-center gap-md rounded-card border border-neutral-200 p-lg dark:border-neutral-800"
     >
-      <Ionicons name={icon} size={22} color="#d7a300" />
+      <Ionicons name={icon} size={22} color="#97720A" />
       <Text variant="body" className="flex-1">
         {title}
       </Text>
-      <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+      <Ionicons name="chevron-forward" size={20} color="#9A9384" />
     </Pressable>
   );
 }
@@ -50,7 +51,10 @@ export function LegalScreen({ navigation }: LegalProps) {
           key={d.title}
           icon="document-text-outline"
           title={d.title}
-          onPress={() => d.url && Linking.openURL(d.url)}
+          onPress={() => {
+            if (!d.url) return;
+            navigation.navigate('PdfViewer', { title: d.title, url: d.url });
+          }}
         />
       ))}
       <Row icon="reader-outline" title="Estado de cuenta" onPress={() => navigation.navigate('Statements')} />
@@ -157,11 +161,11 @@ export function StatementsScreen() {
             accessibilityRole="button"
             className="flex-row items-center gap-md rounded-card border border-neutral-200 p-lg dark:border-neutral-800"
           >
-            <Ionicons name="document-outline" size={22} color="#d7a300" />
+            <Ionicons name="document-outline" size={22} color="#97720A" />
             <Text variant="body" className="flex-1">
               {item.from.slice(0, 10)} – {item.to.slice(0, 10)}
             </Text>
-            <Ionicons name="download-outline" size={20} color="#9ca3af" />
+            <Ionicons name="download-outline" size={20} color="#9A9384" />
           </Pressable>
         )}
       />
@@ -171,6 +175,30 @@ export function StatementsScreen() {
         error={error}
         onSubmit={onAuthorize}
         onClose={() => setNipFor(null)}
+      />
+    </View>
+  );
+}
+
+type PdfViewerProps = NativeStackScreenProps<SectionsStackParamList, 'PdfViewer'>;
+
+export function PdfViewerScreen({ route }: PdfViewerProps) {
+  const [webLoading, setWebLoading] = useState(true);
+  const pdfUrl = Platform.OS === 'ios'
+    ? route.params.url
+    : `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(route.params.url)}`;
+
+  return (
+    <View className="flex-1 bg-neutral-0 dark:bg-neutral-950">
+      {webLoading ? (
+        <View className="absolute inset-0 items-center justify-center">
+          <ActivityIndicator size="large" color="#FCD535" />
+        </View>
+      ) : null}
+      <WebView
+        source={{ uri: pdfUrl }}
+        onLoadEnd={() => setWebLoading(false)}
+        style={{ flex: 1 }}
       />
     </View>
   );
