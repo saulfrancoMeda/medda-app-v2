@@ -28,10 +28,10 @@ export function BalanceCard({
           {label}
         </Text>
         <View
-          className="rounded-pill px-3 py-1"
-          style={{ backgroundColor: '#1B1812' }}
+          className="rounded-pill"
+          style={{ backgroundColor: '#1B1812', padding: 4 }}
         >
-          <Text variant="caption" className="font-bold tracking-widest" style={{ color: '#FCD535', fontSize: 10 }}>
+          <Text variant="caption" className="font-bold tracking-widest" style={{ color: '#FCD535', fontSize: 12 }}>
             MXN
           </Text>
         </View>
