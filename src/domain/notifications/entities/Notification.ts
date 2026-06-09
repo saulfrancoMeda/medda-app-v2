@@ -1,4 +1,3 @@
-/** Notificación in-app (/notifications/list). Subconjunto fiel al legacy (NotificationsList). */
 export interface AppNotification {
   readonly id: string;
   readonly subject?: string;

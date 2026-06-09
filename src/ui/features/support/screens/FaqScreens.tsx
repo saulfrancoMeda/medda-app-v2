@@ -31,7 +31,7 @@ export function FaqListScreen({ navigation }: ListProps) {
       <FlatList
         data={filtered}
         keyExtractor={(f) => f.id}
-        contentContainerClassName="gap-md p-lg"
+        contentContainerClassName="gap-lg p-lg"
         ListHeaderComponent={
           <View className="gap-md pb-sm">
             <Text variant="h1">¿En qué te podemos ayudar?</Text>

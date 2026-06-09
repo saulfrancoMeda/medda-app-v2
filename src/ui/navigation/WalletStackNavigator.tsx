@@ -1,5 +1,4 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useColorScheme } from 'nativewind';
 import { WalletScreen } from '@ui/features/wallet/screens/WalletScreen';
 import { CashInMethodsScreen, CashInSpeiScreen } from '@ui/features/wallet/screens/CashInScreens';
 import {
@@ -10,24 +9,18 @@ import {
   CashOutSpeiFormScreen,
   TransactionSuccessScreen,
 } from '@ui/features/wallet/screens/CashOutScreens';
+import { MovementDetailScreen } from '@ui/features/wallet/screens/MovementDetailScreen';
+import { useStackScreenOptions } from '@ui/navigation/headerOptions';
 import type { WalletStackParamList } from '@ui/navigation/types';
 
 const Stack = createNativeStackNavigator<WalletStackParamList>();
 
 // Stack DENTRO del tab Billetera: las pantallas de Abonar/Enviar conservan el bottom tab visible.
 export function WalletStackNavigator() {
-  const { colorScheme } = useColorScheme();
-  const tint = colorScheme === 'dark' ? '#FAFAF9' : '#1B1812';
-  const bg = colorScheme === 'dark' ? '#131110' : '#ffffff';
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerTintColor: tint,
-        headerTitleStyle: { color: tint },
-        headerStyle: { backgroundColor: bg },
-      }}
-    >
+    <Stack.Navigator screenOptions={useStackScreenOptions()}>
       <Stack.Screen name="WalletHome" component={WalletScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="MovementDetail" component={MovementDetailScreen} options={{ title: 'Detalle del movimiento' }} />
       <Stack.Screen name="CashInMethods" component={CashInMethodsScreen} options={{ title: 'Abonar dinero' }} />
       <Stack.Screen name="CashInSpei" component={CashInSpeiScreen} options={{ title: 'Transferencia SPEI' }} />
       <Stack.Screen name="CashOutMethods" component={CashOutMethodsScreen} options={{ title: 'Enviar dinero' }} />

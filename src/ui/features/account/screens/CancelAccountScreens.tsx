@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { FlatList, Modal, Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { isValidClabe, type Bank } from '@domain/wallet/entities/Transfer';
-import type { AccountError } from '@domain/account/ports/AccountRepository';
+import { findBankByClabe, isValidClabe, type Bank } from '@domain/wallet/entities/Transfer';
 import { Button, Input, Text } from '@ui/design-system/components';
+import { accountErrorMessage } from '@ui/features/account/errorMessages';
+import { useNipAuthorization } from '@ui/features/common/useNipAuthorization';
+import { BankPicker } from '@ui/features/wallet/components/BankPicker';
 import { NipModal } from '@ui/features/wallet/components/NipModal';
 import { SuccessView } from '@ui/features/common/SuccessView';
 import { useSpeiBanks } from '@ui/features/wallet/hooks/useWallet';
@@ -14,70 +16,24 @@ import type { SectionsStackParamList } from '@ui/navigation/types';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const accountErrorMessage = (e: AccountError): string =>
-  e.type === 'unauthorized'
-    ? 'Datos incorrectos. Verifica tu NIP.'
-    : e.type === 'network'
-      ? 'Revisa tu conexión a internet'
-      : e.message || 'No se pudo cancelar la cuenta';
-
-function BankPicker({ value, onSelect }: { value?: Bank; onSelect: (b: Bank) => void }) {
-  const [open, setOpen] = useState(false);
-  const banks = useSpeiBanks();
-  return (
-    <View className="w-full gap-xs">
-      <Text variant="caption" tone="muted">
-        Banco
-      </Text>
-      <Pressable
-        onPress={() => setOpen(true)}
-        accessibilityRole="button"
-        className="h-14 flex-row items-center justify-between rounded-md bg-neutral-100 px-md dark:bg-neutral-800"
-      >
-        <Text variant="body" tone={value ? 'default' : 'muted'}>
-          {value?.name ?? 'Selecciona un banco'}
-        </Text>
-        <Ionicons name="chevron-down" size={18} color="#9A9384" />
-      </Pressable>
-      <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
-        <Pressable className="flex-1 bg-black/50" onPress={() => setOpen(false)} />
-        <View className="max-h-[70%] gap-sm rounded-t-xl bg-neutral-0 p-lg dark:bg-neutral-900">
-          <Text variant="h2">Banco</Text>
-          {banks.isPending ? <Text tone="muted">Cargando bancos…</Text> : null}
-          {banks.isError ? <Text tone="muted">No se pudieron cargar los bancos.</Text> : null}
-          <FlatList
-            data={banks.data ?? []}
-            keyExtractor={(b) => b.code}
-            renderItem={({ item }) => (
-              <Pressable
-                className="border-b border-neutral-100 py-md dark:border-neutral-800"
-                onPress={() => {
-                  onSelect(item);
-                  setOpen(false);
-                }}
-              >
-                <Text variant="body">{item.name}</Text>
-              </Pressable>
-            )}
-          />
-        </View>
-      </Modal>
-    </View>
-  );
-}
-
 type Props = NativeStackScreenProps<SectionsStackParamList, 'CancelAccount'>;
 
 export function CancelAccountScreen(_: Props) {
   const { accountRepository } = useContainer();
   const { signOut } = useAuth();
+  const nipAuth = useNipAuthorization(accountErrorMessage);
+  const banks = useSpeiBanks();
   const [clabe, setClabe] = useState('');
   const [bank, setBank] = useState<Bank | undefined>(undefined);
+
+  const onClabeChange = (text: string) => {
+    const next = text.replace(/[^0-9]/g, '');
+    setClabe(next);
+    const match = findBankByClabe(banks.data ?? [], next);
+    if (match) setBank(match);
+  };
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [nipVisible, setNipVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [nipError, setNipError] = useState<string | undefined>(undefined);
   const [done, setDone] = useState(false);
 
   const valid =
@@ -86,24 +42,19 @@ export function CancelAccountScreen(_: Props) {
     name.trim().length > 0 &&
     (email.length === 0 || EMAIL_RE.test(email));
 
-  const authorize = async (nip: string) => {
+  const authorize = (nip: string) => {
     if (!bank) return;
-    setLoading(true);
-    setNipError(undefined);
-    const res = await accountRepository.cancelAccount({
-      clabe,
-      bank: bank.code,
-      beneficiaryName: name.trim(),
-      email: email.trim() || undefined,
-      nip,
-    });
-    setLoading(false);
-    if (!res.ok) {
-      setNipError(accountErrorMessage(res.error));
-      return;
-    }
-    setNipVisible(false);
-    setDone(true);
+    void nipAuth.submit(
+      () =>
+        accountRepository.cancelAccount({
+          clabe,
+          bank: bank.code,
+          beneficiaryName: name.trim(),
+          email: email.trim() || undefined,
+          nip,
+        }),
+      () => setDone(true),
+    );
   };
 
   if (done) {
@@ -118,7 +69,7 @@ export function CancelAccountScreen(_: Props) {
   }
 
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
       <View className="gap-sm rounded-card bg-danger/10 p-lg">
         <View className="flex-row items-center gap-sm">
           <Ionicons name="warning-outline" size={22} color="#C24A30" />
@@ -137,16 +88,26 @@ export function CancelAccountScreen(_: Props) {
       </Text>
       <Input
         label="CLABE (18 dígitos)"
+        leftIcon="card-outline"
+        placeholder="18 dígitos"
         keyboardType="number-pad"
         maxLength={18}
         value={clabe}
-        onChangeText={(t) => setClabe(t.replace(/[^0-9]/g, ''))}
+        onChangeText={onClabeChange}
         error={clabe.length > 0 && !isValidClabe(clabe) ? 'CLABE inválida' : undefined}
       />
       <BankPicker value={bank} onSelect={setBank} />
-      <Input label="Nombre del beneficiario" value={name} onChangeText={setName} />
+      <Input
+        label="Nombre del beneficiario"
+        leftIcon="person-outline"
+        placeholder="Nombre completo"
+        value={name}
+        onChangeText={setName}
+      />
       <Input
         label="Correo para notificaciones (opcional)"
+        leftIcon="mail-outline"
+        placeholder="correo@ejemplo.com"
         keyboardType="email-address"
         autoCapitalize="none"
         value={email}
@@ -154,14 +115,14 @@ export function CancelAccountScreen(_: Props) {
         error={email.length > 0 && !EMAIL_RE.test(email) ? 'Correo inválido' : undefined}
       />
 
-      <Button title="Cancelar mi cuenta" full disabled={!valid} onPress={() => setNipVisible(true)} />
+      <Button title="Cancelar mi cuenta" full disabled={!valid} onPress={nipAuth.open} />
 
       <NipModal
-        visible={nipVisible}
-        loading={loading}
-        error={nipError}
+        visible={nipAuth.visible}
+        loading={nipAuth.loading}
+        error={nipAuth.nipError}
         onSubmit={authorize}
-        onClose={() => setNipVisible(false)}
+        onClose={nipAuth.close}
       />
     </ScrollView>
   );

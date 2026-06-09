@@ -9,6 +9,7 @@ import type {
 } from '@domain/account/ports/AccountRepository';
 import type { HttpClient, HttpError } from '@infrastructure/http/HttpClient';
 import { endpoints } from '@infrastructure/http/endpoints';
+import { isNipError } from '@infrastructure/http/apiError';
 
 interface RawProfileFields {
   firstName?: string;
@@ -33,7 +34,7 @@ interface RawProfile extends RawProfileFields {
 
 const toAccountError = (e: HttpError): AccountError => {
   if (e.kind === 'network') return { type: 'network' };
-  // Surfacea el mensaje real del servicio (incluye 401), para diagnóstico del usuario/backend.
+  if (e.status === 401 || isNipError(e.message)) return { type: 'unauthorized' };
   return { type: 'unknown', message: e.message };
 };
 

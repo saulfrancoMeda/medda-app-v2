@@ -1,5 +1,4 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useColorScheme } from 'nativewind';
 import { StoreScreen } from '@ui/features/home/screens/StoreScreen';
 import { MyQrScreen } from '@ui/features/home/screens/MyQrScreen';
 import {
@@ -7,22 +6,14 @@ import {
   ServicePayScreen,
   ServicePaymentsScreen,
 } from '@ui/features/home/screens/ServicePaymentsScreen';
+import { useStackScreenOptions } from '@ui/navigation/headerOptions';
 import type { StoreStackParamList } from '@ui/navigation/types';
 
 const Stack = createNativeStackNavigator<StoreStackParamList>();
 
 export function StoreStackNavigator() {
-  const { colorScheme } = useColorScheme();
-  const tint = colorScheme === 'dark' ? '#FAFAF9' : '#1B1812';
-  const bg = colorScheme === 'dark' ? '#131110' : '#ffffff';
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerTintColor: tint,
-        headerTitleStyle: { color: tint },
-        headerStyle: { backgroundColor: bg },
-      }}
-    >
+    <Stack.Navigator screenOptions={useStackScreenOptions()}>
       <Stack.Screen name="StoreHome" component={StoreScreen} options={{ headerShown: false }} />
       <Stack.Screen
         name="ServicePayments"

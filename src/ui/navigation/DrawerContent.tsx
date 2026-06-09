@@ -1,8 +1,6 @@
-import { Pressable, View } from 'react-native';
-import {
-  DrawerContentScrollView,
-  type DrawerContentComponentProps,
-} from '@react-navigation/drawer';
+import { Pressable, ScrollView, View } from 'react-native';
+import type { DrawerContentComponentProps } from '@react-navigation/drawer';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { config } from '@config/env';
 import { GoldGradient, Text } from '@ui/design-system/components';
@@ -13,13 +11,43 @@ import type { SectionsStackParamList } from '@ui/navigation/types';
 type IoniconName = keyof typeof Ionicons.glyphMap;
 
 const ITEMS: { label: string; icon: IoniconName; route: keyof SectionsStackParamList }[] = [
+  { label: 'Ver mi perfil', icon: 'person-outline', route: 'Profile' },
   { label: 'Legales y Estado de cuenta', icon: 'document-text-outline', route: 'Legal' },
   { label: 'Seguridad', icon: 'shield-checkmark-outline', route: 'Security' },
 ];
 
+function Row({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: IoniconName;
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      className="flex-row items-center gap-md rounded-lg py-md"
+      onPress={onPress}
+      accessibilityRole="button"
+      android_ripple={{ color: 'rgba(0,0,0,0.05)' }}
+      style={({ pressed }) => (pressed ? { opacity: 0.7 } : undefined)}
+    >
+      <View className="h-11 w-11 items-center justify-center rounded-card bg-brand-100">
+        <Ionicons name={icon} size={20} color="#97720A" />
+      </View>
+      <Text variant="body" className="flex-1 font-semibold">
+        {label}
+      </Text>
+      <Ionicons name="chevron-forward" size={20} color="#9A9384" />
+    </Pressable>
+  );
+}
+
 export function DrawerContent(props: DrawerContentComponentProps) {
   const { session, signOut } = useAuth();
   const profile = useProfile();
+  const insets = useSafeAreaInsets();
   const p = profile.data;
   const name = p ? `${p.firstName} ${p.lastName}` : (session?.username ?? '');
   const initials = p ? `${p.firstName[0] ?? ''}${p.lastName[0] ?? ''}`.toUpperCase() : '';
@@ -35,93 +63,94 @@ export function DrawerContent(props: DrawerContentComponentProps) {
   };
 
   return (
-    <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 0 }}>
-      <GoldGradient radius={0} style={{ paddingTop: 56, paddingBottom: 28, paddingHorizontal: 20 }}>
-        <Pressable
-          className="absolute right-4 top-12"
-          hitSlop={10}
-          onPress={() => props.navigation.closeDrawer()}
-          accessibilityRole="button"
-          accessibilityLabel="Cerrar menú"
+    <View className="flex-1 bg-neutral-0 dark:bg-neutral-950">
+      <ScrollView
+        bounces={false}
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <GoldGradient
+          radius={0}
+          style={{ paddingTop: insets.top + 32, paddingBottom: 36, paddingHorizontal: 20 }}
         >
-          <Ionicons name="close" size={26} color="#1B1812" />
-        </Pressable>
-        <View className="items-center gap-sm">
-          <View
-            className="h-20 w-20 items-center justify-center rounded-pill bg-brand-100"
-            style={{ borderWidth: 3, borderColor: 'rgba(255,255,255,0.7)' }}
-          >
-            {initials ? (
-              <Text variant="h1" className="text-brand-700">
-                {initials}
-              </Text>
-            ) : (
-              <Ionicons name="person" size={32} color="#97720A" />
-            )}
-          </View>
-          <Text variant="h2" center className="text-ink">
-            {name || 'Bienvenido'}
-          </Text>
-          <Pressable onPress={() => go('Profile')} accessibilityRole="button">
-            <Text variant="body" className="text-ink" style={{ opacity: 0.7 }}>
-              Ver mi perfil
-            </Text>
-          </Pressable>
-        </View>
-      </GoldGradient>
-
-      <View className="gap-xs p-md">
-        {ITEMS.map((item) => (
           <Pressable
-            key={item.route}
-            className="flex-row items-center gap-md border-b border-neutral-100 py-md dark:border-neutral-800"
-            onPress={() => go(item.route)}
+            className="absolute right-4 h-10 w-10 items-center justify-center rounded-pill"
+            style={{ top: insets.top + 8, backgroundColor: 'rgba(27,24,18,0.12)' }}
+            hitSlop={10}
+            onPress={() => props.navigation.closeDrawer()}
             accessibilityRole="button"
+            accessibilityLabel="Cerrar menú"
           >
-            <View className="h-11 w-11 items-center justify-center rounded-card bg-brand-100">
-              <Ionicons name={item.icon} size={20} color="#97720A" />
-            </View>
-            <Text variant="body" className="flex-1 font-semibold">
-              {item.label}
-            </Text>
-            <Ionicons name="chevron-forward" size={20} color="#9A9384" />
+            <Ionicons name="close" size={24} color="#1B1812" />
           </Pressable>
-        ))}
-
-        <Pressable
-          className="flex-row items-center gap-md border-b border-neutral-100 py-md dark:border-neutral-800"
-          onPress={goFaq}
-          accessibilityRole="button"
-        >
-          <View className="h-11 w-11 items-center justify-center rounded-card bg-brand-100">
-            <Ionicons name="help-circle-outline" size={20} color="#97720A" />
+          <View className="items-center gap-md pt-lg">
+            <View
+              className="h-28 w-28 items-center justify-center rounded-pill bg-neutral-0"
+              style={{
+                borderWidth: 4,
+                borderColor: 'rgba(255,255,255,0.9)',
+                shadowColor: '#000',
+                shadowOpacity: 0.12,
+                shadowRadius: 8,
+                shadowOffset: { width: 0, height: 3 },
+                elevation: 4,
+              }}
+            >
+              {initials ? (
+                <Text variant="display" className="text-brand-700" style={{ fontSize: 44 }}>
+                  {initials}
+                </Text>
+              ) : (
+                <Ionicons name="person" size={48} color="#97720A" />
+              )}
+            </View>
+            <View className="items-center gap-1">
+              <Text variant="h1" center className="text-ink" numberOfLines={2}>
+                {name || 'Bienvenido'}
+              </Text>
+              {session?.username ? (
+                <Text variant="body" center className="font-mono text-ink" style={{ opacity: 0.7 }}>
+                  {session.username}
+                </Text>
+              ) : null}
+            </View>
           </View>
-          <Text variant="body" className="flex-1 font-semibold">
-            Preguntas frecuentes
-          </Text>
-          <Ionicons name="chevron-forward" size={20} color="#9A9384" />
-        </Pressable>
+        </GoldGradient>
 
-        <Pressable
-          className="mt-md flex-row items-center gap-md py-md"
-          onPress={signOut}
-          accessibilityRole="button"
-        >
-          <View
-            className="h-11 w-11 items-center justify-center rounded-card"
-            style={{ backgroundColor: '#FAE8E2' }}
-          >
-            <Ionicons name="log-out-outline" size={20} color="#C24A30" />
+        <View className="flex-1 p-lg justify-between">
+          <View>
+            {ITEMS.map((item) => (
+              <Row key={item.route} icon={item.icon} label={item.label} onPress={() => go(item.route)} />
+            ))}
+            <Row icon="help-circle-outline" label="Preguntas frecuentes" onPress={goFaq} />
           </View>
-          <Text variant="body" tone="danger" className="flex-1 font-semibold">
-            Cerrar sesión
-          </Text>
-        </Pressable>
 
-        <Text variant="caption" tone="muted" center className="pt-lg">
-          Versión {config.appVersion}
-        </Text>
-      </View>
-    </DrawerContentScrollView>
+          <View className="mt-xl gap-lg pb-md">
+            <View className="h-px w-full bg-neutral-200 dark:bg-neutral-800" />
+            <Pressable
+              className="flex-row items-center gap-md rounded-lg"
+              onPress={signOut}
+              accessibilityRole="button"
+              android_ripple={{ color: 'rgba(0,0,0,0.05)' }}
+              style={({ pressed }) => (pressed ? { opacity: 0.7 } : undefined)}
+            >
+              <View
+                className="h-12 w-12 items-center justify-center rounded-card"
+                style={{ backgroundColor: '#FAE8E2' }}
+              >
+                <Ionicons name="log-out-outline" size={22} color="#C24A30" />
+              </View>
+              <Text variant="body" tone="danger" className="flex-1 font-semibold">
+                Cerrar sesión
+              </Text>
+            </Pressable>
+
+            <Text variant="caption" tone="muted" center>
+              Versión {config.appVersion}
+            </Text>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
   );
 }

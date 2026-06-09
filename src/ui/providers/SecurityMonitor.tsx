@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Button, Text } from '@ui/design-system/components';
 import { useAuth } from '@ui/providers/AuthProvider';
 
-const SESSION_TIMEOUT_MS = 5 * 60 * 1000;
+const INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000;
 
 export function SecurityMonitor({ children }: { children: ReactNode }) {
   const { status, signOut } = useAuth();
@@ -15,21 +15,31 @@ export function SecurityMonitor({ children }: { children: ReactNode }) {
 
   const signedIn = useRef(false);
   const lastNetType = useRef<string | null>(null);
+  const inactivityTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const backgroundedAt = useRef<number | null>(null);
-
-  useEffect(() => {
-    signedIn.current = status === 'signedIn';
-    if (status === 'signedIn') {
-      lastNetType.current = null;
-      backgroundedAt.current = null;
-    }
-  }, [status]);
 
   const expire = useCallback(() => {
     if (!signedIn.current) return;
     setExpired(true);
     void signOut();
   }, [signOut]);
+
+  const resetInactivity = useCallback(() => {
+    if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+    if (!signedIn.current) return;
+    inactivityTimer.current = setTimeout(expire, INACTIVITY_TIMEOUT_MS);
+  }, [expire]);
+
+  useEffect(() => {
+    signedIn.current = status === 'signedIn';
+    if (status === 'signedIn') {
+      lastNetType.current = null;
+      backgroundedAt.current = null;
+      resetInactivity();
+    } else if (inactivityTimer.current) {
+      clearTimeout(inactivityTimer.current);
+    }
+  }, [status, resetInactivity]);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
@@ -46,29 +56,37 @@ export function SecurityMonitor({ children }: { children: ReactNode }) {
   }, [expire]);
 
   useEffect(() => {
-    if (status !== 'signedIn') return;
-
-    const sub = AppState.addEventListener('change', (nextState) => {
-      if (nextState === 'background' || nextState === 'inactive') {
+    const sub = AppState.addEventListener('change', (next) => {
+      if (next === 'background' || next === 'inactive') {
         backgroundedAt.current = Date.now();
-      } else if (nextState === 'active' && backgroundedAt.current !== null) {
-        if (Date.now() - backgroundedAt.current >= SESSION_TIMEOUT_MS) {
-          expire();
-        }
+      } else if (next === 'active' && signedIn.current) {
+        const since = backgroundedAt.current;
         backgroundedAt.current = null;
+        if (since !== null && Date.now() - since >= INACTIVITY_TIMEOUT_MS) {
+          expire();
+        } else {
+          resetInactivity();
+        }
       }
     });
+    return () => sub.remove();
+  }, [expire, resetInactivity]);
 
-    const timer = setTimeout(expire, SESSION_TIMEOUT_MS);
-
-    return () => {
-      sub.remove();
-      clearTimeout(timer);
-    };
-  }, [status, expire]);
+  useEffect(
+    () => () => {
+      if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+    },
+    [],
+  );
 
   return (
-    <View className="flex-1">
+    <View
+      className="flex-1"
+      onStartShouldSetResponderCapture={() => {
+        resetInactivity();
+        return false;
+      }}
+    >
       {children}
 
       {offline ? (
@@ -92,8 +110,7 @@ export function SecurityMonitor({ children }: { children: ReactNode }) {
               Tu sesión expiró
             </Text>
             <Text variant="body" tone="muted" center>
-              Se cerró tu sesión automáticamente por seguridad. Inicia sesión de nuevo para
-              continuar.
+              Cerramos tu sesión por inactividad. Inicia sesión de nuevo para continuar.
             </Text>
             <Button title="Iniciar sesión" full onPress={() => setExpired(false)} />
           </View>

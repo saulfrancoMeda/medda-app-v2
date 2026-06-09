@@ -35,6 +35,16 @@ export interface TransactionResult {
 /** CLABE válida = 18 dígitos. */
 export const isValidClabe = (clabe: string): boolean => /^[0-9]{18}$/.test(clabe);
 
+/** Banco de una CLABE: los primeros 3 dígitos son el código de institución (catálogo Banxico). */
+export const findBankByClabe = (
+  banks: readonly Bank[],
+  clabe: string,
+): Bank | undefined => {
+  if (clabe.length < 3) return undefined;
+  const code = clabe.slice(0, 3);
+  return banks.find((b) => b.code === code || b.code.endsWith(code) || b.code === `40${code}`);
+};
+
 /** NIP válido = 6 dígitos. */
 export const isValidNip = (nip: string): boolean => /^[0-9]{6}$/.test(nip);
 

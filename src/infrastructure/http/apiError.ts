@@ -1,8 +1,3 @@
-/**
- * Extrae un mensaje legible del cuerpo de error del backend, revisando los campos comunes
- * (como en el legacy apiBase.js): error_description / message / error / errors[].
- * Devuelve undefined si no encuentra ninguno.
- */
 export const extractApiMessage = (body: unknown): string | undefined => {
   if (!body || typeof body !== 'object') return undefined;
   const b = body as Record<string, unknown>;
@@ -18,6 +13,13 @@ export const extractApiMessage = (body: unknown): string | undefined => {
     if (first && typeof first === 'object' && typeof (first as { message?: unknown }).message === 'string') {
       return (first as { message: string }).message;
     }
+  } else if (errors && typeof errors === 'object') {
+    for (const value of Object.values(errors)) {
+      if (typeof value === 'string') return value;
+    }
   }
   return undefined;
 };
+
+export const isNipError = (message: string | undefined): boolean =>
+  typeof message === 'string' && /nip/i.test(message);

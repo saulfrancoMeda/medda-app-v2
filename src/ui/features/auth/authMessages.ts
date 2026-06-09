@@ -1,23 +1,22 @@
 import type { AuthError } from '@domain/auth/ports/AuthGateway';
 import type { LookupError } from '@domain/auth/ports/UserDirectory';
+import type { RecoveryError } from '@domain/auth/ports/PasswordRecovery';
 
-/** Mapea los errores de auth a mensajes en español (paridad con el legacy). */
 export const authErrorMessage = (error: AuthError): string => {
   switch (error.type) {
     case 'invalid_credentials':
-      return 'Verifica tus credenciales';
+      return 'Usuario o contraseña incorrectos. Verifícalos e intenta de nuevo.';
     case 'account_locked':
-      return 'Tu cuenta está bloqueada';
+      return 'Tu cuenta está bloqueada. Comunícate al Centro de Atención.';
     case 'too_many_attempts':
-      return 'Se superaron los intentos de inicio de sesión';
+      return 'Se superaron los intentos de inicio de sesión. Intenta más tarde.';
     case 'network':
-      return 'Hubo un error, revisa tu conexión a internet';
+      return 'Revisa tu conexión a internet e intenta de nuevo.';
     case 'unknown':
-      return error.message || 'Ocurrió un error inesperado';
+      return 'No pudimos iniciar sesión. Intenta de nuevo en un momento.';
   }
 };
 
-/** Mapea los errores de validación del teléfono (paso 1) a mensajes en español. */
 export const lookupErrorMessage = (error: LookupError): string => {
   switch (error.type) {
     case 'not_found':
@@ -25,8 +24,21 @@ export const lookupErrorMessage = (error: LookupError): string => {
     case 'account_cancel_requested':
       return 'Cancelación de cuenta solicitada. Usuario bloqueado.';
     case 'network':
-      return 'Hubo un error, revisa tu conexión a internet';
+      return 'Revisa tu conexión a internet e intenta de nuevo.';
     case 'unknown':
-      return error.message || 'No pudimos validar tu número';
+      return 'No pudimos validar tu número. Intenta de nuevo.';
+  }
+};
+
+export const recoveryErrorMessage = (e: RecoveryError): string => {
+  switch (e.type) {
+    case 'locked':
+      return 'Tu cuenta está bloqueada. Comunícate al Centro de Atención.';
+    case 'invalid_code':
+      return 'Código incorrecto. Verifícalo e intenta de nuevo.';
+    case 'network':
+      return 'Revisa tu conexión a internet e intenta de nuevo.';
+    case 'unknown':
+      return 'No se pudo completar la operación. Intenta de nuevo.';
   }
 };

@@ -1,5 +1,6 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { SpeiSendInput, TransactionResult } from '@domain/wallet/entities/Transfer';
+import type { Movement } from '@domain/wallet/entities/Movement';
 import type { FaqItem } from '@domain/support/entities/Faq';
 
 export type AuthStackParamList = {
@@ -24,6 +25,7 @@ export type WalletStackParamList = {
   TransactionSuccess: { result: TransactionResult; draft: SpeiDraft };
   CashOutMedaScan: undefined;
   CashOutMedaAmount: { resource: string };
+  MovementDetail: { movement: Movement };
 };
 
 // Tabs visibles + un tab oculto "Sections" (stack) con las pantallas del drawer, para que el

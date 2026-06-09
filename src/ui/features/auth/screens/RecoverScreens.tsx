@@ -2,42 +2,28 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RecoveryError } from '@domain/auth/ports/PasswordRecovery';
 import { Button, Input, Text } from '@ui/design-system/components';
+import { recoveryErrorMessage } from '@ui/features/auth/authMessages';
 import { useContainer } from '@ui/providers/ContainerProvider';
 import { useToast } from '@ui/providers/ToastProvider';
 import type { AuthStackParamList } from '@ui/navigation/types';
 
 const MIN_PASSWORD = 6;
 
-const recoveryErrorMessage = (e: RecoveryError): string => {
-  switch (e.type) {
-    case 'locked':
-      return 'Tu cuenta está bloqueada. Comunícate al Centro de Atención.';
-    case 'invalid_code':
-      return 'Código incorrecto.';
-    case 'network':
-      return 'Revisa tu conexión a internet';
-    case 'unknown':
-      return e.message || 'No se pudo completar la operación';
-  }
-};
-
 // Paso 1: teléfono -> envía código SMS.
 type PhoneProps = NativeStackScreenProps<AuthStackParamList, 'RecoverPhone'>;
 export function RecoverPhoneScreen({ navigation }: PhoneProps) {
   const { passwordRecovery } = useContainer();
+  const toast = useToast();
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | undefined>(undefined);
 
   const onSend = async () => {
     setLoading(true);
-    setError(undefined);
     const res = await passwordRecovery.sendCode(phone);
     setLoading(false);
     if (!res.ok) {
-      setError(recoveryErrorMessage(res.error));
+      toast.error(recoveryErrorMessage(res.error));
       return;
     }
     navigation.navigate('RecoverCode', { phone });
@@ -56,11 +42,11 @@ export function RecoverPhoneScreen({ navigation }: PhoneProps) {
           <Input
             label="Teléfono"
             placeholder="10 dígitos"
+            leftIcon="call-outline"
             keyboardType="number-pad"
             maxLength={10}
             value={phone}
             onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, ''))}
-            error={error}
           />
         </View>
         <View className="flex-1" />
@@ -82,17 +68,16 @@ type CodeProps = NativeStackScreenProps<AuthStackParamList, 'RecoverCode'>;
 export function RecoverCodeScreen({ route, navigation }: CodeProps) {
   const { phone } = route.params;
   const { passwordRecovery } = useContainer();
+  const toast = useToast();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | undefined>(undefined);
 
   const onValidate = async () => {
     setLoading(true);
-    setError(undefined);
     const res = await passwordRecovery.validateCode(phone, code);
     setLoading(false);
     if (!res.ok) {
-      setError(recoveryErrorMessage(res.error));
+      toast.error(recoveryErrorMessage(res.error));
       return;
     }
     navigation.navigate('RecoverNewPassword', { phone, code });
@@ -110,11 +95,12 @@ export function RecoverCodeScreen({ route, navigation }: CodeProps) {
         <View className="pt-xl">
           <Input
             label="Código"
+            placeholder="Ingresa el código"
+            leftIcon="keypad-outline"
             keyboardType="number-pad"
             maxLength={6}
             value={code}
             onChangeText={(t) => setCode(t.replace(/[^0-9]/g, ''))}
-            error={error}
           />
         </View>
         <View className="flex-1" />
@@ -140,19 +126,15 @@ export function RecoverNewPasswordScreen({ route, navigation }: NewProps) {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | undefined>(undefined);
   const valid = password.length >= MIN_PASSWORD && password === confirm;
 
   const onSubmit = async () => {
     if (!valid) return;
     setLoading(true);
-    setError(undefined);
     const res = await passwordRecovery.resetPassword(phone, code, password);
     setLoading(false);
     if (!res.ok) {
-      const msg = recoveryErrorMessage(res.error);
-      setError(msg);
-      toast.error(msg);
+      toast.error(recoveryErrorMessage(res.error));
       return;
     }
     toast.success('Tu contraseña se actualizó. Inicia sesión con la nueva.');
@@ -169,13 +151,15 @@ export function RecoverNewPasswordScreen({ route, navigation }: NewProps) {
           </Text>
         </View>
         <View className="gap-md pt-xl">
-          <Input label="Nueva contraseña" secureTextEntry value={password} onChangeText={setPassword} />
+          <Input label="Nueva contraseña" placeholder="Ingresa tu nueva contraseña" leftIcon="lock-closed-outline" secureTextEntry value={password} onChangeText={setPassword} />
           <Input
             label="Confirmar contraseña"
+            placeholder="Confirma tu nueva contraseña"
+            leftIcon="lock-closed-outline"
             secureTextEntry
             value={confirm}
             onChangeText={setConfirm}
-            error={confirm.length > 0 && confirm !== password ? 'No coincide' : error}
+            error={confirm.length > 0 && confirm !== password ? 'No coincide' : undefined}
           />
         </View>
         <View className="flex-1" />

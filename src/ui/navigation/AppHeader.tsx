@@ -6,7 +6,6 @@ import { unreadCount } from '@domain/notifications/entities/Notification';
 import { Logo, Text } from '@ui/design-system/components';
 import { useNotifications } from '@ui/features/notifications/hooks/useNotifications';
 
-/** Header del shell (paridad legacy): botón de menú (drawer), logo centrado y campana. */
 export function AppHeader() {
   const navigation = useNavigation();
   const { colorScheme } = useColorScheme();
@@ -35,12 +34,24 @@ export function AppHeader() {
         accessibilityRole="button"
         accessibilityLabel="Notificaciones"
       >
-        <Ionicons name="notifications-outline" size={24} color={iconColor} />
+        <Ionicons name="notifications-outline" size={26} color={iconColor} />
         {unread > 0 ? (
           <View
-            className="absolute -right-1.5 -top-1.5 h-4 min-w-4 items-center justify-center rounded-pill bg-danger px-1"
+            className="absolute items-center justify-center rounded-pill bg-danger"
+            style={{
+              top: -6,
+              right: -8,
+              minWidth: 18,
+              height: 18,
+              paddingHorizontal: 4,
+              borderWidth: 2,
+              borderColor: colorScheme === 'dark' ? '#131110' : '#ffffff',
+            }}
           >
-            <Text variant="caption" className="text-neutral-0" style={{ fontSize: 10, lineHeight: 14 }}>
+            <Text
+              className="text-neutral-0"
+              style={{ fontSize: 11, lineHeight: 13, fontWeight: '700' }}
+            >
               {unread > 9 ? '9+' : unread}
             </Text>
           </View>

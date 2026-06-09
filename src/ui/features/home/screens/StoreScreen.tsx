@@ -91,7 +91,7 @@ export function StoreScreen() {
           </View>
           <View className="flex-1">
             <Text variant="caption" tone="muted">
-              Hola de nuevo 👋
+              Hola de nuevo
             </Text>
             <Text variant="h2">{p ? `${p.firstName} ${p.lastName}` : 'Bienvenido'}</Text>
           </View>
@@ -109,8 +109,6 @@ export function StoreScreen() {
           balance={balance.data}
           loading={balance.isPending && Boolean(account.data)}
           clabe={stp.data?.clabe}
-          onAbonar={() => goWallet('CashInMethods')}
-          onEnviar={() => goWallet('CashOutMethods')}
         />
 
         <View className="flex-row gap-sm">

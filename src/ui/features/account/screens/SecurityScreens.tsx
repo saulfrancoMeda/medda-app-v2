@@ -4,8 +4,9 @@ import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { isValidNip } from '@domain/wallet/entities/Transfer';
-import type { AccountError } from '@domain/account/ports/AccountRepository';
 import { Button, Input, Text } from '@ui/design-system/components';
+import { accountErrorMessage } from '@ui/features/account/errorMessages';
+import { useNipAuthorization } from '@ui/features/common/useNipAuthorization';
 import { NipKeypad } from '@ui/features/wallet/components/NipKeypad';
 import { NipModal } from '@ui/features/wallet/components/NipModal';
 import { SuccessView } from '@ui/features/common/SuccessView';
@@ -14,13 +15,6 @@ import { useToast } from '@ui/providers/ToastProvider';
 import type { SectionsStackParamList } from '@ui/navigation/types';
 
 const MIN_PASSWORD = 6;
-
-const accountErrorMessage = (e: AccountError): string =>
-  e.type === 'unauthorized'
-    ? 'Datos incorrectos. Verifica tu contraseña/NIP.'
-    : e.type === 'network'
-      ? 'Revisa tu conexión a internet'
-      : e.message || 'No se pudo completar la operación';
 
 // --- Menú de seguridad ------------------------------------------------------
 function Row({
@@ -166,13 +160,15 @@ export function SetNipScreen({ navigation }: SetNipProps) {
 
   if (step === 'password') {
     return (
-      <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
+      <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
         <Text variant="h2">Confirma tu contraseña</Text>
         <Text variant="body" tone="muted">
           Necesitamos confirmar tu identidad para establecer tu NIP.
         </Text>
         <Input
           label="Contraseña"
+          placeholder="Ingresa tu contraseña"
+          leftIcon="lock-closed-outline"
           secureTextEntry
           value={password}
           onChangeText={setPassword}
@@ -224,7 +220,6 @@ export function ValidateEmailScreen({ route, navigation }: ValidateEmailProps) {
   const toast = useToast();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | undefined>(undefined);
   const [done, setDone] = useState(false);
 
   // Auto-envía el código al montar (react-query, como el resto del codebase: evita efectos manuales).
@@ -240,17 +235,13 @@ export function ValidateEmailScreen({ route, navigation }: ValidateEmailProps) {
     staleTime: Infinity,
   });
   const sending = codeSent.isFetching;
-  const sendError = codeSent.isError
-    ? accountErrorMessage(codeSent.error as unknown as AccountError)
-    : undefined;
 
   const validate = async () => {
     setLoading(true);
-    setError(undefined);
     const res = await accountRepository.validateEmailValidationCode(code);
     setLoading(false);
     if (!res.ok) {
-      setError(accountErrorMessage(res.error));
+      toast.error(accountErrorMessage(res.error));
       return;
     }
     toast.success('Tu correo se confirmó correctamente.');
@@ -268,18 +259,19 @@ export function ValidateEmailScreen({ route, navigation }: ValidateEmailProps) {
   }
 
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
       <Text variant="h2">Confirma tu correo</Text>
       <Text variant="body" tone="muted">
         Escribe el código que enviamos a{route.params.email ? ` ${route.params.email}` : ' tu correo'}.
       </Text>
       <Input
         label="Código de verificación"
+        placeholder="Ingresa el código"
+        leftIcon="keypad-outline"
         keyboardType="number-pad"
         maxLength={6}
         value={code}
         onChangeText={(t) => setCode(t.replace(/[^0-9]/g, ''))}
-        error={error ?? sendError}
       />
       <Button title="Confirmar" full loading={loading} disabled={code.length < 4} onPress={validate} />
       <Button
@@ -299,50 +291,45 @@ type ChangePwdProps = NativeStackScreenProps<SectionsStackParamList, 'ChangePass
 export function ChangePasswordScreen({ navigation }: ChangePwdProps) {
   const { accountRepository } = useContainer();
   const toast = useToast();
+  const nipAuth = useNipAuthorization(accountErrorMessage);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [nipVisible, setNipVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [nipError, setNipError] = useState<string | undefined>(undefined);
 
   const valid =
     oldPassword.length >= MIN_PASSWORD &&
     newPassword.length >= MIN_PASSWORD &&
     newPassword === confirm;
 
-  const authorize = async (nip: string) => {
-    setLoading(true);
-    setNipError(undefined);
-    const res = await accountRepository.changePassword({ oldPassword, newPassword, nip });
-    setLoading(false);
-    if (!res.ok) {
-      setNipError(accountErrorMessage(res.error));
-      return;
-    }
-    setNipVisible(false);
-    toast.success('Tu contraseña se actualizó correctamente.');
-    navigation.goBack();
-  };
+  const authorize = (nip: string) =>
+    void nipAuth.submit(
+      () => accountRepository.changePassword({ oldPassword, newPassword, nip }),
+      () => {
+        toast.success('Tu contraseña se actualizó correctamente.');
+        navigation.goBack();
+      },
+    );
 
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
-      <Input label="Contraseña actual" secureTextEntry value={oldPassword} onChangeText={setOldPassword} />
-      <Input label="Nueva contraseña" secureTextEntry value={newPassword} onChangeText={setNewPassword} />
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
+      <Input label="Contraseña actual" placeholder="Ingresa tu contraseña actual" leftIcon="lock-closed-outline" secureTextEntry value={oldPassword} onChangeText={setOldPassword} />
+      <Input label="Nueva contraseña" placeholder="Ingresa tu nueva contraseña" leftIcon="lock-closed-outline" secureTextEntry value={newPassword} onChangeText={setNewPassword} />
       <Input
         label="Confirmar nueva contraseña"
+        placeholder="Confirma tu nueva contraseña"
+        leftIcon="lock-closed-outline"
         secureTextEntry
         value={confirm}
         onChangeText={setConfirm}
         error={confirm.length > 0 && confirm !== newPassword ? 'No coincide' : undefined}
       />
-      <Button title="Guardar" full disabled={!valid} onPress={() => setNipVisible(true)} />
+      <Button title="Guardar" full disabled={!valid} onPress={nipAuth.open} />
       <NipModal
-        visible={nipVisible}
-        loading={loading}
-        error={nipError}
+        visible={nipAuth.visible}
+        loading={nipAuth.loading}
+        error={nipAuth.nipError}
         onSubmit={authorize}
-        onClose={() => setNipVisible(false)}
+        onClose={nipAuth.close}
       />
     </ScrollView>
   );
@@ -359,7 +346,6 @@ export function ChangeNipScreen({ navigation }: ChangeNipProps) {
   const [newNip, setNewNip] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | undefined>(undefined);
 
   const valid =
     password.length >= MIN_PASSWORD &&
@@ -370,13 +356,10 @@ export function ChangeNipScreen({ navigation }: ChangeNipProps) {
   const onSave = async () => {
     if (!valid) return;
     setLoading(true);
-    setError(undefined);
     const res = await accountRepository.changeNip({ password, oldNip, newNip });
     setLoading(false);
     if (!res.ok) {
-      const msg = accountErrorMessage(res.error);
-      setError(msg);
-      toast.error(msg);
+      toast.error(accountErrorMessage(res.error));
       return;
     }
     toast.success('Tu NIP se actualizó correctamente.');
@@ -386,18 +369,20 @@ export function ChangeNipScreen({ navigation }: ChangeNipProps) {
   const nipField = (set: (t: string) => void) => (t: string) => set(t.replace(/[^0-9]/g, ''));
 
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
-      <Input label="Contraseña" secureTextEntry value={password} onChangeText={setPassword} />
-      <Input label="NIP actual" keyboardType="number-pad" maxLength={6} secureTextEntry value={oldNip} onChangeText={nipField(setOldNip)} />
-      <Input label="Nuevo NIP" keyboardType="number-pad" maxLength={6} secureTextEntry value={newNip} onChangeText={nipField(setNewNip)} />
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
+      <Input label="Contraseña" placeholder="Ingresa tu contraseña" leftIcon="lock-closed-outline" secureTextEntry value={password} onChangeText={setPassword} />
+      <Input label="NIP actual" placeholder="Ingresa tu NIP actual" leftIcon="keypad-outline" keyboardType="number-pad" maxLength={6} secureTextEntry value={oldNip} onChangeText={nipField(setOldNip)} />
+      <Input label="Nuevo NIP" placeholder="Ingresa tu nuevo NIP" leftIcon="keypad-outline" keyboardType="number-pad" maxLength={6} secureTextEntry value={newNip} onChangeText={nipField(setNewNip)} />
       <Input
         label="Confirmar nuevo NIP"
+        placeholder="Confirma tu nuevo NIP"
+        leftIcon="keypad-outline"
         keyboardType="number-pad"
         maxLength={6}
         secureTextEntry
         value={confirm}
         onChangeText={nipField(setConfirm)}
-        error={confirm.length > 0 && confirm !== newNip ? 'No coincide' : error}
+        error={confirm.length > 0 && confirm !== newNip ? 'No coincide' : undefined}
       />
       <Button title="Guardar" full loading={loading} disabled={!valid} onPress={onSave} />
     </ScrollView>
@@ -411,45 +396,40 @@ type ChangeEmailProps = NativeStackScreenProps<SectionsStackParamList, 'ChangeEm
 export function ChangeEmailScreen({ navigation }: ChangeEmailProps) {
   const { accountRepository } = useContainer();
   const toast = useToast();
+  const nipAuth = useNipAuthorization(accountErrorMessage);
   const [email, setEmail] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [nipVisible, setNipVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [nipError, setNipError] = useState<string | undefined>(undefined);
   const valid = EMAIL_RE.test(email) && email === confirm;
 
-  const authorize = async (nip: string) => {
-    setLoading(true);
-    setNipError(undefined);
-    const res = await accountRepository.changeEmail(email, nip);
-    setLoading(false);
-    if (!res.ok) {
-      setNipError(accountErrorMessage(res.error));
-      return;
-    }
-    setNipVisible(false);
-    toast.success('Tu correo se actualizó correctamente.');
-    navigation.goBack();
-  };
+  const authorize = (nip: string) =>
+    void nipAuth.submit(
+      () => accountRepository.changeEmail(email, nip),
+      () => {
+        toast.success('Tu correo se actualizó correctamente.');
+        navigation.goBack();
+      },
+    );
 
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
-      <Input label="Nuevo correo" keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} />
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
+      <Input label="Nuevo correo" placeholder="correo@ejemplo.com" leftIcon="mail-outline" keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} />
       <Input
         label="Confirmar correo"
+        placeholder="correo@ejemplo.com"
+        leftIcon="mail-outline"
         keyboardType="email-address"
         autoCapitalize="none"
         value={confirm}
         onChangeText={setConfirm}
         error={confirm.length > 0 && confirm !== email ? 'No coincide' : undefined}
       />
-      <Button title="Guardar" full disabled={!valid} onPress={() => setNipVisible(true)} />
+      <Button title="Guardar" full disabled={!valid} onPress={nipAuth.open} />
       <NipModal
-        visible={nipVisible}
-        loading={loading}
-        error={nipError}
+        visible={nipAuth.visible}
+        loading={nipAuth.loading}
+        error={nipAuth.nipError}
         onSubmit={authorize}
-        onClose={() => setNipVisible(false)}
+        onClose={nipAuth.close}
       />
     </ScrollView>
   );
@@ -461,38 +441,29 @@ type ChangeNumberProps = NativeStackScreenProps<SectionsStackParamList, 'ChangeN
 export function ChangeNumberScreen({ navigation }: ChangeNumberProps) {
   const { accountRepository } = useContainer();
   const toast = useToast();
+  const nipAuth = useNipAuthorization(accountErrorMessage);
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [nip, setNip] = useState('');
   const [sent, setSent] = useState(false);
-  const [nipVisible, setNipVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | undefined>(undefined);
+  const [confirming, setConfirming] = useState(false);
 
-  const sendCode = async (enteredNip: string) => {
-    setLoading(true);
-    setError(undefined);
-    const res = await accountRepository.sendNumberChangeCode(phone, enteredNip);
-    setLoading(false);
-    if (!res.ok) {
-      setError(accountErrorMessage(res.error));
-      return;
-    }
-    setNip(enteredNip);
-    setNipVisible(false);
-    setSent(true);
-    toast.success('Te enviamos un código por SMS.');
-  };
+  const sendCode = (enteredNip: string) =>
+    void nipAuth.submit(
+      () => accountRepository.sendNumberChangeCode(phone, enteredNip),
+      () => {
+        setNip(enteredNip);
+        setSent(true);
+        toast.success('Te enviamos un código por SMS.');
+      },
+    );
 
   const confirm = async () => {
-    setLoading(true);
-    setError(undefined);
+    setConfirming(true);
     const res = await accountRepository.setNumber(phone, code, nip);
-    setLoading(false);
+    setConfirming(false);
     if (!res.ok) {
-      const msg = accountErrorMessage(res.error);
-      setError(msg);
-      toast.error(msg);
+      toast.error(accountErrorMessage(res.error));
       return;
     }
     toast.success('Tu número se actualizó. Vuelve a iniciar sesión con el nuevo número.');
@@ -500,22 +471,19 @@ export function ChangeNumberScreen({ navigation }: ChangeNumberProps) {
   };
 
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
       {!sent ? (
         <>
           <Input
             label="Nuevo número (10 dígitos)"
+            placeholder="10 dígitos"
+            leftIcon="call-outline"
             keyboardType="number-pad"
             maxLength={10}
             value={phone}
             onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, ''))}
           />
-          <Button
-            title="Enviar código"
-            full
-            disabled={phone.length !== 10}
-            onPress={() => setNipVisible(true)}
-          />
+          <Button title="Enviar código" full disabled={phone.length !== 10} onPress={nipAuth.open} />
         </>
       ) : (
         <>
@@ -524,21 +492,22 @@ export function ChangeNumberScreen({ navigation }: ChangeNumberProps) {
           </Text>
           <Input
             label="Código"
+            placeholder="Ingresa el código"
+            leftIcon="keypad-outline"
             keyboardType="number-pad"
             maxLength={6}
             value={code}
             onChangeText={(t) => setCode(t.replace(/[^0-9]/g, ''))}
-            error={error}
           />
-          <Button title="Confirmar" full loading={loading} disabled={code.length < 4} onPress={confirm} />
+          <Button title="Confirmar" full loading={confirming} disabled={code.length < 4} onPress={confirm} />
         </>
       )}
       <NipModal
-        visible={nipVisible}
-        loading={loading}
-        error={error}
+        visible={nipAuth.visible}
+        loading={nipAuth.loading}
+        error={nipAuth.nipError}
         onSubmit={sendCode}
-        onClose={() => setNipVisible(false)}
+        onClose={nipAuth.close}
       />
     </ScrollView>
   );

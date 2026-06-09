@@ -1,28 +1,19 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useColorScheme } from 'nativewind';
 import {
   ChatScreen,
   ClarificationsScreen,
   FaqDetailScreen,
   FaqListScreen,
 } from '@ui/features/support/screens/FaqScreens';
+import { useStackScreenOptions } from '@ui/navigation/headerOptions';
 import type { FaqStackParamList } from '@ui/navigation/types';
 
 const Stack = createNativeStackNavigator<FaqStackParamList>();
 
 // Stack del tab Ayuda: lista (con AppHeader) + detalle (HTML) + chat (WebView), con back nativo.
 export function FaqStackNavigator() {
-  const { colorScheme } = useColorScheme();
-  const tint = colorScheme === 'dark' ? '#FAFAF9' : '#1B1812';
-  const bg = colorScheme === 'dark' ? '#131110' : '#ffffff';
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerTintColor: tint,
-        headerTitleStyle: { color: tint },
-        headerStyle: { backgroundColor: bg },
-      }}
-    >
+    <Stack.Navigator screenOptions={useStackScreenOptions()}>
       <Stack.Screen name="FaqList" component={FaqListScreen} options={{ headerShown: false }} />
       <Stack.Screen name="FaqDetail" component={FaqDetailScreen} options={{ title: 'Ayuda' }} />
       <Stack.Screen name="Chat" component={ChatScreen} options={{ title: 'Chatea con nosotros' }} />

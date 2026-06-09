@@ -31,7 +31,7 @@ type MethodsProps = NativeStackScreenProps<WalletStackParamList, 'CashInMethods'
 
 export function CashInMethodsScreen({ navigation }: MethodsProps) {
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
       <Text variant="body" tone="muted">
         Elige cómo quieres abonar dinero a tu billetera.
       </Text>

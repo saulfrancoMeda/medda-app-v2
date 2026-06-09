@@ -1,14 +1,19 @@
-/** Movimiento de billetera (/wallet/movements/list). Subconjunto fiel al legacy. */
 export interface Movement {
   readonly id: string;
   readonly description: string;
-  /** Fecha ISO 8601. */
   readonly date: string;
-  /** p.ej. ['transactional','debit'] o ['credit']. */
   readonly channels: readonly string[];
   readonly amount: number;
   readonly reference?: string;
   readonly referenceLabel?: string;
+  readonly commission?: number;
+  readonly provider?: string;
+  readonly destinyAccount?: string;
+  readonly claveRastreo?: string;
+  readonly beneficiaryName?: string;
+  readonly beneficiaryEmail?: string;
+  readonly comments?: string;
+  readonly state?: string;
 }
 
 /** Un abono (entra dinero) si el canal incluye 'credit'; si no, es cargo. */

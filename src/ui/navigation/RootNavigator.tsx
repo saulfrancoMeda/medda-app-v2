@@ -1,4 +1,3 @@
-import { ActivityIndicator, View } from 'react-native';
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useColorScheme } from 'nativewind';
@@ -11,6 +10,7 @@ import {
   RecoverPhoneScreen,
 } from '@ui/features/auth/screens/RecoverScreens';
 import { UnlockScreen } from '@ui/features/auth/screens/UnlockScreen';
+import { LoadingScreen } from '@ui/features/common/LoadingScreen';
 import { AppNavigator } from '@ui/navigation/AppNavigator';
 import type { AuthStackParamList } from '@ui/navigation/types';
 
@@ -60,11 +60,7 @@ export function RootNavigator() {
   };
 
   if (status === 'loading') {
-    return (
-      <View className="flex-1 items-center justify-center bg-neutral-0 dark:bg-neutral-950">
-        <ActivityIndicator color="#fcd535" />
-      </View>
-    );
+    return <LoadingScreen message="Cargando tu cuenta…" />;
   }
 
   return (

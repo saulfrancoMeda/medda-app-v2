@@ -6,10 +6,6 @@ export type RecoveryError =
   | { readonly type: 'network' }
   | { readonly type: 'unknown'; readonly message: string };
 
-/**
- * Recuperación de contraseña (endpoints PÚBLICOS). Paridad con el legacy:
- * lock check -> enviar código SMS -> validar código -> fijar nueva contraseña.
- */
 export interface PasswordRecovery {
   sendCode(phone: string): Promise<Result<void, RecoveryError>>;
   validateCode(phone: string, code: string): Promise<Result<void, RecoveryError>>;

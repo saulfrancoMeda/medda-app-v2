@@ -16,6 +16,7 @@ import type { Category } from '@domain/wallet/entities/Category';
 import type { Service, ServicePaymentInput } from '@domain/wallet/entities/Service';
 import type { HttpClient, HttpError } from '@infrastructure/http/HttpClient';
 import { endpoints } from '@infrastructure/http/endpoints';
+import { isNipError } from '@infrastructure/http/apiError';
 
 interface RawAccount {
   account?: { id?: string; account?: string; active?: boolean };
@@ -32,7 +33,19 @@ interface RawMovement {
   date?: string;
   channels?: string[];
   amount?: number;
-  properties?: { amount?: number; reference?: string; referenceLabel?: string };
+  properties?: {
+    amount?: number;
+    reference?: string;
+    referenceLabel?: string;
+    commission?: number;
+    provider?: string;
+    destinyAccount?: string;
+    claveRastreo?: string;
+    beneficiaryName?: string;
+    beneficiaryEmail?: string;
+    comments?: string;
+    state?: string;
+  };
 }
 interface RawMovements {
   movements?: RawMovement[];
@@ -42,7 +55,7 @@ interface RawMovements {
 
 const toWalletError = (e: HttpError): WalletError => {
   if (e.kind === 'network') return { type: 'network' };
-  // Surfacea el mensaje real del servicio (incluye 401) para diagnóstico.
+  if (e.status === 401 || isNipError(e.message)) return { type: 'unauthorized' };
   return { type: 'unknown', message: e.message };
 };
 
@@ -90,6 +103,14 @@ export class MedaWalletRepository implements WalletRepository {
       amount: m.properties?.amount ?? m.amount ?? 0,
       reference: m.properties?.reference,
       referenceLabel: m.properties?.referenceLabel,
+      commission: m.properties?.commission,
+      provider: m.properties?.provider,
+      destinyAccount: m.properties?.destinyAccount,
+      claveRastreo: m.properties?.claveRastreo,
+      beneficiaryName: m.properties?.beneficiaryName,
+      beneficiaryEmail: m.properties?.beneficiaryEmail,
+      comments: m.properties?.comments,
+      state: m.properties?.state,
     }));
     return ok({ movements, page: res.value.page ?? page, lastPage: res.value.lastPage ?? page });
   }
@@ -157,11 +178,24 @@ export class MedaWalletRepository implements WalletRepository {
   }
 
   async sendSpei(input: SpeiSendInput): Promise<Result<TransactionResult, WalletError>> {
+    // El backend espera SIEMPRE estos campos; si se omiten (undefined), lanza
+    // "Undefined array key" (408). Enviamos cadena vacía cuando son opcionales.
     const res = await this.http.request<{
       id?: string;
       date?: string;
       properties?: { claveRastreo?: string };
-    }>(endpoints.walletSpeiSend, { body: input });
+    }>(endpoints.walletSpeiSend, {
+      body: {
+        cuentaBeneficiario: input.cuentaBeneficiario,
+        institucionContraparte: input.institucionContraparte,
+        nombreBeneficiario: input.nombreBeneficiario,
+        emailBeneficiario: input.emailBeneficiario ?? '',
+        monto: input.monto,
+        comment: input.comment ?? '',
+        nip: input.nip,
+        location: input.location,
+      },
+    });
     if (!res.ok) return err(toWalletError(res.error));
     return ok({
       id: res.value.id ?? '',

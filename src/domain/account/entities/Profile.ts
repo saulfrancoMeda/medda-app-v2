@@ -5,7 +5,6 @@ export interface HomeAddress {
   readonly reference?: string;
 }
 
-/** Perfil del usuario (/user/profile). Subconjunto fiel al legacy (Account.js). */
 export interface UserProfile {
   readonly firstName: string;
   readonly lastName: string;
@@ -20,7 +19,6 @@ export interface UserProfile {
   readonly homeAddress?: HomeAddress;
 }
 
-/** Estado de cuenta (/account-statements/list). */
 export interface AccountStatement {
   readonly id: string;
   readonly from: string;
@@ -30,7 +28,6 @@ export interface AccountStatement {
 export const fullName = (p: UserProfile): string =>
   [p.firstName, p.lastName, p.lastName2].filter(Boolean).join(' ').trim();
 
-/** Beneficiario (/beneficiaries/list). */
 export interface Beneficiary {
   readonly firstName: string;
   readonly lastName: string;

@@ -7,12 +7,6 @@ interface GoldGradientProps extends ViewProps {
   readonly children?: ReactNode;
 }
 
-/**
- * Fondo con gradiente dorado diagonal (goldBright -> gold -> goldPress) + un brillo diagonal
- * sutil, paridad con la tarjeta de saldo del prototipo standalone. Usa react-native-svg con
- * `absoluteFill` (cubre TODO el contenedor, sin importar su altura automática) y `backgroundColor`
- * dorado de respaldo. Las esquinas se redondean con overflow:hidden + borderRadius.
- */
 export function GoldGradient({ radius = 26, style, children, ...rest }: GoldGradientProps) {
   return (
     <View

@@ -1,12 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { ActivityIndicator, FlatList, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { formatCurrency } from '@domain/shared/money';
-import { categoryChannel } from '@domain/wallet/entities/Category';
+import type { Movement } from '@domain/wallet/entities/Movement';
 import { AppHeader } from '@ui/navigation/AppHeader';
 import { Text } from '@ui/design-system/components';
-import { cn } from '@ui/lib/cn';
-import { useCategories, useDefaultAccount, useMovements } from '@ui/features/wallet/hooks/useWallet';
+import { useDefaultAccount, useMovements } from '@ui/features/wallet/hooks/useWallet';
+import type { AppTabsParamList } from '@ui/navigation/types';
 
 const formatDate = (iso: string): string => {
   if (!iso) return '';
@@ -16,63 +18,26 @@ const formatDate = (iso: string): string => {
   return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${String(d.getFullYear()).slice(2)}`;
 };
 
-// Pantalla "Mis gastos" (paridad con Wallet/Screens/Sales): filtra movimientos por categoría
-// (canal CAT_<id>) y muestra el total de gastos.
 export function SalesScreen() {
+  const tabNav = useNavigation<BottomTabNavigationProp<AppTabsParamList>>();
   const account = useDefaultAccount();
-  const categories = useCategories();
-  const [selected, setSelected] = useState<readonly string[]>([]);
-
-  const channels = useMemo(
-    () => (selected.length > 0 ? selected.map(categoryChannel) : undefined),
-    [selected],
-  );
-  const movements = useMovements(account.data?.id, channels);
+  const movements = useMovements(account.data?.id);
   const total = useMemo(
     () => (movements.data?.movements ?? []).reduce((sum, m) => sum + Math.abs(m.amount), 0),
     [movements.data],
   );
 
-  const toggle = (id: string) =>
-    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  const openDetail = (movement: Movement) =>
+    tabNav.navigate('Wallet', { screen: 'MovementDetail', params: { movement } });
 
   const header = (
     <View className="gap-md pb-md">
-      {categories.data && categories.data.length > 0 ? (
-        <>
-          <Text variant="h2">Filtra por categoría</Text>
-          <View className="flex-row flex-wrap gap-sm">
-            {categories.data.map((c) => {
-              const active = selected.includes(c.id);
-              return (
-                <Pressable
-                  key={c.id}
-                  onPress={() => toggle(c.id)}
-                  accessibilityRole="button"
-                  className={cn(
-                    'rounded-pill border px-md py-sm',
-                    active
-                      ? 'border-brand-500 bg-brand-500'
-                      : 'border-neutral-200 dark:border-neutral-700',
-                  )}
-                >
-                  <Text variant="caption" className={active ? 'text-ink' : ''}>
-                    {c.name}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </>
-      ) : null}
-
       <View className="gap-xs rounded-card bg-brand-500 p-lg">
         <Text className="text-ink">Total de gastos</Text>
         <Text variant="display" className="text-ink">
           {formatCurrency(total)}
         </Text>
       </View>
-
       <Text variant="h2">Movimientos</Text>
     </View>
   );
@@ -86,7 +51,11 @@ export function SalesScreen() {
         contentContainerClassName="p-lg pb-2xl"
         ListHeaderComponent={header}
         renderItem={({ item }) => (
-          <View className="flex-row items-center justify-between border-b border-neutral-100 py-md dark:border-neutral-800">
+          <Pressable
+            onPress={() => openDetail(item)}
+            accessibilityRole="button"
+            className="flex-row items-center justify-between border-b border-neutral-100 py-md dark:border-neutral-800"
+          >
             <View className="flex-1 pr-md">
               <Text variant="body">{item.description || 'Movimiento'}</Text>
               <Text variant="caption" tone="muted">
@@ -96,14 +65,14 @@ export function SalesScreen() {
             <Text variant="body" className="font-semibold">
               {formatCurrency(Math.abs(item.amount))}
             </Text>
-          </View>
+          </Pressable>
         )}
         ListEmptyComponent={
           movements.isPending && account.data ? (
-            <ActivityIndicator className="mt-lg" />
+            <ActivityIndicator className="mt-lg" color="#FCD535" />
           ) : (
             <Text variant="caption" tone="muted">
-              Sin gastos en este filtro.
+              Aún no tienes movimientos.
             </Text>
           )
         }

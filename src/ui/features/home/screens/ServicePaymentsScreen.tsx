@@ -2,21 +2,21 @@ import { useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, ScrollView, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { WalletError } from '@domain/wallet/ports/WalletRepository';
 import { isValidAmount } from '@domain/wallet/entities/Transfer';
 import { Button, Input, Text } from '@ui/design-system/components';
+import { walletErrorMessage } from '@ui/features/wallet/errorMessages';
+import { useNipAuthorization } from '@ui/features/common/useNipAuthorization';
+import { MoneyInput } from '@ui/features/wallet/components/MoneyInput';
 import { NipModal } from '@ui/features/wallet/components/NipModal';
-import { useCategories, useDefaultAccount, useServices } from '@ui/features/wallet/hooks/useWallet';
+import {
+  useCategories,
+  useDefaultAccount,
+  useInvalidateWallet,
+  useServices,
+} from '@ui/features/wallet/hooks/useWallet';
 import { useContainer } from '@ui/providers/ContainerProvider';
 import { useToast } from '@ui/providers/ToastProvider';
 import type { StoreStackParamList } from '@ui/navigation/types';
-
-const walletErrorMessage = (e: WalletError): string =>
-  e.type === 'unauthorized'
-    ? 'NIP incorrecto o sesión expirada'
-    : e.type === 'network'
-      ? 'Revisa tu conexión a internet'
-      : e.message || 'No se pudo procesar el pago';
 
 // Paso 1: categorías.
 type CatProps = NativeStackScreenProps<StoreStackParamList, 'ServicePayments'>;
@@ -106,32 +106,29 @@ export function ServicePayScreen({ route, navigation }: PayProps) {
   const account = useDefaultAccount();
   const { walletRepository } = useContainer();
   const toast = useToast();
+  const nipAuth = useNipAuthorization(walletErrorMessage);
+  const invalidateWallet = useInvalidateWallet();
   const [reference, setReference] = useState('');
   const [amount, setAmount] = useState('');
-  const [nipVisible, setNipVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [nipError, setNipError] = useState<string | undefined>(undefined);
   const valid = reference.trim().length > 0 && isValidAmount(amount) && Boolean(account.data);
 
-  const authorize = async (nip: string) => {
+  const authorize = (nip: string) => {
     if (!account.data) return;
-    setLoading(true);
-    setNipError(undefined);
-    const res = await walletRepository.payService({
-      account: account.data.id,
-      service: serviceId,
-      amount: Number(amount).toFixed(2),
-      reference: reference.trim(),
-      nip,
-    });
-    setLoading(false);
-    if (!res.ok) {
-      setNipError(walletErrorMessage(res.error));
-      return;
-    }
-    setNipVisible(false);
-    toast.success(`Tu pago de ${serviceName} se procesó correctamente.`);
-    navigation.popToTop();
+    void nipAuth.submit(
+      () =>
+        walletRepository.payService({
+          account: account.data!.id,
+          service: serviceId,
+          amount: Number(amount).toFixed(2),
+          reference: reference.trim(),
+          nip,
+        }),
+      () => {
+        invalidateWallet();
+        toast.success(`Tu pago de ${serviceName} se procesó correctamente.`);
+        navigation.popToTop();
+      },
+    );
   };
 
   return (
@@ -144,27 +141,23 @@ export function ServicePayScreen({ route, navigation }: PayProps) {
       </View>
       <Input
         label="Referencia / número de servicio"
+        leftIcon="barcode-outline"
+        placeholder="Número de referencia"
         keyboardType="number-pad"
         value={reference}
         onChangeText={(t) => setReference(t.replace(/[^0-9]/g, ''))}
       />
-      <Input
-        label="Monto a pagar"
-        keyboardType="decimal-pad"
-        value={amount}
-        onChangeText={(t) => setAmount(t.replace(/[^0-9.]/g, ''))}
-        error={amount.length > 0 && !isValidAmount(amount) ? 'Monto inválido' : undefined}
-      />
+      <MoneyInput label="Monto a pagar" value={amount} onChangeValue={setAmount} />
       <Text variant="caption" tone="muted">
         Al continuar, autoriza el pago con tu NIP.
       </Text>
-      <Button title="Pagar" full disabled={!valid} onPress={() => setNipVisible(true)} />
+      <Button title="Pagar" full disabled={!valid} onPress={nipAuth.open} />
       <NipModal
-        visible={nipVisible}
-        loading={loading}
-        error={nipError}
+        visible={nipAuth.visible}
+        loading={nipAuth.loading}
+        error={nipAuth.nipError}
         onSubmit={authorize}
-        onClose={() => setNipVisible(false)}
+        onClose={nipAuth.close}
       />
     </ScrollView>
   );

@@ -1,4 +1,4 @@
-import { ActivityIndicator, FlatList, Pressable, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import { Ionicons } from '@expo/vector-icons';
@@ -42,29 +42,56 @@ function CopyRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function MovementRow({ movement }: { movement: Movement }) {
+function MovementRow({ movement, onPress }: { movement: Movement; onPress: () => void }) {
   const credit = isCredit(movement);
   const reference = movement.reference
-    ? ` · ${movement.referenceLabel ?? 'Ref'} ${movement.reference}`
+    ? `· ${movement.referenceLabel ?? 'Ref'} ${movement.reference}`
     : '';
   return (
-    <View className="flex-row items-center justify-between border-b border-neutral-100 py-md dark:border-neutral-800">
-      <View className="flex-1 pr-md">
-        <Text variant="body">{movement.description || 'Movimiento'}</Text>
-        <Text variant="caption" tone="muted">
-          {formatMovementDate(movement.date)}
-          {reference}
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      className="flex-row items-center justify-between py-md active:opacity-70"
+    >
+      <View className="mr-md h-12 w-12 items-center justify-center rounded-pill bg-neutral-100 dark:bg-neutral-800">
+        <Ionicons name={credit ? 'arrow-down' : 'arrow-up'} size={22} color={credit ? '#2E8C6A' : '#9A9384'} />
+      </View>
+      <View className="flex-1 pr-md justify-center">
+        <Text variant="body" className="font-semibold" numberOfLines={1}>
+          {movement.description || 'Movimiento'}
+        </Text>
+        <Text variant="caption" tone="muted" numberOfLines={1} className="mt-1">
+          {formatMovementDate(movement.date)} {reference}
         </Text>
       </View>
       <Text variant="body" className={credit ? 'font-semibold text-success' : 'font-semibold'}>
         {formatCurrency(signedAmount(movement))}
       </Text>
-    </View>
+    </Pressable>
   );
 }
 
-// Pantalla "Mi Billetera" (paridad con Wallet/Screens/Wallet del legacy): saldo, CLABE/cuenta,
-// botones de mover dinero y lista de movimientos.
+function QuickAction({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable className="flex-1 items-center gap-xs" accessibilityRole="button" onPress={onPress}>
+      <View className="h-14 w-14 items-center justify-center rounded-card bg-brand-100 dark:bg-brand-900">
+        <Ionicons name={icon} size={24} color="#97720A" />
+      </View>
+      <Text variant="caption" tone="muted" center>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
 export function WalletScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<WalletStackParamList>>();
   const account = useDefaultAccount();
@@ -72,15 +99,26 @@ export function WalletScreen() {
   const stp = useStpAccount();
   const movements = useMovements(account.data?.id);
 
+  const refreshing = balance.isRefetching || movements.isRefetching;
+  const onRefresh = () => {
+    void account.refetch();
+    void balance.refetch();
+    void stp.refetch();
+    void movements.refetch();
+  };
+
   const header = (
     <View className="gap-lg pb-md pt-lg">
       <BalanceCard
         balance={balance.data}
         loading={balance.isPending && Boolean(account.data)}
         clabe={stp.data?.clabe}
-        onAbonar={() => navigation.navigate('CashInMethods')}
-        onEnviar={() => navigation.navigate('CashOutMethods')}
       />
+
+      <View className="flex-row gap-sm px-6">
+        <QuickAction icon="arrow-down" label="Abonar" onPress={() => navigation.navigate('CashInMethods')} />
+        <QuickAction icon="arrow-up" label="Enviar" onPress={() => navigation.navigate('CashOutMethods')} />
+      </View>
 
       <View className="rounded-card border border-neutral-200 px-lg dark:border-neutral-800">
         <CopyRow label="CLABE Medá" value={stp.data?.clabe ?? ''} />
@@ -102,9 +140,22 @@ export function WalletScreen() {
       <FlatList
         data={movements.data?.movements ?? []}
         keyExtractor={(m) => m.id}
-        renderItem={({ item }) => <MovementRow movement={item} />}
+        renderItem={({ item }) => (
+          <MovementRow
+            movement={item}
+            onPress={() => navigation.navigate('MovementDetail', { movement: item })}
+          />
+        )}
+        ItemSeparatorComponent={() => <View className="h-px bg-neutral-100 dark:bg-neutral-800" />}
         ListHeaderComponent={header}
         contentContainerClassName="px-lg pb-2xl"
+        initialNumToRender={15}
+        maxToRenderPerBatch={15}
+        windowSize={5}
+        removeClippedSubviews={true}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#97720A" />
+        }
         ListEmptyComponent={
           movements.isPending && account.data ? (
             <ActivityIndicator className="mt-lg" />

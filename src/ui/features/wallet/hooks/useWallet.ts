@@ -1,8 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useContainer } from '@ui/providers/ContainerProvider';
 
-// Hooks de datos de billetera. Cada uno llama al WalletRepository (puerto de dominio) y
-// lanza el error si el Result es err para que TanStack Query lo maneje (loading/error/data).
+export function useInvalidateWallet() {
+  const queryClient = useQueryClient();
+  return () => {
+    void queryClient.invalidateQueries({ queryKey: ['wallet', 'balance'] });
+    void queryClient.invalidateQueries({ queryKey: ['wallet', 'movements'] });
+    void queryClient.invalidateQueries({ queryKey: ['wallet', 'salesTotal'] });
+  };
+}
 
 export function useDefaultAccount() {
   const { walletRepository } = useContainer();

@@ -6,6 +6,8 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { config } from '@config/env';
 import { Text } from '@ui/design-system/components';
 import { beneficiaryName } from '@domain/account/entities/Profile';
+import { accountErrorMessage } from '@ui/features/account/errorMessages';
+import { useNipAuthorization } from '@ui/features/common/useNipAuthorization';
 import { NipModal } from '@ui/features/wallet/components/NipModal';
 import { useBeneficiaries, useStatements } from '@ui/features/account/hooks/useAccount';
 import { useContainer } from '@ui/providers/ContainerProvider';
@@ -45,7 +47,7 @@ export function LegalScreen({ navigation }: LegalProps) {
     { title: 'Contrato de Adhesión Medá', url: config.legal.adhesionContract },
   ];
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
       {docs.map((d) => (
         <Row
           key={d.title}
@@ -118,28 +120,26 @@ export function BeneficiariesScreen() {
 export function StatementsScreen() {
   const statements = useStatements();
   const { accountRepository } = useContainer();
-  const [nipFor, setNipFor] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | undefined>(undefined);
+  const nipAuth = useNipAuthorization(accountErrorMessage);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const onAuthorize = async (nip: string) => {
-    if (!nipFor) return;
-    setLoading(true);
-    setError(undefined);
-    const res = await accountRepository.getStatementPdfUrl(nipFor, nip);
-    setLoading(false);
-    if (!res.ok) {
-      setError(res.error.type === 'unauthorized' ? 'NIP incorrecto' : 'No se pudo obtener el PDF');
-      return;
-    }
-    setNipFor(null);
-    void Linking.openURL(res.value);
+  const openFor = (id: string) => {
+    setSelectedId(id);
+    nipAuth.open();
+  };
+
+  const authorize = (nip: string) => {
+    if (!selectedId) return;
+    void nipAuth.submit(
+      () => accountRepository.getStatementPdfUrl(selectedId, nip),
+      (url) => void Linking.openURL(url),
+    );
   };
 
   if (statements.isPending) {
     return (
       <View className="flex-1 items-center justify-center bg-neutral-0 dark:bg-neutral-950">
-        <ActivityIndicator />
+        <ActivityIndicator color="#FCD535" />
       </View>
     );
   }
@@ -157,7 +157,7 @@ export function StatementsScreen() {
         }
         renderItem={({ item }) => (
           <Pressable
-            onPress={() => setNipFor(item.id)}
+            onPress={() => openFor(item.id)}
             accessibilityRole="button"
             className="flex-row items-center gap-md rounded-card border border-neutral-200 p-lg dark:border-neutral-800"
           >
@@ -170,11 +170,11 @@ export function StatementsScreen() {
         )}
       />
       <NipModal
-        visible={nipFor !== null}
-        loading={loading}
-        error={error}
-        onSubmit={onAuthorize}
-        onClose={() => setNipFor(null)}
+        visible={nipAuth.visible}
+        loading={nipAuth.loading}
+        error={nipAuth.nipError}
+        onSubmit={authorize}
+        onClose={nipAuth.close}
       />
     </View>
   );
@@ -184,22 +184,42 @@ type PdfViewerProps = NativeStackScreenProps<SectionsStackParamList, 'PdfViewer'
 
 export function PdfViewerScreen({ route }: PdfViewerProps) {
   const [webLoading, setWebLoading] = useState(true);
-  const pdfUrl = Platform.OS === 'ios'
-    ? route.params.url
-    : `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(route.params.url)}`;
+  const { url } = route.params;
+
+  if (!url) {
+    return (
+      <View className="flex-1 items-center justify-center gap-md bg-neutral-0 p-lg dark:bg-neutral-950">
+        <Ionicons name="document-outline" size={48} color="#9A9384" />
+        <Text variant="body" tone="muted" center>
+          Este documento no está disponible por ahora.
+        </Text>
+      </View>
+    );
+  }
+
+  // Android no renderiza PDFs en WebView nativamente: usamos el visor de Google Docs.
+  const pdfUrl =
+    Platform.OS === 'ios'
+      ? url
+      : `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`;
 
   return (
     <View className="flex-1 bg-neutral-0 dark:bg-neutral-950">
-      {webLoading ? (
-        <View className="absolute inset-0 items-center justify-center">
-          <ActivityIndicator size="large" color="#FCD535" />
-        </View>
-      ) : null}
       <WebView
         source={{ uri: pdfUrl }}
         onLoadEnd={() => setWebLoading(false)}
+        onError={() => setWebLoading(false)}
         style={{ flex: 1 }}
+        startInLoadingState
       />
+      {webLoading ? (
+        <View className="absolute inset-0 items-center justify-center gap-md bg-neutral-0 dark:bg-neutral-950">
+          <ActivityIndicator size="large" color="#FCD535" />
+          <Text variant="body" tone="muted">
+            Cargando documento…
+          </Text>
+        </View>
+      ) : null}
     </View>
   );
 }

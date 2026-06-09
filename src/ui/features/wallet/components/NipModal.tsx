@@ -11,8 +11,6 @@ interface NipModalProps {
   readonly onClose: () => void;
 }
 
-// Mantiene el NIP en curso. Se remonta vía `key` al abrir el modal o al cambiar el error,
-// reiniciando los dígitos sin efectos ni refs en render.
 function NipEntry({
   loading,
   error,

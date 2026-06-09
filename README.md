@@ -1,64 +1,99 @@
-# Medá Agentes (v2)
+# Medá Agentes (v2) - Gestión de Migración y Harness Engineering
 
-Reescritura modernizada de la app de agentes Medá. Proyecto nuevo en **React Native + TypeScript**
-con arquitectura por capas, pensado para tener paridad funcional con el legacy, ser mantenible por
-una sola persona y permitir migrar piezas a nativo (Kotlin/Swift) en el futuro.
+Este documento describe la arquitectura detallada, el estado de la migración y el marco de trabajo para agentes (Harness Engineering).
 
-> Plan completo: `~/.claude/plans/binary-soaring-acorn.md`. App legacy de referencia: `../medaapp`.
+## 🚀 Estado de la Migración (Legacy -> v2)
 
-## Stack
+| Módulo Legacy | Estado v2 | Capa en v2 |
+| :--- | :--- | :--- |
+| Login / Auth / Recovery | ✅ Migrado | `domain/auth`, `ui/features/auth` |
+| Account / Profile | 🟡 En progreso | `domain/account`, `ui/features/account` |
+| Notifications | 🟡 En progreso | `domain/notifications` |
+| Wallet | 🟡 En progreso | `domain/wallet` |
+| Support / FAQ / Help | 🟡 En progreso | `domain/support` |
+| Beneficiaries | ❌ Pendiente | - |
+| Fiscal | ❌ Pendiente | - |
+| Prospect | ❌ Pendiente | - |
+| SOD (Sistema de Operaciones) | ❌ Pendiente | - |
 
-- **Expo SDK 56** · **React Native 0.85** · **React 19** (New Architecture activa por defecto)
-- **TypeScript 6 strict** (+ `tsconfig.domain.json` que verifica la pureza del dominio)
-- **NativeWind v4** (Tailwind 3) + design system propio con tokens
-- **class-variance-authority** para variantes tipadas de componentes
-- **Jest** (jest-expo) para tests
+> [!IMPORTANT]
+> El repositorio `medaapp-v2` es ahora el controlador principal de la aplicación. El código legacy se usa únicamente como referencia técnica para asegurar la paridad de reglas de negocio.
 
-## Requisitos
+## 🏗️ Arquitectura del Sistema
 
-- **Node 22** (ver `.nvmrc`): `nvm use`
-- iOS local requiere Xcode (hoy solo hay Command Line Tools → usar EAS para iOS por ahora)
+Utilizamos **Arquitectura Hexagonal (Clean Architecture)** para garantizar que la lógica de negocio sea independiente de frameworks, UI y bases de datos.
 
-## Comandos
+### Diagrama de Capas
 
-```bash
-npm start              # Metro / Expo dev server
-npm run android        # correr en Android
-npm run ios            # correr en iOS (requiere Xcode)
-npm run typecheck      # tsc de todo el proyecto
-npm run typecheck:domain  # verifica que domain sea TS PURO (sin imports de RN/Expo)
-npm run lint           # ESLint (incluye la regla de aislamiento de capas)
-npm run format         # Prettier
-npm test               # Jest
+```mermaid
+graph TD
+    UI[Capa UI - React Native/Expo] --> App[Capa Application - Casos de Uso]
+    App --> Domain[Capa Domain - Lógica Pura]
+    Infra[Capa Infrastructure - Adaptadores] --> Domain
+    App -.-> Infra
 ```
 
-## Arquitectura por capas
+### Descripción de Archivos y Carpetas
 
-Regla de dependencias (forzada por ESLint `import/no-restricted-paths`):
-`ui → application → domain` y `infrastructure → domain`.
-**`domain` no importa NADA externo** (ni React, ni RN, ni Expo). Es la capa portable a Kotlin/Swift.
+- **`src/domain/`**: El corazón de la aplicación. Contiene Entidades y Puertos (interfaces). No tiene dependencias externas.
+  - *¿Por qué?* Permite que la lógica sea testeable y portable a futuro (Kotlin/Swift).
+- **`src/application/`**: Implementa los Casos de Uso que orquestan el dominio y los puertos.
+  - *¿Por qué?* Separa la intención del usuario de la implementación técnica (ej. "Iniciar Sesión").
+- **`src/infrastructure/`**: Implementaciones técnicas (Adaptadores): API REST, Almacenamiento Local, Auth real.
+  - *¿Por qué?* Mantiene el framework y las librerías de terceros lejos del negocio.
+- **`src/ui/`**: Componentes visuales (Atomic Design), navegación y estado de UI.
+  - *¿Por qué?* Centraliza todo lo que el usuario ve y toca.
+- **`src/composition/`**: Contenedor de Inyección de Dependencias.
+  - *¿Por qué?* Aquí se "ensambla" toda la aplicación (une puertos con adaptadores). Es el único lugar con acoplamiento total.
+- **`src/config/`**: Variables de entorno y constantes globales.
+  - *¿Por qué?* Control centralizado de configuraciones.
 
+
+## 🔄 Flujos Críticos (Diagramas de Secuencia)
+
+### Flujo de Autenticación (Login)
+
+```mermaid
+sequenceDiagram
+    participant User as Usuario
+    participant UI as LoginScreen (UI)
+    participant UC as LoginUseCase (App)
+    participant Domain as Session (Domain)
+    participant Auth as AuthGateway (Infra)
+
+    User->>UI: Ingresa Credenciales
+    UI->>UC: ejecutar(user, pass)
+    UC->>Auth: login(user, pass)
+    Auth-->>UC: Tokens / Info Usuario
+    UC->>Domain: Crear Sesión
+    Domain-->>UC: Sesión Válida
+    UC-->>UI: Éxito (Navegar a Home)
+    UI-->>User: Bienvenida
 ```
-src/
-  domain/          # TS PURO: entidades, reglas de negocio, puertos (interfaces). Sin framework.
-  application/     # casos de uso que orquestan domain + puertos
-  infrastructure/  # adaptadores que implementan los puertos (HTTP, storage, auth, push)
-  ui/              # SOLO React Native: design-system, providers, hooks, navigation, features
-  config/  test/
-```
 
-### Por qué esto hace seguros los cambios
+## 🛠️ Harness Engineering (Sistema de Agentes)
 
-- **Aislamiento:** un cambio en una pantalla no puede tocar la lógica de negocio ni otro feature
-  (las dependencias van en una sola dirección; el lint lo impide).
-- **`tsc` strict:** cualquier cambio de contrato marca en compilación todos los lugares afectados.
-- **Tests:** el dominio (TS puro) y los casos de uso se testean rápido como red de regresión.
-- **Pureza del dominio:** `npm run typecheck:domain` falla si algo de RN/Expo se cuela en `domain`.
+Para asegurar la calidad y el detalle en cada revisión, implementamos un sistema de **Harness Engineering**.
 
-## Estado actual (Fase 0 — Fundaciones)
+### Roles de Agentes
 
-Hecho y verificado: scaffold, capas + aliases, NativeWind + tokens, ESLint/Prettier, tests,
-dominio de auth (Session, SessionManager, puertos), caso de uso `login`, componentes `Text` y `Button`.
+1.  **Orquestador (Lead Agent)**:
+    - **Responsabilidad**: Recibir requerimientos de alto nivel, planificar la ejecución y delegar subtareas.
+    - **Output**: Plan de acción consolidado.
+2.  **Sub-agente Reviewer**:
+    - **Responsabilidad**: Revisión profunda de código, cumplimiento de linting y patrones arquitectónicos.
+3.  **Sub-agente Migrator**:
+    - **Responsabilidad**: Analizar discrepancias entre el repo legacy (`medaapp`) y el nuevo (`medaapp-v2`).
+4.  **Sub-agente Tester**:
+    - **Responsabilidad**: Generación y ejecución de tests unitarios y de integración.
 
-Pendiente Fase 0: extraer tokens de marca reales de meda.com.mx (los colores actuales son placeholder),
-tipar `MedaApiClient` contra los endpoints del legacy, EAS + CI.
+### Proceso de Revisión
+
+1.  **Activación**: El Orquestador analiza el `AGENTS.md` para conocer las reglas vigentes.
+2.  **Análisis Legacy**: El Migrator escanea el archivo correspondiente en el repo antiguo.
+3.  **Implementación/Mejora**: El Orquestador propone el cambio en `v2`.
+4.  **Validación**: Reviewer y Tester confirman que el código es robusto y cumple la arquitectura.
+
+---
+
+*Última actualización: 2026-06-09*

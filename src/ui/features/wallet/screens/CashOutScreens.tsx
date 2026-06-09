@@ -1,14 +1,21 @@
 import { useRef, useState } from 'react';
-import { FlatList, Modal, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { formatCurrency } from '@domain/shared/money';
-import { isValidAmount, isValidClabe, type Bank } from '@domain/wallet/entities/Transfer';
-import type { WalletError } from '@domain/wallet/ports/WalletRepository';
+import { findBankByClabe, isValidAmount, isValidClabe, type Bank } from '@domain/wallet/entities/Transfer';
 import { Button, Input, Text } from '@ui/design-system/components';
+import { walletErrorMessage } from '@ui/features/wallet/errorMessages';
+import { useNipAuthorization } from '@ui/features/common/useNipAuthorization';
+import { BankPicker } from '@ui/features/wallet/components/BankPicker';
+import { MoneyInput } from '@ui/features/wallet/components/MoneyInput';
 import { NipModal } from '@ui/features/wallet/components/NipModal';
-import { useDefaultAccount, useSpeiBanks } from '@ui/features/wallet/hooks/useWallet';
+import {
+  useDefaultAccount,
+  useInvalidateWallet,
+  useSpeiBanks,
+} from '@ui/features/wallet/hooks/useWallet';
 import { useContainer } from '@ui/providers/ContainerProvider';
 import { useToast } from '@ui/providers/ToastProvider';
 import type { WalletStackParamList } from '@ui/navigation/types';
@@ -77,56 +84,11 @@ export function CashOutMethodsScreen({ navigation }: MethodsProps) {
   );
 }
 
-// --- Selector de banco ------------------------------------------------------
-function BankPicker({ value, onSelect }: { value?: Bank; onSelect: (b: Bank) => void }) {
-  const [open, setOpen] = useState(false);
-  const banks = useSpeiBanks();
-  return (
-    <View className="w-full gap-xs">
-      <Text variant="caption" tone="muted">
-        Banco destino
-      </Text>
-      <Pressable
-        onPress={() => setOpen(true)}
-        accessibilityRole="button"
-        className="h-14 flex-row items-center justify-between rounded-md bg-neutral-100 px-md dark:bg-neutral-800"
-      >
-        <Text variant="body" tone={value ? 'default' : 'muted'}>
-          {value?.name ?? 'Selecciona un banco'}
-        </Text>
-        <Ionicons name="chevron-down" size={18} color="#9A9384" />
-      </Pressable>
-      <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
-        <Pressable className="flex-1 bg-black/50" onPress={() => setOpen(false)} />
-        <View className="max-h-[70%] gap-sm rounded-t-xl bg-neutral-0 p-lg dark:bg-neutral-900">
-          <Text variant="h2">Banco destino</Text>
-          {banks.isPending ? <Text tone="muted">Cargando bancos…</Text> : null}
-          {banks.isError ? <Text tone="muted">No se pudieron cargar los bancos.</Text> : null}
-          <FlatList
-            data={banks.data ?? []}
-            keyExtractor={(b) => b.code}
-            renderItem={({ item }) => (
-              <Pressable
-                className="border-b border-neutral-100 py-md dark:border-neutral-800"
-                onPress={() => {
-                  onSelect(item);
-                  setOpen(false);
-                }}
-              >
-                <Text variant="body">{item.name}</Text>
-              </Pressable>
-            )}
-          />
-        </View>
-      </Modal>
-    </View>
-  );
-}
-
 // --- Formulario SPEI --------------------------------------------------------
 type FormProps = NativeStackScreenProps<WalletStackParamList, 'CashOutSpeiForm'>;
 
 export function CashOutSpeiFormScreen({ navigation }: FormProps) {
+  const banks = useSpeiBanks();
   const [clabe, setClabe] = useState('');
   const [bank, setBank] = useState<Bank | undefined>(undefined);
   const [name, setName] = useState('');
@@ -136,6 +98,13 @@ export function CashOutSpeiFormScreen({ navigation }: FormProps) {
 
   const valid =
     isValidClabe(clabe) && Boolean(bank) && name.trim().length > 0 && isValidAmount(amount);
+
+  const onClabeChange = (text: string) => {
+    const next = text.replace(/[^0-9]/g, '');
+    setClabe(next);
+    const match = findBankByClabe(banks.data ?? [], next);
+    if (match) setBank(match);
+  };
 
   const onContinue = () => {
     if (!valid || !bank) return;
@@ -152,48 +121,47 @@ export function CashOutSpeiFormScreen({ navigation }: FormProps) {
   };
 
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
       <Input
         label="CLABE destino (18 dígitos)"
+        leftIcon="card-outline"
+        placeholder="18 dígitos"
         keyboardType="number-pad"
         maxLength={18}
         value={clabe}
-        onChangeText={(t) => setClabe(t.replace(/[^0-9]/g, ''))}
+        onChangeText={onClabeChange}
         error={clabe.length > 0 && !isValidClabe(clabe) ? 'CLABE inválida' : undefined}
       />
       <BankPicker value={bank} onSelect={setBank} />
-      <Input label="Nombre del beneficiario" value={name} onChangeText={setName} />
+      <Input
+        label="Nombre del beneficiario"
+        leftIcon="person-outline"
+        placeholder="Nombre completo"
+        value={name}
+        onChangeText={setName}
+      />
       <Input
         label="Email del beneficiario (opcional)"
+        leftIcon="mail-outline"
+        placeholder="correo@ejemplo.com"
         keyboardType="email-address"
         autoCapitalize="none"
         value={email}
         onChangeText={setEmail}
       />
+      <MoneyInput label="Monto" value={amount} onChangeValue={setAmount} />
       <Input
-        label="Monto"
-        keyboardType="decimal-pad"
-        value={amount}
-        onChangeText={(t) => setAmount(t.replace(/[^0-9.]/g, ''))}
-        error={amount.length > 0 && !isValidAmount(amount) ? 'Monto inválido' : undefined}
+        label="Concepto (opcional)"
+        leftIcon="chatbubble-ellipses-outline"
+        placeholder="Ej. Renta, préstamo…"
+        maxLength={25}
+        value={comment}
+        onChangeText={setComment}
       />
-      <Input label="Concepto (opcional)" maxLength={25} value={comment} onChangeText={setComment} />
       <Button title="Continuar" full disabled={!valid} onPress={onContinue} />
     </ScrollView>
   );
 }
-
-// --- Confirmación + NIP -----------------------------------------------------
-const walletErrorMessage = (e: WalletError): string => {
-  switch (e.type) {
-    case 'unauthorized':
-      return 'NIP incorrecto o sesión expirada';
-    case 'network':
-      return 'Revisa tu conexión a internet';
-    case 'unknown':
-      return e.message || 'No se pudo completar el envío';
-  }
-};
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -213,33 +181,17 @@ type ConfirmProps = NativeStackScreenProps<WalletStackParamList, 'CashOutConfirm
 export function CashOutConfirmScreen({ route, navigation }: ConfirmProps) {
   const { draft } = route.params;
   const { walletRepository } = useContainer();
-  const toast = useToast();
-  const [nipVisible, setNipVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [nipError, setNipError] = useState<string | undefined>(undefined);
+  const nipAuth = useNipAuthorization(walletErrorMessage);
+  const invalidateWallet = useInvalidateWallet();
 
-  const authorize = async (nip: string) => {
-    setNipError(undefined);
-    setLoading(true);
-    const nipRes = await walletRepository.validateNip(nip);
-    if (!nipRes.ok) {
-      setLoading(false);
-      setNipError(walletErrorMessage(nipRes.error));
-      return;
-    }
-    const sendRes = await walletRepository.sendSpei({
-      ...draft,
-      nip,
-      location: { latitude: 0, longitude: 0 },
-    });
-    setLoading(false);
-    if (!sendRes.ok) {
-      setNipError(walletErrorMessage(sendRes.error));
-      return;
-    }
-    setNipVisible(false);
-    toast.success('Transferencia enviada correctamente.');
-    navigation.navigate('TransactionSuccess', { result: sendRes.value, draft });
+  const authorize = (nip: string) => {
+    void nipAuth.submit(
+      () => walletRepository.sendSpei({ ...draft, nip, location: { latitude: 0, longitude: 0 } }),
+      (result) => {
+        invalidateWallet();
+        navigation.navigate('TransactionSuccess', { result, draft });
+      },
+    );
   };
 
   return (
@@ -260,14 +212,14 @@ export function CashOutConfirmScreen({ route, navigation }: ConfirmProps) {
       <Text variant="caption" tone="muted">
         Al continuar, autoriza la transferencia con tu NIP.
       </Text>
-      <Button title="Enviar" full onPress={() => setNipVisible(true)} />
+      <Button title="Enviar" full onPress={nipAuth.open} />
 
       <NipModal
-        visible={nipVisible}
-        loading={loading}
-        error={nipError}
+        visible={nipAuth.visible}
+        loading={nipAuth.loading}
+        error={nipAuth.nipError}
         onSubmit={authorize}
-        onClose={() => setNipVisible(false)}
+        onClose={nipAuth.close}
       />
     </ScrollView>
   );
@@ -354,54 +306,52 @@ export function CashOutMedaAmountScreen({ route, navigation }: MedaAmountProps) 
   const account = useDefaultAccount();
   const { walletRepository } = useContainer();
   const toast = useToast();
+  const nipAuth = useNipAuthorization(walletErrorMessage);
+  const invalidateWallet = useInvalidateWallet();
   const [amount, setAmount] = useState('');
   const [comment, setComment] = useState('');
-  const [nipVisible, setNipVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [nipError, setNipError] = useState<string | undefined>(undefined);
   const valid = isValidAmount(amount) && Boolean(account.data);
 
-  const authorize = async (nip: string) => {
+  const authorize = (nip: string) => {
     if (!account.data) return;
-    setLoading(true);
-    setNipError(undefined);
-    const res = await walletRepository.transferToUser({
-      originAccount: account.data.id,
-      resource,
-      amount: Number(amount).toFixed(2),
-      nip,
-      comment: comment.trim() || undefined,
-    });
-    setLoading(false);
-    if (!res.ok) {
-      setNipError(walletErrorMessage(res.error));
-      return;
-    }
-    setNipVisible(false);
-    toast.success('Envío realizado correctamente.');
-    navigation.popToTop();
+    void nipAuth.submit(
+      () =>
+        walletRepository.transferToUser({
+          originAccount: account.data!.id,
+          resource,
+          amount: Number(amount).toFixed(2),
+          nip,
+          comment: comment.trim() || undefined,
+        }),
+      () => {
+        invalidateWallet();
+        toast.success('Envío realizado correctamente.');
+        navigation.popToTop();
+      },
+    );
   };
 
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-md p-lg">
+    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
       <Text variant="body" tone="muted">
         Destinatario: {resource}
       </Text>
+      <MoneyInput label="Monto" value={amount} onChangeValue={setAmount} />
       <Input
-        label="Monto"
-        keyboardType="decimal-pad"
-        value={amount}
-        onChangeText={(t) => setAmount(t.replace(/[^0-9.]/g, ''))}
-        error={amount.length > 0 && !isValidAmount(amount) ? 'Monto inválido' : undefined}
+        label="Concepto (opcional)"
+        leftIcon="chatbubble-ellipses-outline"
+        placeholder="Ej. Renta, préstamo…"
+        maxLength={25}
+        value={comment}
+        onChangeText={setComment}
       />
-      <Input label="Concepto (opcional)" maxLength={25} value={comment} onChangeText={setComment} />
-      <Button title="Enviar" full disabled={!valid} onPress={() => setNipVisible(true)} />
+      <Button title="Enviar" full disabled={!valid} onPress={nipAuth.open} />
       <NipModal
-        visible={nipVisible}
-        loading={loading}
-        error={nipError}
+        visible={nipAuth.visible}
+        loading={nipAuth.loading}
+        error={nipAuth.nipError}
         onSubmit={authorize}
-        onClose={() => setNipVisible(false)}
+        onClose={nipAuth.close}
       />
     </ScrollView>
   );

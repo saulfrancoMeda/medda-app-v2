@@ -1,5 +1,4 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useColorScheme } from 'nativewind';
 import { ProfileScreen } from '@ui/features/account/screens/AccountScreens';
 import {
   BeneficiariesScreen,
@@ -18,6 +17,7 @@ import {
 } from '@ui/features/account/screens/SecurityScreens';
 import { CancelAccountScreen } from '@ui/features/account/screens/CancelAccountScreens';
 import { NotificationsScreen } from '@ui/features/notifications/screens/NotificationsScreen';
+import { useStackScreenOptions } from '@ui/navigation/headerOptions';
 import type { SectionsStackParamList } from '@ui/navigation/types';
 
 const Stack = createNativeStackNavigator<SectionsStackParamList>();
@@ -25,17 +25,8 @@ const Stack = createNativeStackNavigator<SectionsStackParamList>();
 // Stack de las secciones del drawer (Perfil/Legales/Seguridad y subpantallas). Es un tab oculto,
 // así que el bottom tab permanece visible y las subpantallas tienen push/back nativo.
 export function SectionsStackNavigator() {
-  const { colorScheme } = useColorScheme();
-  const tint = colorScheme === 'dark' ? '#FAFAF9' : '#1B1812';
-  const bg = colorScheme === 'dark' ? '#131110' : '#ffffff';
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerTintColor: tint,
-        headerTitleStyle: { color: tint },
-        headerStyle: { backgroundColor: bg },
-      }}
-    >
+    <Stack.Navigator screenOptions={useStackScreenOptions()}>
       <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Mi perfil' }} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ title: 'Notificaciones' }} />
       <Stack.Screen name="Legal" component={LegalScreen} options={{ title: 'Legales y Estado de cuenta' }} />

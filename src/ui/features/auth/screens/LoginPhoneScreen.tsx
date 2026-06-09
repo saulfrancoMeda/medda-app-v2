@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Button, Input, Logo, Text } from '@ui/design-system/components';
 import { useAuth } from '@ui/providers/AuthProvider';
+import { useToast } from '@ui/providers/ToastProvider';
 import { lookupErrorMessage } from '@ui/features/auth/authMessages';
 import type { AuthStackParamList } from '@ui/navigation/types';
 
@@ -15,22 +16,18 @@ const PHONE_LENGTH = 10;
 // que devuelve el nombre (ya enmascarado por el backend) para mostrarlo en el paso 2.
 export function LoginPhoneScreen({ navigation }: Props) {
   const { lookupName } = useAuth();
+  const toast = useToast();
   const [phone, setPhone] = useState('');
-  const [error, setError] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const valid = phone.length === PHONE_LENGTH;
 
   const onContinue = async () => {
-    if (!valid) {
-      setError('Ingresa un teléfono de 10 dígitos');
-      return;
-    }
-    setError(undefined);
+    if (!valid) return;
     setLoading(true);
     const result = await lookupName(phone);
     setLoading(false);
     if (!result.ok) {
-      setError(lookupErrorMessage(result.error));
+      toast.error(lookupErrorMessage(result.error));
       return;
     }
     navigation.navigate('LoginPassword', { phone, name: result.value });
@@ -43,14 +40,14 @@ export function LoginPhoneScreen({ navigation }: Props) {
           <Logo width={96} height={96} />
         </View>
 
-        <Text variant="h1" className="mb-md">          
-          Bienvenido,{' '}
-          <Text variant="h1" tone="muted" className="font-normal">
+        <View className="gap-xs">
+          <Text variant="h1">Bienvenido,</Text>
+          <Text variant="h2" tone="muted" className="font-normal" numberOfLines={2}>
             inicia sesión
           </Text>
-        </Text>
+        </View>
 
-        <View className="gap-md pt-2xl">
+        <View className="pt-2xl">
           <Input
             label="Número de celular"
             placeholder="Ingresa tu número de celular"
@@ -59,7 +56,6 @@ export function LoginPhoneScreen({ navigation }: Props) {
             maxLength={PHONE_LENGTH}
             value={phone}
             onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, ''))}
-            error={error}
           />
         </View>
 
@@ -68,7 +64,7 @@ export function LoginPhoneScreen({ navigation }: Props) {
         <View className="gap-md pb-lg">
           <Button title="Iniciar sesión" full disabled={!valid} loading={loading} onPress={onContinue} />
 
-          <View className="flex-row justify-center gap-xs mb-2">
+          <View className="flex-row justify-center gap-xs">
             <Text variant="body" tone="muted">
               No tengo cuenta.
             </Text>

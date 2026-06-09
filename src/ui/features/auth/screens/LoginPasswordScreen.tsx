@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Button, Input, Logo, Text } from '@ui/design-system/components';
 import { useAuth } from '@ui/providers/AuthProvider';
+import { useToast } from '@ui/providers/ToastProvider';
 import { authErrorMessage } from '@ui/features/auth/authMessages';
 import type { AuthStackParamList } from '@ui/navigation/types';
 
@@ -16,20 +17,19 @@ const MIN_PASSWORD = 6;
 export function LoginPasswordScreen({ route, navigation }: Props) {
   const { phone, name } = route.params;
   const { signIn } = useAuth();
+  const toast = useToast();
   const [password, setPassword] = useState('');
   const [secure, setSecure] = useState(true);
-  const [error, setError] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const valid = password.length >= MIN_PASSWORD;
 
   const onSubmit = async () => {
     if (!valid) return;
-    setError(undefined);
     setLoading(true);
     const result = await signIn({ phone, password });
     setLoading(false);
     if (!result.ok) {
-      setError(authErrorMessage(result.error));
+      toast.error(authErrorMessage(result.error));
     }
     // En éxito, el RootNavigator cambia solo a la app (status -> signedIn).
   };
@@ -52,10 +52,10 @@ export function LoginPasswordScreen({ route, navigation }: Props) {
           <Input
             label="Contraseña"
             placeholder="Ingresa tu contraseña"
+            leftIcon="lock-closed-outline"
             secureTextEntry={secure}
             value={password}
             onChangeText={setPassword}
-            error={error}
             rightSlot={
               <Pressable
                 onPress={() => setSecure((s) => !s)}
@@ -90,7 +90,6 @@ export function LoginPasswordScreen({ route, navigation }: Props) {
         </Text>
 
         <View className="flex-1" />
-
         <View className="gap-md pb-lg">
           <Button title="Iniciar sesión" full disabled={!valid} loading={loading} onPress={onSubmit} />
 

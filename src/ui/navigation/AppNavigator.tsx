@@ -42,7 +42,6 @@ function MainTabs() {
           borderTopLeftRadius: 24,
           borderTopRightRadius: 24,
           backgroundColor: dark ? '#1B1812' : '#ffffff',
-          // Sombra hacia arriba (sin borde plano), paridad con el prototipo standalone.
           shadowColor: '#000',
           shadowOpacity: 0.08,
           shadowRadius: 12,
@@ -59,7 +58,6 @@ function MainTabs() {
       <Tabs.Screen name="Sales" component={SalesScreen} options={{ title: 'Mis gastos' }} />
       <Tabs.Screen name="Wallet" component={WalletStackNavigator} options={{ title: 'Mi Billetera' }} />
       <Tabs.Screen name="Faq" component={FaqStackNavigator} options={{ title: 'Ayuda' }} />
-      {/* Tab oculto: secciones del drawer (Perfil/Legales/Seguridad). Mantiene el bottom tab. */}
       <Tabs.Screen
         name="Sections"
         component={SectionsStackNavigator}
