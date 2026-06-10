@@ -1,15 +1,22 @@
 import { useState } from 'react';
-import { ActivityIndicator, FlatList, Linking, Platform, Pressable, ScrollView, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Linking,
+  Platform,
+  Pressable,
+  ScrollView,
+  View,
+} from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { config } from '@config/env';
 import { Text } from '@ui/design-system/components';
-import { beneficiaryName } from '@domain/account/entities/Profile';
 import { accountErrorMessage } from '@ui/features/account/errorMessages';
 import { useNipAuthorization } from '@ui/features/common/useNipAuthorization';
 import { NipModal } from '@ui/features/wallet/components/NipModal';
-import { useBeneficiaries, useStatements } from '@ui/features/account/hooks/useAccount';
+import { useStatements } from '@ui/features/account/hooks/useAccount';
 import { useContainer } from '@ui/providers/ContainerProvider';
 import type { SectionsStackParamList } from '@ui/navigation/types';
 
@@ -47,7 +54,10 @@ export function LegalScreen({ navigation }: LegalProps) {
     { title: 'Contrato de Adhesión Medá', url: config.legal.adhesionContract },
   ];
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
+    <ScrollView
+      className="flex-1 bg-neutral-0 dark:bg-neutral-950"
+      contentContainerClassName="gap-lg p-lg"
+    >
       {docs.map((d) => (
         <Row
           key={d.title}
@@ -59,8 +69,16 @@ export function LegalScreen({ navigation }: LegalProps) {
           }}
         />
       ))}
-      <Row icon="reader-outline" title="Estado de cuenta" onPress={() => navigation.navigate('Statements')} />
-      <Row icon="people-outline" title="Mis beneficiarios" onPress={() => navigation.navigate('Beneficiaries')} />
+      <Row
+        icon="reader-outline"
+        title="Estado de cuenta"
+        onPress={() => navigation.navigate('Statements')}
+      />
+      <Row
+        icon="people-outline"
+        title="Mis beneficiarios"
+        onPress={() => navigation.navigate('Beneficiaries')}
+      />
 
       <View className="mt-md gap-sm rounded-card border border-neutral-200 p-lg dark:border-neutral-800">
         <Text variant="body" className="font-semibold">
@@ -78,42 +96,6 @@ export function LegalScreen({ navigation }: LegalProps) {
         </Text>
       </View>
     </ScrollView>
-  );
-}
-
-export function BeneficiariesScreen() {
-  const beneficiaries = useBeneficiaries();
-  if (beneficiaries.isPending) {
-    return (
-      <View className="flex-1 items-center justify-center bg-neutral-0 dark:bg-neutral-950">
-        <ActivityIndicator />
-      </View>
-    );
-  }
-  return (
-    <FlatList
-      className="flex-1 bg-neutral-0 dark:bg-neutral-950"
-      data={beneficiaries.data ?? []}
-      keyExtractor={(_, i) => String(i)}
-      contentContainerClassName="p-lg gap-md"
-      ListEmptyComponent={
-        <Text tone="muted" className="p-lg">
-          {beneficiaries.isError ? 'No se pudieron cargar tus beneficiarios.' : 'No tienes beneficiarios registrados.'}
-        </Text>
-      }
-      renderItem={({ item }) => (
-        <View className="flex-row items-center justify-between rounded-card border border-neutral-200 p-lg dark:border-neutral-800">
-          <Text variant="body" className="flex-1 pr-md">
-            {beneficiaryName(item)}
-          </Text>
-          {item.percent !== undefined ? (
-            <Text variant="body" className="font-semibold text-brand-700">
-              {item.percent}%
-            </Text>
-          ) : null}
-        </View>
-      )}
-    />
   );
 }
 
@@ -152,7 +134,9 @@ export function StatementsScreen() {
         contentContainerClassName="p-lg gap-md"
         ListEmptyComponent={
           <Text tone="muted" className="p-lg">
-            {statements.isError ? 'No se pudieron cargar tus estados de cuenta.' : 'Aún no tienes estados de cuenta.'}
+            {statements.isError
+              ? 'No se pudieron cargar tus estados de cuenta.'
+              : 'Aún no tienes estados de cuenta.'}
           </Text>
         }
         renderItem={({ item }) => (

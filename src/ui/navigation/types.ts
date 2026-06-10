@@ -2,6 +2,7 @@ import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { SpeiSendInput, TransactionResult } from '@domain/wallet/entities/Transfer';
 import type { Movement } from '@domain/wallet/entities/Movement';
 import type { FaqItem } from '@domain/support/entities/Faq';
+import type { Beneficiary } from '@domain/beneficiaries/entities/Beneficiary';
 
 export type AuthStackParamList = {
   LoginPhone: undefined;
@@ -60,6 +61,7 @@ export type SectionsStackParamList = {
   PdfViewer: { title: string; url: string };
   Statements: undefined;
   Beneficiaries: undefined;
+  BeneficiariesEdit: { initial?: Beneficiary[] } | undefined;
   Security: undefined;
   ChangePassword: undefined;
   ChangeNip: undefined;

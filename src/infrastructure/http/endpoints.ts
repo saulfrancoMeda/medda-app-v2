@@ -74,6 +74,8 @@ export const endpoints = {
   },
   usernameChangeSet: { path: '/user/username/change/set', method: 'POST', auth: 'user' },
   beneficiariesList: { path: '/beneficiaries/list', method: 'GET', auth: 'user' },
+  beneficiariesEdit: { path: '/beneficiaries/edit', method: 'PUT', auth: 'user' },
+  postalCodeInfo: { path: '/public/postalCode/info', method: 'GET', auth: 'public' },
   notificationsList: { path: '/notifications/list', method: 'GET', auth: 'user' },
 } as const satisfies Record<string, Endpoint>;
 
