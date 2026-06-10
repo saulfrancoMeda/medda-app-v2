@@ -25,7 +25,9 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
     let active = true;
     (async () => {
       const stored = await registrationDraftStore.read();
-      if (active && stored) setDraft(stored);
+      // Merge over the current defaults so a draft saved with an older shape still gets every field
+      // (avoids crashes like reading `.map` on a field that did not exist when it was persisted).
+      if (active && stored) setDraft({ ...makeEmptyRegistrationDraft(), ...stored });
     })()
       .catch(() => undefined)
       .finally(() => {

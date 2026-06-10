@@ -13,7 +13,7 @@ Este documento describe la arquitectura detallada, el estado de la migración y 
 | Support / FAQ / Help         | 🟡 En progreso | `domain/support`                                    |
 | Beneficiaries                | ✅ Migrado     | `domain/beneficiaries`, `ui/features/beneficiaries` |
 | Fiscal                       | ❌ Pendiente   | -                                                   |
-| Prospect                     | ❌ Pendiente   | -                                                   |
+| Prospect / Registro          | ✅ Migrado     | `domain/registration`, `ui/features/registration`   |
 | SOD (Sistema de Operaciones) | ❌ Pendiente   | -                                                   |
 
 > [!IMPORTANT]

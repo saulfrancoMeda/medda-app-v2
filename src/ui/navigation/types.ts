@@ -14,6 +14,11 @@ export type AuthStackParamList = {
   RegisterPhone: undefined;
   RegisterOtp: undefined;
   RegisterPersonal: undefined;
+  RegisterDemographics: undefined;
+  RegisterDocument: undefined;
+  RegisterAddress: undefined;
+  RegisterBeneficiaries: undefined;
+  RegisterSurvey: undefined;
   RegisterNip: undefined;
   RegisterLegal: undefined;
 };

@@ -11,21 +11,28 @@ import {
 } from '@ui/features/auth/screens/RecoverScreens';
 import { UnlockScreen } from '@ui/features/auth/screens/UnlockScreen';
 import {
+  RegisterAddressScreen,
+  RegisterBeneficiariesScreen,
+  RegisterDemographicsScreen,
+  RegisterDocumentScreen,
   RegisterLegalScreen,
   RegisterNipScreen,
   RegisterOtpScreen,
   RegisterPersonalScreen,
   RegisterPhoneScreen,
+  RegisterSurveyScreen,
 } from '@ui/features/auth/screens/RegisterScreens';
 import { LoadingScreen } from '@ui/features/common/LoadingScreen';
 import { AppNavigator } from '@ui/navigation/AppNavigator';
+import { useStackScreenOptions } from '@ui/navigation/headerOptions';
 import type { AuthStackParamList } from '@ui/navigation/types';
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 
 function AuthNavigator() {
+  // Reuse the project's standard header (and its custom back button) for screens that show a header.
   return (
-    <AuthStack.Navigator screenOptions={{ headerShown: false }}>
+    <AuthStack.Navigator screenOptions={{ ...useStackScreenOptions(), headerShown: false }}>
       <AuthStack.Screen name="LoginPhone" component={LoginPhoneScreen} />
       <AuthStack.Screen name="LoginPassword" component={LoginPasswordScreen} />
       <AuthStack.Screen
@@ -62,6 +69,31 @@ function AuthNavigator() {
         name="RegisterPersonal"
         component={RegisterPersonalScreen}
         options={{ headerShown: true, title: 'Tus datos' }}
+      />
+      <AuthStack.Screen
+        name="RegisterDemographics"
+        component={RegisterDemographicsScreen}
+        options={{ headerShown: true, title: 'Cuéntanos de ti' }}
+      />
+      <AuthStack.Screen
+        name="RegisterDocument"
+        component={RegisterDocumentScreen}
+        options={{ headerShown: true, title: 'Tu identificación' }}
+      />
+      <AuthStack.Screen
+        name="RegisterAddress"
+        component={RegisterAddressScreen}
+        options={{ headerShown: true, title: 'Tu domicilio' }}
+      />
+      <AuthStack.Screen
+        name="RegisterBeneficiaries"
+        component={RegisterBeneficiariesScreen}
+        options={{ headerShown: true, title: 'Beneficiarios' }}
+      />
+      <AuthStack.Screen
+        name="RegisterSurvey"
+        component={RegisterSurveyScreen}
+        options={{ headerShown: true, title: 'Unas preguntas' }}
       />
       <AuthStack.Screen
         name="RegisterNip"

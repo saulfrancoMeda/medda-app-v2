@@ -8,8 +8,13 @@ import {
 } from '@domain/registration/services/credentials';
 import type { RegistrationDraft } from '@domain/registration/entities/Registration';
 import type {
+  CatalogItem,
+  DocumentImage,
+  DocumentRequirement,
+  OcrResult,
   RegistrationError,
   RegistrationGateway,
+  TransactionalQuestion,
 } from '@domain/registration/ports/RegistrationGateway';
 
 type Deps = { readonly gateway: RegistrationGateway };
@@ -38,6 +43,29 @@ export const makeValidateVerificationCode =
     if (!isValidOtp(code)) return Promise.resolve(err({ type: 'invalid_code' }));
     return gateway.validateVerificationCode(phone, code);
   };
+
+export const makeGetRequiredDocuments =
+  ({ gateway }: Deps) =>
+  (
+    nationality: string,
+    resident: string,
+  ): Promise<Result<DocumentRequirement, RegistrationError>> =>
+    gateway.getRequiredDocuments(nationality, resident);
+
+export const makeExtractDocumentData =
+  ({ gateway }: Deps) =>
+  (documentId: string, image: DocumentImage): Promise<Result<OcrResult, RegistrationError>> =>
+    gateway.extractDocumentData(documentId, image);
+
+export const makeGetTransactionalProfileQuestions =
+  ({ gateway }: Deps) =>
+  (): Promise<Result<readonly TransactionalQuestion[], RegistrationError>> =>
+    gateway.getTransactionalProfileQuestions();
+
+export const makeGetOccupations =
+  ({ gateway }: Deps) =>
+  (): Promise<Result<readonly CatalogItem[], RegistrationError>> =>
+    gateway.getOccupations();
 
 export const makeRegister =
   ({ gateway }: Deps) =>

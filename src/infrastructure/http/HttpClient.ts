@@ -19,6 +19,8 @@ export type AuthHeaderProvider = (auth: Endpoint['auth']) => Promise<string | nu
 export interface RequestOptions {
   readonly query?: Record<string, string | number | boolean | undefined>;
   readonly body?: unknown;
+  /** HTTP statuses the caller handles as normal control flow (e.g. 404 = phone available); not logged. */
+  readonly silentStatuses?: readonly number[];
 }
 
 /**
@@ -31,31 +33,44 @@ export class HttpClient {
     private readonly baseUrl: string = config.apiBaseUrl,
   ) {}
 
-  async request<T>(endpoint: Endpoint, options: RequestOptions = {}): Promise<Result<T, HttpError>> {
+  async request<T>(
+    endpoint: Endpoint,
+    options: RequestOptions = {},
+  ): Promise<Result<T, HttpError>> {
     const url = this.buildUrl(endpoint.path, options.query);
+    const isMultipart = typeof FormData !== 'undefined' && options.body instanceof FormData;
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
       'X-Auth-Token': config.xAuthToken,
       'X-App-Version': config.appVersion,
     };
+    // For multipart, let fetch set Content-Type (with the boundary); for everything else use JSON.
+    if (!isMultipart) headers['Content-Type'] = 'application/json';
     const authValue = await this.getAuthHeader(endpoint.auth);
     if (authValue) {
       headers.Authorization = authValue;
     }
 
     try {
+      const body =
+        options.body === undefined
+          ? undefined
+          : isMultipart
+            ? (options.body as FormData)
+            : JSON.stringify(options.body);
       const response = await fetch(url, {
         method: endpoint.method,
         headers,
-        body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+        body,
       });
       const text = await response.text();
       const parsed: unknown = text ? JSON.parse(text) : null;
 
       if (!response.ok) {
         // Por ahora se loguea TODO (status + cuerpo) para que el equipo de backend sepa por qué
-        // falla el servicio. Más adelante, dejar solo el status code.
-        console.warn(`[API] ${endpoint.method} ${endpoint.path} -> ${response.status}`, parsed);
+        // falla el servicio, salvo los status que el caller maneja como flujo normal.
+        if (!options.silentStatuses?.includes(response.status)) {
+          console.warn(`[API] ${endpoint.method} ${endpoint.path} -> ${response.status}`, parsed);
+        }
         return err({
           kind: 'http',
           status: response.status,

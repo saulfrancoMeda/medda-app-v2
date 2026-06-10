@@ -62,8 +62,14 @@ Reglas:
 
 ## 5. Definition of Done (global)
 
-- [ ] Flujo completo paso a paso con persistencia/reanudacion.
-- [ ] SMS con cooldown de 60s.
-- [ ] Reglas de password/nip/curp/edad/legal trazadas a legacy.
-- [ ] Registro crea cuenta que puede iniciar sesion.
-- [ ] Quality Gate por fase.
+- [x] Flujo completo paso a paso con persistencia/reanudacion (draft en SecureStore).
+- [x] SMS con cooldown de 60s.
+- [x] Reglas de password/nip/curp/edad/legal trazadas a legacy.
+- [x] KYC: captura de documento con camara + OCR, black-list, nipSignature (SHA-256) y multipart.
+- [~] Registro crea cuenta que puede iniciar sesion: flujo y payload completos; el contrato del
+  backend `/public/register/v2` se implemento a ciegas (paridad legacy) y queda por validar contra
+  un entorno real.
+- [x] Quality Gate por fase.
+
+Flujo final: telefono -> OTP (60s) -> datos+password -> demografia+CURP -> documento (camara+OCR)
+-> domicilio -> beneficiarios (opcional) -> encuesta (opcional) -> NIP -> legal -> registro.

@@ -7,6 +7,10 @@ import {
 } from '@application/beneficiaries/useCases/manageBeneficiaries';
 import {
   makeCheckPhoneAvailable,
+  makeExtractDocumentData,
+  makeGetOccupations,
+  makeGetRequiredDocuments,
+  makeGetTransactionalProfileQuestions,
   makeRegister,
   makeSendVerificationCode,
   makeValidateVerificationCode,
@@ -55,6 +59,12 @@ export interface AppContainer {
   readonly checkPhoneAvailable: ReturnType<typeof makeCheckPhoneAvailable>;
   readonly sendVerificationCode: ReturnType<typeof makeSendVerificationCode>;
   readonly validateVerificationCode: ReturnType<typeof makeValidateVerificationCode>;
+  readonly getRequiredDocuments: ReturnType<typeof makeGetRequiredDocuments>;
+  readonly extractDocumentData: ReturnType<typeof makeExtractDocumentData>;
+  readonly getOccupations: ReturnType<typeof makeGetOccupations>;
+  readonly getTransactionalProfileQuestions: ReturnType<
+    typeof makeGetTransactionalProfileQuestions
+  >;
   readonly register: ReturnType<typeof makeRegister>;
   readonly passwordRecovery: PasswordRecovery;
 }
@@ -105,6 +115,12 @@ export const createAppContainer = (): AppContainer => {
     checkPhoneAvailable: makeCheckPhoneAvailable({ gateway: registrationGateway }),
     sendVerificationCode: makeSendVerificationCode({ gateway: registrationGateway }),
     validateVerificationCode: makeValidateVerificationCode({ gateway: registrationGateway }),
+    getRequiredDocuments: makeGetRequiredDocuments({ gateway: registrationGateway }),
+    extractDocumentData: makeExtractDocumentData({ gateway: registrationGateway }),
+    getOccupations: makeGetOccupations({ gateway: registrationGateway }),
+    getTransactionalProfileQuestions: makeGetTransactionalProfileQuestions({
+      gateway: registrationGateway,
+    }),
     register: makeRegister({ gateway: registrationGateway }),
     passwordRecovery,
   };

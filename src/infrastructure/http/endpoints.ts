@@ -94,6 +94,14 @@ export const endpoints = {
   },
   usernameChangeSet: { path: '/user/username/change/set', method: 'POST', auth: 'user' },
   register: { path: '/public/register/v2', method: 'POST', auth: 'public' },
+  documentsRequired: { path: '/public/documents/id/required', method: 'POST', auth: 'public' },
+  blackListCheck: { path: '/public/black-lists/check', method: 'POST', auth: 'public' },
+  transactionalProfileQuestions: {
+    path: '/public/survey/declarative/profile/questions',
+    method: 'GET',
+    auth: 'public',
+  },
+  occupations: { path: '/public/catalogs/occupations', method: 'GET', auth: 'public' },
   beneficiariesList: { path: '/beneficiaries/list', method: 'GET', auth: 'user' },
   beneficiariesEdit: { path: '/beneficiaries/edit', method: 'PUT', auth: 'user' },
   postalCodeInfo: { path: '/public/postalCode/info', method: 'GET', auth: 'public' },
@@ -105,6 +113,13 @@ export const notificationReadEndpoint = (id: string): Endpoint => ({
   path: `/notifications/${id}/mark-as-read`,
   method: 'PUT',
   auth: 'user',
+});
+
+/** OCR de un documento de identidad (path con parámetro `{documento}`). */
+export const documentDataExtractEndpoint = (documentId: string): Endpoint => ({
+  path: `/public/document/${documentId}/data-extract`,
+  method: 'POST',
+  auth: 'public',
 });
 
 export type EndpointName = keyof typeof endpoints;
