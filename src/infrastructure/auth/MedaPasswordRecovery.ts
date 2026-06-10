@@ -8,12 +8,8 @@ const toRecoveryError = (e: HttpError): RecoveryError => {
   return { type: 'unknown', message: e.message };
 };
 
-// Nombres de params alineados al legacy (RecoveryPasswordCode.js / api.js):
-//  - sendCode: getPhoneCode(phone, false) -> { phone, validate: false }
-//  - validateCode: validCode(code, phone, 0) -> { code, phone, omitUserValidation: 0 }
-//  - resetPassword: publicPasswordChange(phone, code, password) -> { phone, code, password }
 export class MedaPasswordRecovery implements PasswordRecovery {
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient) { }
 
   async sendCode(phone: string): Promise<Result<void, RecoveryError>> {
     const res = await this.http.request<unknown>(endpoints.phoneSendCode, {

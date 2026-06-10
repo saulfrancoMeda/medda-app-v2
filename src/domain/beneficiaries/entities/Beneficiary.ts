@@ -141,8 +141,7 @@ export const formatBeneficiaryDate = (value: string): string => {
   return `${pad(parsed.day)}/${pad(parsed.month)}/${parsed.year}`;
 };
 
-// Birth date is optional; when present it must be a real calendar date for someone aged 18–80.
-// Returns a specific message so the UI can give inline feedback, or null when the value is acceptable.
+
 export const validateBirthDate = (value: string, now: Date = new Date()): string | null => {
   const trimmed = value.trim();
   if (!trimmed) return null;
@@ -191,40 +190,40 @@ export const validateBeneficiaries = (
 
 const validateBeneficiaryDraft =
   (totalBeneficiaries: number, now: Date) =>
-  (draft: BeneficiaryDraft): BeneficiaryFieldErrors => {
-    const errors: BeneficiaryFieldErrors = {};
-    if (!NAME_RE.test(clean(draft.firstName))) {
-      errors.firstName = 'El nombre es inválido.';
-    }
-    if (!NAME_RE.test(clean(draft.lastName))) {
-      errors.lastName = 'Dato inválido.';
-    }
-    if (draft.lastName2.length > 0 && !NAME_RE.test(clean(draft.lastName2))) {
-      errors.lastName2 = 'Dato inválido.';
-    }
-    if (!isValidPostalCode(draft.address.postalCode)) {
-      errors.postalCode = 'El código postal es inválido.';
-    }
-    if (!clean(draft.address.colony)) {
-      errors.colony = 'Selecciona una colonia.';
-    }
-    if (clean(draft.address.street).length < 3) {
-      errors.street = 'El domicilio es inválido.';
-    }
-    if (!clean(draft.address.extNumber)) {
-      errors.extNumber = 'Dato inválido.';
-    }
-    if (!isBeneficiaryPercent(draft.percent)) {
-      errors.percent = 'Selecciona un porcentaje.';
-    } else if (totalBeneficiaries > 1 && draft.percent === 100) {
-      errors.percent = 'El 100% solo puede asignarse a un beneficiario.';
-    }
-    const birthDateError = validateBirthDate(draft.birthDate, now);
-    if (birthDateError) {
-      errors.birthDate = birthDateError;
-    }
-    return errors;
-  };
+    (draft: BeneficiaryDraft): BeneficiaryFieldErrors => {
+      const errors: BeneficiaryFieldErrors = {};
+      if (!NAME_RE.test(clean(draft.firstName))) {
+        errors.firstName = 'El nombre es inválido.';
+      }
+      if (!NAME_RE.test(clean(draft.lastName))) {
+        errors.lastName = 'Dato inválido.';
+      }
+      if (draft.lastName2.length > 0 && !NAME_RE.test(clean(draft.lastName2))) {
+        errors.lastName2 = 'Dato inválido.';
+      }
+      if (!isValidPostalCode(draft.address.postalCode)) {
+        errors.postalCode = 'El código postal es inválido.';
+      }
+      if (!clean(draft.address.colony)) {
+        errors.colony = 'Selecciona una colonia.';
+      }
+      if (clean(draft.address.street).length < 3) {
+        errors.street = 'El domicilio es inválido.';
+      }
+      if (!clean(draft.address.extNumber)) {
+        errors.extNumber = 'Dato inválido.';
+      }
+      if (!isBeneficiaryPercent(draft.percent)) {
+        errors.percent = 'Selecciona un porcentaje.';
+      } else if (totalBeneficiaries > 1 && draft.percent === 100) {
+        errors.percent = 'El 100% solo puede asignarse a un beneficiario.';
+      }
+      const birthDateError = validateBirthDate(draft.birthDate, now);
+      if (birthDateError) {
+        errors.birthDate = birthDateError;
+      }
+      return errors;
+    };
 
 const normalizeBeneficiary = (draft: BeneficiaryDraft): Beneficiary => {
   const beneficiary: Beneficiary = {

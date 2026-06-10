@@ -3,8 +3,6 @@ import { err, ok, type Result } from '@domain/shared/result';
 import type { Session } from '@domain/auth/entities/Session';
 import type { AuthError, AuthGateway, Credentials } from '@domain/auth/ports/AuthGateway';
 
-// El legacy usa Cognito con USER_PASSWORD_AUTH y username '+52'+phone (Auth.signIn).
-// Aquí llamamos directo a la API InitiateAuth de Cognito por fetch (sin SDK ni crypto nativo).
 const PHONE_PREFIX = '+52';
 
 interface AuthenticationResult {
@@ -33,7 +31,6 @@ export class CognitoAuthGateway implements AuthGateway {
     if (!res.ok) return res;
     const data = res.value;
     if (data.ChallengeName) {
-      // p.ej. NEW_PASSWORD_REQUIRED -> en el legacy lleva a "cambiar contraseña" (Fase posterior).
       return err({ type: 'unknown', message: 'Debes cambiar tu contraseña' });
     }
     if (!data.AuthenticationResult) {
@@ -60,7 +57,6 @@ export class CognitoAuthGateway implements AuthGateway {
   }
 
   async logout(): Promise<Result<void, AuthError>> {
-    // El borrado local de la sesión lo hace el SessionStore. (Opcional: GlobalSignOut.)
     return ok(undefined);
   }
 
@@ -78,8 +74,6 @@ export class CognitoAuthGateway implements AuthGateway {
       });
       const json = (await response.json()) as InitiateAuthResponse;
       if (!response.ok) {
-        // Diagnóstico (igual que el HttpClient): Cognito se llama directo, así que sin este log
-        // el motivo real no aparecería en consola. Más adelante, dejar solo el status.
         console.warn(`[Cognito] InitiateAuth -> ${response.status}`, json.__type, json.message);
         return err(this.mapError(json));
       }

@@ -17,8 +17,6 @@ const toError = (e: HttpError): RegistrationError => {
   return { type: 'unknown', message: e.message };
 };
 
-// Catalog endpoints come in several shapes: an array of objects, a `{ key: label }` map, or wrapped
-// under `occupations`/`catalogs`/`data`. Parse all of them defensively so we never call .map on a map.
 const parseCatalog = (value: unknown): CatalogItem[] => {
   const record = (v: unknown): Record<string, unknown> | null =>
     v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
@@ -50,8 +48,6 @@ const isFilePart = (value: unknown): value is DocumentImage =>
   'name' in value &&
   'type' in value;
 
-// Mirrors the legacy apiBase.buildFormData: nested objects/arrays flatten to bracket keys
-// (homeAddress[street], beneficiaries[0][firstName]); booleans become 1/0; files append as-is.
 const buildFormData = (form: FormData, data: unknown, parentKey?: string): void => {
   if (Array.isArray(data)) {
     data.forEach((item, index) =>
@@ -74,9 +70,8 @@ const buildFormData = (form: FormData, data: unknown, parentKey?: string): void 
 };
 
 export class MedaRegistrationGateway implements RegistrationGateway {
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient) { }
 
-  // GET /public/user/name returns a masked name when the phone is already registered; 404 means free.
   async isPhoneAvailable(phone: string): Promise<Result<true, RegistrationError>> {
     const res = await this.http.request<{ user?: string }>(endpoints.getUserName, {
       query: { cellphone: phone },
@@ -151,8 +146,7 @@ export class MedaRegistrationGateway implements RegistrationGateway {
     });
   }
 
-  // Dynamic "perfil transaccional" questionnaire. Legacy returns { questions: {key: text},
-  // options: {key: {label: value}} }; we flatten it to an ordered list of questions.
+
   async getTransactionalProfileQuestions(): Promise<
     Result<readonly TransactionalQuestion[], RegistrationError>
   > {
@@ -181,9 +175,6 @@ export class MedaRegistrationGateway implements RegistrationGateway {
     return ok(parseCatalog(res.value));
   }
 
-  // Final account creation against the `agent_register` form. Fields go FLAT (no wrapper): JSON when
-  // there are no files, multipart/form-data (bracket-flattened) when ID images are attached. Field
-  // names/values mirror the backend form (adminmerchant AgentRegisterType/AddressType).
   async register(draft: RegistrationDraft): Promise<Result<true, RegistrationError>> {
     const blackList = await this.blackListSign(draft);
     if (!blackList.ok) return err(blackList.error);
@@ -197,11 +188,10 @@ export class MedaRegistrationGateway implements RegistrationGateway {
       lastName2: draft.lastName2,
       password: draft.password,
       nip: draft.nip,
-      // The backend requires nipSignature === nip (proof of T&C acceptance), not a hash.
       nipSignature: draft.nip,
       birthDate: draft.birthDate,
       occupation: draft.occupation,
-      genre: draft.gender, // 'Masculino' | 'Femenino'
+      genre: draft.gender === 'Masculino' ? 'M' : 'F',
       nationality: draft.nationality === 'mexicana' ? 'mx' : 'ext',
       curp: draft.curp,
       resident: draft.resident === 'fm',
@@ -258,8 +248,6 @@ export class MedaRegistrationGateway implements RegistrationGateway {
     return res.ok ? ok(true) : err(toError(res.error));
   }
 
-  // Legacy validates the prospect against a black list before creating the account; the response
-  // carries `validationSign`. Best-effort: a non-network rejection does not block registration.
   private async blackListSign(
     draft: RegistrationDraft,
   ): Promise<{ ok: true; sign: unknown } | { ok: false; error: RegistrationError }> {

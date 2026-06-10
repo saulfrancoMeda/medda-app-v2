@@ -46,7 +46,6 @@ import type { AuthStackParamList } from '@ui/navigation/types';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const POSTAL_RE = /^\d{5}$/;
 
-// DD/MM/AAAA mask with light clamping; full validation (real date, 18+) happens via isAdult.
 const formatBirthDate = (text: string): string => {
   let digits = text.replace(/\D/g, '').slice(0, 8);
   if (digits.length >= 1 && Number(digits[0]) > 3) digits = `0${digits}`.slice(0, 8);
@@ -58,12 +57,9 @@ const formatBirthDate = (text: string): string => {
   return digits;
 };
 
-// Fixed action bar pinned to the bottom of a step so the primary button never shifts with content.
 function StepFooter({ children }: { children: ReactNode }) {
   return <View className="gap-sm px-lg pb-lg pt-sm">{children}</View>;
 }
-
-// Secure text field with a show/hide eye toggle (used for password and NIP).
 function SecureInput(props: InputProps) {
   const [hidden, setHidden] = useState(true);
   return (
@@ -84,7 +80,6 @@ function SecureInput(props: InputProps) {
   );
 }
 
-// Occupation is a CnbvCatalog entry: the user picks from the backend list and we send its `key`.
 function OccupationField({
   label,
   onSelect,
@@ -206,7 +201,6 @@ function ChoiceGroup<T extends string>({
   );
 }
 
-// Step 1: collect the phone, confirm it has no account yet, and send the SMS code.
 type PhoneProps = NativeStackScreenProps<AuthStackParamList, 'RegisterPhone'>;
 export function RegisterPhoneScreen({ navigation }: PhoneProps) {
   const { checkPhoneAvailable, sendVerificationCode } = useContainer();
@@ -268,7 +262,6 @@ export function RegisterPhoneScreen({ navigation }: PhoneProps) {
   );
 }
 
-// Step 2: validate the SMS code. Resend is rate-limited with a 60s cooldown.
 const RESEND_COOLDOWN_SECONDS = 60;
 type OtpProps = NativeStackScreenProps<AuthStackParamList, 'RegisterOtp'>;
 export function RegisterOtpScreen({ navigation }: OtpProps) {
@@ -280,7 +273,6 @@ export function RegisterOtpScreen({ navigation }: OtpProps) {
   const [resending, setResending] = useState(false);
   const { secondsLeft, isCoolingDown, start } = useResendCooldown(RESEND_COOLDOWN_SECONDS);
 
-  // A code was just sent when we arrive here, so begin the cooldown immediately.
   useEffect(() => {
     start();
   }, [start]);
@@ -354,7 +346,6 @@ export function RegisterOtpScreen({ navigation }: OtpProps) {
   );
 }
 
-// Step 3: personal data + password (validated live against the legacy rules).
 type PersonalProps = NativeStackScreenProps<AuthStackParamList, 'RegisterPersonal'>;
 export function RegisterPersonalScreen({ navigation }: PersonalProps) {
   const { draft, update } = useRegistration();
@@ -452,7 +443,6 @@ export function RegisterPersonalScreen({ navigation }: PersonalProps) {
   );
 }
 
-// Step 3b: demographics + CURP.
 type DemographicsProps = NativeStackScreenProps<AuthStackParamList, 'RegisterDemographics'>;
 export function RegisterDemographicsScreen({ navigation }: DemographicsProps) {
   const { draft, update } = useRegistration();
@@ -567,7 +557,6 @@ export function RegisterDemographicsScreen({ navigation }: DemographicsProps) {
   );
 }
 
-// Step 3c: home address (colony resolved from the postal code).
 type AddressProps = NativeStackScreenProps<AuthStackParamList, 'RegisterAddress'>;
 export function RegisterAddressScreen({ navigation }: AddressProps) {
   const { draft, update } = useRegistration();
@@ -666,7 +655,6 @@ export function RegisterAddressScreen({ navigation }: AddressProps) {
   );
 }
 
-// Step 3c-bis: identity document capture (camera) + OCR. Skippable when there is no camera.
 type DocumentProps = NativeStackScreenProps<AuthStackParamList, 'RegisterDocument'>;
 type Side = 'front' | 'back';
 export function RegisterDocumentScreen({ navigation }: DocumentProps) {
@@ -711,7 +699,6 @@ export function RegisterDocumentScreen({ navigation }: DocumentProps) {
     }
   };
 
-  // OCR is best-effort: prefill CURP/name only when still empty so we never overwrite the user.
   const runOcr = async (uri: string) => {
     if (!documentId) return;
     const res = await extractDocumentData(documentId, {
@@ -844,7 +831,6 @@ function DocumentTile({
   );
 }
 
-// Step 3d: beneficiaries. The backend requires at least one and percentages must total 100%.
 const MAX_REGISTRATION_BENEFICIARIES = 4;
 const emptyBeneficiary = (): RegistrationBeneficiary => ({
   firstName: '',
@@ -868,7 +854,6 @@ export function RegisterBeneficiariesScreen({ navigation }: BeneficiariesProps) 
     );
   const remove = (index: number) => setList((prev) => prev.filter((_, i) => i !== index));
 
-  // Names (including the second last name, required by the backend) must be valid and total 100%.
   const namesOk = list.every(
     (b) => isValidName(b.firstName) && isValidName(b.lastName) && isValidName(b.lastName2),
   );
@@ -966,7 +951,6 @@ export function RegisterBeneficiariesScreen({ navigation }: BeneficiariesProps) 
   );
 }
 
-// Step 3e: "Perfil transaccional" — dynamic declarative questionnaire (goalsSurvey) from the backend.
 type SurveyProps = NativeStackScreenProps<AuthStackParamList, 'RegisterSurvey'>;
 export function RegisterSurveyScreen({ navigation }: SurveyProps) {
   const { getTransactionalProfileQuestions } = useContainer();
@@ -1045,7 +1029,6 @@ export function RegisterSurveyScreen({ navigation }: SurveyProps) {
   );
 }
 
-// Step 4: transactional NIP (6 digits, confirmed).
 type NipProps = NativeStackScreenProps<AuthStackParamList, 'RegisterNip'>;
 export function RegisterNipScreen({ navigation }: NipProps) {
   const { draft, update } = useRegistration();
@@ -1124,7 +1107,6 @@ function CheckRow({
   );
 }
 
-// Step 5: legal acceptance + final account creation.
 type LegalProps = NativeStackScreenProps<AuthStackParamList, 'RegisterLegal'>;
 export function RegisterLegalScreen({ navigation }: LegalProps) {
   const { register } = useContainer();
@@ -1137,7 +1119,6 @@ export function RegisterLegalScreen({ navigation }: LegalProps) {
   const [loading, setLoading] = useState(false);
   const valid = terms && privacy && opening;
 
-  // Best-effort geolocation (the backend requires latitude/longitude). Falls back to the draft default.
   useEffect(() => {
     let active = true;
     void (async () => {
@@ -1152,7 +1133,7 @@ export function RegisterLegalScreen({ navigation }: LegalProps) {
           });
         }
       } catch {
-        // Keep the default coordinates.
+        console.log('Error al obtener la ubicación');
       }
     })();
     return () => {

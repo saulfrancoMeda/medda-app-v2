@@ -10,7 +10,6 @@ import type { AuthStackParamList } from '@ui/navigation/types';
 
 const MIN_PASSWORD = 6;
 
-// Paso 1: teléfono -> envía código SMS.
 type PhoneProps = NativeStackScreenProps<AuthStackParamList, 'RecoverPhone'>;
 export function RecoverPhoneScreen({ navigation }: PhoneProps) {
   const { passwordRecovery } = useContainer();
@@ -63,7 +62,6 @@ export function RecoverPhoneScreen({ navigation }: PhoneProps) {
   );
 }
 
-// Paso 2: código -> valida.
 type CodeProps = NativeStackScreenProps<AuthStackParamList, 'RecoverCode'>;
 export function RecoverCodeScreen({ route, navigation }: CodeProps) {
   const { phone } = route.params;
@@ -117,7 +115,6 @@ export function RecoverCodeScreen({ route, navigation }: CodeProps) {
   );
 }
 
-// Paso 3: nueva contraseña.
 type NewProps = NativeStackScreenProps<AuthStackParamList, 'RecoverNewPassword'>;
 export function RecoverNewPasswordScreen({ route, navigation }: NewProps) {
   const { phone, code } = route.params;

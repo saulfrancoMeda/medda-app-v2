@@ -8,18 +8,13 @@ export interface LoginDeps {
   readonly store: SessionStore;
 }
 
-/**
- * Caso de uso: iniciar sesión. Orquesta el puerto de auth y persiste la sesión.
- * Es una factory (inyección de dependencias por closure) para que sea trivial de testear
- * con mocks de los puertos, sin tocar React ni la red real.
- */
 export const makeLogin =
   (deps: LoginDeps) =>
-  async (credentials: Credentials): Promise<Result<Session, AuthError>> => {
-    const result = await deps.auth.login(credentials);
-    if (!result.ok) {
+    async (credentials: Credentials): Promise<Result<Session, AuthError>> => {
+      const result = await deps.auth.login(credentials);
+      if (!result.ok) {
+        return result;
+      }
+      await deps.store.write(result.value);
       return result;
-    }
-    await deps.store.write(result.value);
-    return result;
-  };
+    };

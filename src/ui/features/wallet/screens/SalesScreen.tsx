@@ -22,7 +22,6 @@ export function SalesScreen() {
   const tabNav = useNavigation<BottomTabNavigationProp<AppTabsParamList>>();
   const account = useDefaultAccount();
   const movements = useMovements(account.data?.id);
-  // "Mis gastos" son las salidas: enviar SPEI o transferir a cuentas Medá. Los abonos son ingresos.
   const expenses = useMemo(
     () => (movements.data?.movements ?? []).filter(isExpense),
     [movements.data],

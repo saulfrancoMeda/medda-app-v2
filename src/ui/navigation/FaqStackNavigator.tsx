@@ -10,7 +10,6 @@ import type { FaqStackParamList } from '@ui/navigation/types';
 
 const Stack = createNativeStackNavigator<FaqStackParamList>();
 
-// Stack del tab Ayuda: lista (con AppHeader) + detalle (HTML) + chat (WebView), con back nativo.
 export function FaqStackNavigator() {
   return (
     <Stack.Navigator screenOptions={useStackScreenOptions()}>

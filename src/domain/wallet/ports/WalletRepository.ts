@@ -21,27 +21,21 @@ export interface MovementsPage {
   readonly lastPage: number;
 }
 
-/** Puerto de datos de billetera. La infraestructura lo implementa contra el backend Medá. */
 export interface WalletRepository {
   getDefaultAccount(): Promise<Result<Account, WalletError>>;
   getBalance(accountId: string): Promise<Result<number, WalletError>>;
   getStpAccount(): Promise<Result<StpAccount, WalletError>>;
-  /** `channels` filtra por tipo (p.ej. ['transactional'] o ['CAT_5'] para una categoría). */
   getMovements(
     accountId: string,
     page: number,
     channels?: readonly string[],
   ): Promise<Result<MovementsPage, WalletError>>;
   getCategories(): Promise<Result<readonly Category[], WalletError>>;
-  /** Total de gastos del agente (/balances/sales/total). */
   getSalesTotal(): Promise<Result<number, WalletError>>;
   getServices(categoryId: string): Promise<Result<readonly Service[], WalletError>>;
   payService(input: ServicePaymentInput): Promise<Result<TransactionResult, WalletError>>;
   getSpeiBanks(): Promise<Result<readonly Bank[], WalletError>>;
-  /** Valida el NIP del usuario antes de autorizar una transacción (/user/nip/validate). */
   validateNip(nip: string): Promise<Result<true, WalletError>>;
-  /** Envía un SPEI a terceros (/wallet/transactions/spei/send). */
   sendSpei(input: SpeiSendInput): Promise<Result<TransactionResult, WalletError>>;
-  /** Transfiere a un usuario Medá (/wallet/accounts/transfer/toResource). */
   transferToUser(input: MedaTransferInput): Promise<Result<TransactionResult, WalletError>>;
 }

@@ -13,7 +13,6 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'LoginPassword'>;
 
 const MIN_PASSWORD = 6;
 
-// Paso 2 del login (paridad con Login2.js): contraseña + autenticación.
 export function LoginPasswordScreen({ route, navigation }: Props) {
   const { phone, name } = route.params;
   const { signIn } = useAuth();
@@ -31,7 +30,6 @@ export function LoginPasswordScreen({ route, navigation }: Props) {
     if (!result.ok) {
       toast.error(authErrorMessage(result.error));
     }
-    // En éxito, el RootNavigator cambia solo a la app (status -> signedIn).
   };
 
   return (

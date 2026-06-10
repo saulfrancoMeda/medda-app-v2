@@ -20,7 +20,6 @@ import { useContainer } from '@ui/providers/ContainerProvider';
 import { useToast } from '@ui/providers/ToastProvider';
 import type { WalletStackParamList } from '@ui/navigation/types';
 
-// --- Métodos de envío -------------------------------------------------------
 type MethodsProps = NativeStackScreenProps<WalletStackParamList, 'CashOutMethods'>;
 
 function MethodRow({
@@ -225,7 +224,6 @@ export function CashOutConfirmScreen({ route, navigation }: ConfirmProps) {
   );
 }
 
-// --- Éxito ------------------------------------------------------------------
 type SuccessProps = NativeStackScreenProps<WalletStackParamList, 'TransactionSuccess'>;
 
 export function TransactionSuccessScreen({ route, navigation }: SuccessProps) {
@@ -253,7 +251,6 @@ export function TransactionSuccessScreen({ route, navigation }: SuccessProps) {
   );
 }
 
-// --- Medá a Medá: escáner QR ------------------------------------------------
 type ScanProps = NativeStackScreenProps<WalletStackParamList, 'CashOutMedaScan'>;
 
 export function CashOutMedaScanScreen({ navigation }: ScanProps) {
@@ -298,7 +295,6 @@ export function CashOutMedaScanScreen({ navigation }: ScanProps) {
   );
 }
 
-// --- Medá a Medá: monto + NIP -----------------------------------------------
 type MedaAmountProps = NativeStackScreenProps<WalletStackParamList, 'CashOutMedaAmount'>;
 
 export function CashOutMedaAmountScreen({ route, navigation }: MedaAmountProps) {

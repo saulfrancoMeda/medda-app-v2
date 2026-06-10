@@ -148,7 +148,6 @@ export function ClarificationsScreen() {
 }
 
 export function ChatScreen({ navigation }: NativeStackScreenProps<FaqStackParamList, 'Chat'>) {
-  // Cache-buster calculado una vez (no en cada render) para no romper la regla de pureza.
   const [cacheBust] = useState(() => Date.now());
   if (!config.chatUri) {
     return (

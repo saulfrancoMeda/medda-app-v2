@@ -96,8 +96,8 @@ export function DrawerContent(props: DrawerContentComponentProps) {
                 shadowOpacity: 0.12,
                 shadowRadius: 3,
                 shadowOffset: { width: 0, height: 3 },
-                elevation: 4,        // Sombra para Android
-                overflow: 'hidden',  // Evita que cualquier subcontenido deforme las esquinas
+                elevation: 4,
+                overflow: 'hidden',
               }}
             >
               {initials ? (
@@ -122,7 +122,6 @@ export function DrawerContent(props: DrawerContentComponentProps) {
           </View>
         </GoldGradient>
 
-        {/* ... resto del código sin cambios ... */}
         <View className="flex-1 p-lg justify-between">
           <View>
             {ITEMS.map((item) => (

@@ -5,10 +5,6 @@ interface TokenResponse {
   expires_in?: number;
 }
 
-/**
- * Obtiene y cachea el token anónimo (OAuth grant_type=client_credentials) usado para
- * autorizar endpoints PÚBLICOS, como en el legacy (OAuthManager.getAnonymousToken).
- */
 export class AnonymousTokenProvider {
   private token: string | null = null;
   private expiresAt = 0;

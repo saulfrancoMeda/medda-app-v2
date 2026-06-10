@@ -185,8 +185,6 @@ export function PdfViewerScreen({ route }: PdfViewerProps) {
     );
   }
 
-  // Web pages load as-is. For PDFs, Android can't render them natively in a WebView, so we use the
-  // Google Docs viewer; iOS renders PDFs directly.
   const pdfUrl =
     web || Platform.OS === 'ios'
       ? url

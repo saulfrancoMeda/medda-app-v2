@@ -30,7 +30,6 @@ import type { AuthStackParamList } from '@ui/navigation/types';
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 
 function AuthNavigator() {
-  // Reuse the project's standard header (and its custom back button) for screens that show a header.
   return (
     <AuthStack.Navigator screenOptions={{ ...useStackScreenOptions(), headerShown: false }}>
       <AuthStack.Screen name="LoginPhone" component={LoginPhoneScreen} />

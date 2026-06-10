@@ -14,8 +14,6 @@ interface RegistrationContextValue {
 
 const RegistrationContext = createContext<RegistrationContextValue | null>(null);
 
-// Holds the registration draft and mirrors every change to encrypted storage so the user can leave
-// and resume on the step they left.
 export function RegistrationProvider({ children }: { children: ReactNode }) {
   const { registrationDraftStore } = useContainer();
   const [draft, setDraft] = useState<RegistrationDraft>(makeEmptyRegistrationDraft);
@@ -25,8 +23,6 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
     let active = true;
     (async () => {
       const stored = await registrationDraftStore.read();
-      // Merge over the current defaults so a draft saved with an older shape still gets every field
-      // (avoids crashes like reading `.map` on a field that did not exist when it was persisted).
       if (active && stored) setDraft({ ...makeEmptyRegistrationDraft(), ...stored });
     })()
       .catch(() => undefined)

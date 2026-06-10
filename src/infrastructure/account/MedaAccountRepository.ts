@@ -25,8 +25,6 @@ interface RawProfileFields {
   homeAddress?: { street?: string; colony?: string; postalCode?: string; reference?: string };
 }
 
-// El perfil viene bajo `info` (Account.js usa __loadData(..., 'info', ...)); aceptamos también
-// `profile` o la raíz como respaldo.
 interface RawProfile extends RawProfileFields {
   info?: RawProfileFields;
   profile?: RawProfileFields;
@@ -39,7 +37,7 @@ const toAccountError = (e: HttpError): AccountError => {
 };
 
 export class MedaAccountRepository implements AccountRepository {
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient) { }
 
   async getProfile(): Promise<Result<UserProfile, AccountError>> {
     const res = await this.http.request<RawProfile>(endpoints.userProfile);

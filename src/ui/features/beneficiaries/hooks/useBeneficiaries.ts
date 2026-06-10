@@ -17,8 +17,6 @@ export function useBeneficiariesQuery() {
   });
 }
 
-// Persists the whole list (the backend replaces it wholesale); the use case revalidates the 100%
-// rule before the call, and we refetch on success.
 export function useSaveBeneficiaries() {
   const { saveBeneficiaries } = useContainer();
   const queryClient = useQueryClient();

@@ -1,6 +1,3 @@
-// Dependency-free SHA-256 (legacy signs the NIP with SHA-256 for the registration payload).
-// Pure computation over a UTF-8 string -> lowercase hex. Works under Hermes without expo-crypto.
-
 const K = [
   0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
   0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
@@ -48,7 +45,6 @@ export const sha256 = (message: string): string => {
   const bitLength = bytes.length * 8;
   bytes.push(0x80);
   while (bytes.length % 64 !== 56) bytes.push(0);
-  // 64-bit big-endian length (high word is 0 for our message sizes).
   for (let i = 7; i >= 0; i--) bytes.push((bitLength / 2 ** (8 * i)) & 0xff);
 
   const w = new Array<number>(64);

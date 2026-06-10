@@ -39,7 +39,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [container],
   );
 
-  // Restaura la sesión guardada al abrir; si expiró, intenta refrescarla.
   useEffect(() => {
     let active = true;
     (async () => {

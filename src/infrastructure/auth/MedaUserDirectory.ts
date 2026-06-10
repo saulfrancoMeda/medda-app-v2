@@ -7,9 +7,8 @@ interface UserNameResponse {
   user?: string;
 }
 
-/** GET /public/user/name?cellphone=<phone> -> { user: "S*** F*****" } (nombre ya enmascarado). */
 export class MedaUserDirectory implements UserDirectory {
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient) { }
 
   async getName(phone: string): Promise<Result<string, LookupError>> {
     const res = await this.http.request<UserNameResponse>(endpoints.getUserName, {

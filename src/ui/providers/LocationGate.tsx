@@ -12,7 +12,7 @@ export function LocationGate({ children }: { children: ReactNode }) {
     try {
       setEnabled(await Location.hasServicesEnabledAsync());
     } catch {
-      setEnabled(true); // si no se puede determinar, no bloquear
+      setEnabled(true);
     }
   }, []);
 

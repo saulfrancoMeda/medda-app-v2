@@ -12,8 +12,6 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'LoginPhone'>;
 
 const PHONE_LENGTH = 10;
 
-// Paso 1 del login (paridad con Login.js): valida el teléfono contra GET /public/user/name,
-// que devuelve el nombre (ya enmascarado por el backend) para mostrarlo en el paso 2.
 export function LoginPhoneScreen({ navigation }: Props) {
   const { lookupName } = useAuth();
   const toast = useToast();

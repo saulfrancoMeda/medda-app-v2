@@ -38,14 +38,12 @@ export interface TransactionalQuestion {
   readonly options: readonly TransactionalQuestionOption[];
 }
 
-// A catalog entry (e.g. occupation): `key` is the value sent to the backend, `label` is shown.
 export interface CatalogItem {
   readonly key: string;
   readonly label: string;
 }
 
 export interface RegistrationGateway {
-  /** ok(true) when the phone has no account yet; err('phone_taken') when it is already registered. */
   isPhoneAvailable(phone: string): Promise<Result<true, RegistrationError>>;
   sendVerificationCode(phone: string): Promise<Result<true, RegistrationError>>;
   validateVerificationCode(phone: string, code: string): Promise<Result<true, RegistrationError>>;

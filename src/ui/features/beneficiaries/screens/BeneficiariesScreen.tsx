@@ -31,30 +31,27 @@ const formatUpdate = (iso: string | null): string | null => {
   return `${pad(date.getUTCDate())}/${pad(date.getUTCMonth() + 1)}/${date.getUTCFullYear()}`;
 };
 
-// A beneficiary list must always sum to exactly 100% and never be empty (legacy rule). Deleting one
-// is therefore resolved up front instead of leaving an invalid total: persist directly when the
-// outcome is unambiguous, otherwise route to the edit form for manual reassignment.
 type DeletePlan =
   | {
-      readonly kind: 'block';
-      readonly title: string;
-      readonly message: string;
-      readonly confirmLabel: string;
-    }
+    readonly kind: 'block';
+    readonly title: string;
+    readonly message: string;
+    readonly confirmLabel: string;
+  }
   | {
-      readonly kind: 'persist';
-      readonly title: string;
-      readonly message: string;
-      readonly confirmLabel: string;
-      readonly drafts: readonly BeneficiaryDraft[];
-    }
+    readonly kind: 'persist';
+    readonly title: string;
+    readonly message: string;
+    readonly confirmLabel: string;
+    readonly drafts: readonly BeneficiaryDraft[];
+  }
   | {
-      readonly kind: 'reassign';
-      readonly title: string;
-      readonly message: string;
-      readonly confirmLabel: string;
-      readonly remaining: readonly Beneficiary[];
-    };
+    readonly kind: 'reassign';
+    readonly title: string;
+    readonly message: string;
+    readonly confirmLabel: string;
+    readonly remaining: readonly Beneficiary[];
+  };
 
 const buildDeletePlan = (target: Beneficiary, all: readonly Beneficiary[]): DeletePlan => {
   const remaining = all.filter((item) => item !== target);

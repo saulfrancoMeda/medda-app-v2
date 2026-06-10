@@ -23,7 +23,6 @@ export type AuthStackParamList = {
   RegisterLegal: undefined;
 };
 
-// Datos del SPEI recolectados antes de confirmar (sin nip ni location, que se agregan al enviar).
 export type SpeiDraft = Omit<SpeiSendInput, 'nip' | 'location'>;
 
 export type WalletStackParamList = {
@@ -39,8 +38,6 @@ export type WalletStackParamList = {
   MovementDetail: { movement: Movement };
 };
 
-// Tabs visibles + un tab oculto "Sections" (stack) con las pantallas del drawer, para que el
-// bottom tab SIEMPRE permanezca visible y las subpantallas tengan push/back nativo.
 export type AppTabsParamList = {
   Store: undefined;
   Sales: undefined;

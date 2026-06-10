@@ -1,6 +1,3 @@
-// Registration draft: everything collected across the onboarding steps. It is persisted so a user
-// who leaves can resume on the step they left. Mirrors the legacy `onboarding_state` cache.
-
 export const REGISTRATION_STEPS = [
   'phone',
   'otp',
@@ -37,7 +34,6 @@ export interface RegistrationBeneficiary {
   readonly percent: number | null;
 }
 
-// Answer to a "perfil transaccional" question (sent to the backend as goalsSurvey).
 export interface TransactionalAnswer {
   readonly key: string;
   readonly value: string;
@@ -51,10 +47,10 @@ export interface RegistrationDraft {
   readonly lastName2: string;
   readonly password: string;
   readonly email: string;
-  readonly birthDate: string; // DD/MM/AAAA
+  readonly birthDate: string;
   readonly gender: string;
-  readonly occupation: string; // CnbvCatalog key sent to the backend
-  readonly occupationLabel: string; // human label for display
+  readonly occupation: string;
+  readonly occupationLabel: string;
   readonly nationality: Nationality;
   readonly resident: ResidentStatus;
   readonly curp: string;

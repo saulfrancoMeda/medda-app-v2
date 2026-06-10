@@ -1,6 +1,5 @@
 import { Image, type ImageStyle, type StyleProp } from 'react-native';
 
-// Logo oficial de Medá (dorado "M MEDÁ"). Asset real tomado del legacy (app/assets/logo_meda.png).
 const logoSource = require('../../../../assets/brand/logo_meda.png');
 
 export interface LogoProps {

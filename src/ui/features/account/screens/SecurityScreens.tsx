@@ -16,7 +16,6 @@ import type { SectionsStackParamList } from '@ui/navigation/types';
 
 const MIN_PASSWORD = 6;
 
-// --- Menú de seguridad ------------------------------------------------------
 function Row({
   icon,
   title,
@@ -201,7 +200,6 @@ export function SetNipScreen({ navigation }: SetNipProps) {
   );
 }
 
-// --- Validar correo (envía código al correo -> valida) ----------------------
 type ValidateEmailProps = NativeStackScreenProps<SectionsStackParamList, 'ValidateEmail'>;
 
 export function ValidateEmailScreen({ route, navigation }: ValidateEmailProps) {
@@ -211,7 +209,6 @@ export function ValidateEmailScreen({ route, navigation }: ValidateEmailProps) {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
-  // Auto-envía el código al montar (react-query, como el resto del codebase: evita efectos manuales).
   const codeSent = useQuery({
     queryKey: ['account', 'emailValidationCode'],
     queryFn: async () => {
@@ -324,7 +321,6 @@ export function ChangePasswordScreen({ navigation }: ChangePwdProps) {
   );
 }
 
-// --- Cambiar NIP ------------------------------------------------------------
 type ChangeNipProps = NativeStackScreenProps<SectionsStackParamList, 'ChangeNip'>;
 
 export function ChangeNipScreen({ navigation }: ChangeNipProps) {
@@ -378,7 +374,6 @@ export function ChangeNipScreen({ navigation }: ChangeNipProps) {
   );
 }
 
-// --- Cambiar correo ---------------------------------------------------------
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 type ChangeEmailProps = NativeStackScreenProps<SectionsStackParamList, 'ChangeEmail'>;
 
@@ -424,7 +419,6 @@ export function ChangeEmailScreen({ navigation }: ChangeEmailProps) {
   );
 }
 
-// --- Cambiar número (nuevo número + NIP -> código SMS -> confirmar) ----------
 type ChangeNumberProps = NativeStackScreenProps<SectionsStackParamList, 'ChangeNumber'>;
 
 export function ChangeNumberScreen({ navigation }: ChangeNumberProps) {

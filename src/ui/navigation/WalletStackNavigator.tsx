@@ -15,7 +15,6 @@ import type { WalletStackParamList } from '@ui/navigation/types';
 
 const Stack = createNativeStackNavigator<WalletStackParamList>();
 
-// Stack DENTRO del tab Billetera: las pantallas de Abonar/Enviar conservan el bottom tab visible.
 export function WalletStackNavigator() {
   return (
     <Stack.Navigator screenOptions={useStackScreenOptions()}>

@@ -10,28 +10,19 @@ export interface HttpError {
   readonly message: string;
 }
 
-/**
- * Provee el valor del header Authorization según el tipo de endpoint. Lo inyecta la capa de
- * auth (token anónimo para 'public', JWT de Cognito para 'user'). Devuelve null si no aplica.
- */
 export type AuthHeaderProvider = (auth: Endpoint['auth']) => Promise<string | null>;
 
 export interface RequestOptions {
   readonly query?: Record<string, string | number | boolean | undefined>;
   readonly body?: unknown;
-  /** HTTP statuses the caller handles as normal control flow (e.g. 404 = phone available); not logged. */
   readonly silentStatuses?: readonly number[];
 }
 
-/**
- * Capa HTTP. Replica los headers del legacy (apiBase.js): Content-Type, X-Auth-Token,
- * X-App-Version y Authorization condicional. Devuelve Result en vez de lanzar.
- */
 export class HttpClient {
   constructor(
     private readonly getAuthHeader: AuthHeaderProvider,
     private readonly baseUrl: string = config.apiBaseUrl,
-  ) {}
+  ) { }
 
   async request<T>(
     endpoint: Endpoint,
@@ -43,7 +34,6 @@ export class HttpClient {
       'X-Auth-Token': config.xAuthToken,
       'X-App-Version': config.appVersion,
     };
-    // For multipart, let fetch set Content-Type (with the boundary); for everything else use JSON.
     if (!isMultipart) headers['Content-Type'] = 'application/json';
     const authValue = await this.getAuthHeader(endpoint.auth);
     if (authValue) {
@@ -66,8 +56,6 @@ export class HttpClient {
       const parsed: unknown = text ? JSON.parse(text) : null;
 
       if (!response.ok) {
-        // Por ahora se loguea TODO (status + cuerpo) para que el equipo de backend sepa por qué
-        // falla el servicio, salvo los status que el caller maneja como flujo normal.
         if (!options.silentStatuses?.includes(response.status)) {
           console.warn(`[API] ${endpoint.method} ${endpoint.path} -> ${response.status}`, parsed);
         }
@@ -75,7 +63,6 @@ export class HttpClient {
           kind: 'http',
           status: response.status,
           body: parsed,
-          // Mensaje real del backend si lo hay; si no, el status. (Más adelante: solo status.)
           message: extractApiMessage(parsed) ?? `Error ${response.status}`,
         });
       }

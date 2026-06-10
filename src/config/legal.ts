@@ -1,5 +1,3 @@
-// Legal catalog mirrored from paginaweb-v2 (src/data/termsAndConditions.js). Single canonical PDFs
-// open in-app; multi-document sections open their web page; government links open externally.
 const DOCS = 'https://meda.com.mx/docs';
 const SECTION = 'https://meda.com.mx/terms-and-conditions?section=';
 
@@ -50,19 +48,8 @@ export const legalDocuments: readonly LegalDocument[] = [
     url: `${DOCS}/aviso_privacidad/aviso_privacidad.pdf`,
   },
   { id: 'notices', title: 'Avisos', kind: 'web', url: `${SECTION}notices` },
-  {
-    id: 'financial',
-    title: 'Estados financieros',
-    kind: 'web',
-    url: `${SECTION}financialStatements`,
-  },
+
   { id: 'costs', title: 'Costos y Comisiones', kind: 'web', url: `${SECTION}costsAndCommissions` },
-  {
-    id: 'products',
-    title: 'Productos / Requisitos de contratación',
-    kind: 'web',
-    url: `${SECTION}productsAndRequirements`,
-  },
   {
     id: 'adhesion',
     title: 'Contrato de Adhesión Medá',
@@ -71,7 +58,6 @@ export const legalDocuments: readonly LegalDocument[] = [
   },
 ];
 
-// External regulatory links (open in the system browser).
 export const legalLinks: readonly LegalDocument[] = [
   { id: 'condusef', title: 'CONDUSEF', kind: 'external', url: 'https://www.condusef.gob.mx/' },
   {

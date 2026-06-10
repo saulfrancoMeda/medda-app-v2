@@ -1,6 +1,3 @@
-// Pure validators for the registration flow, mirroring the legacy rules
-// (medaapp/app/src/Wallet/Components/Forms/NewPassword). No React/Expo here.
-
 const PHONE_RE = /^\d{10}$/;
 const NIP_RE = /^\d{6}$/;
 const OTP_RE = /^\d{6}$/;
@@ -17,10 +14,9 @@ export const isValidCurp = (curp: string): boolean => CURP_RE.test(curp.trim().t
 
 export interface PasswordContext {
   readonly phone?: string;
-  readonly birthDate?: string; // DD/MM/AAAA
+  readonly birthDate?: string;
 }
 
-// Returns a specific message when the password breaks a rule, or null when it is acceptable.
 export const validatePassword = (password: string, ctx: PasswordContext = {}): string | null => {
   if (password.length < 8) return 'Usa al menos 8 caracteres.';
   if (!/[A-Z]/.test(password)) return 'Incluye al menos una mayúscula.';
@@ -38,7 +34,6 @@ export const validatePassword = (password: string, ctx: PasswordContext = {}): s
   return null;
 };
 
-// True when the same character repeats more than `max` times in a row.
 const hasLongRun = (value: string, max: number): boolean => {
   let run = 1;
   for (let i = 1; i < value.length; i++) {
@@ -48,7 +43,6 @@ const hasLongRun = (value: string, max: number): boolean => {
   return false;
 };
 
-// True when characters ascend or descend consecutively more than `max` times (e.g. "abcd", "4321").
 const hasSequence = (value: string, max: number): boolean => {
   let asc = 1;
   let desc = 1;
@@ -72,7 +66,6 @@ const containsBirthDate = (password: string, birthDate: string): boolean => {
   );
 };
 
-// Age 18+ from a DD/MM/AAAA string.
 export const isAdult = (birthDate: string, now: Date = new Date()): boolean => {
   const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(birthDate.trim());
   if (!match) return false;

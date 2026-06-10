@@ -3,8 +3,6 @@ import { Text as RNText, type TextProps as RNTextProps } from 'react-native';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@ui/lib/cn';
 
-// El color SOLO lo define `tone` (una clase de color por modo). Las variantes `dark:` no
-// chocan con las de light porque son condicionales. `variant` controla tamaño/peso.
 const text = cva('font-sans', {
   variants: {
     variant: {
@@ -29,7 +27,7 @@ const text = cva('font-sans', {
 
 type TextVariants = VariantProps<typeof text>;
 
-export interface TextProps extends RNTextProps, TextVariants {}
+export interface TextProps extends RNTextProps, TextVariants { }
 
 export const Text = forwardRef<RNText, TextProps>(
   ({ variant, tone, center, className, ...rest }, ref) => (

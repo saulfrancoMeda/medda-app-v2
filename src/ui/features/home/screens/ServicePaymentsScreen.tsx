@@ -18,7 +18,6 @@ import { useContainer } from '@ui/providers/ContainerProvider';
 import { useToast } from '@ui/providers/ToastProvider';
 import type { StoreStackParamList } from '@ui/navigation/types';
 
-// Paso 1: categorías.
 type CatProps = NativeStackScreenProps<StoreStackParamList, 'ServicePayments'>;
 export function ServicePaymentsScreen({ navigation }: CatProps) {
   const categories = useCategories();
@@ -58,7 +57,6 @@ export function ServicePaymentsScreen({ navigation }: CatProps) {
   );
 }
 
-// Paso 2: operadores/servicios de la categoría.
 type ListProps = NativeStackScreenProps<StoreStackParamList, 'ServiceList'>;
 export function ServiceListScreen({ route, navigation }: ListProps) {
   const { categoryId } = route.params;
@@ -99,7 +97,6 @@ export function ServiceListScreen({ route, navigation }: ListProps) {
   );
 }
 
-// Paso 3: monto + referencia -> NIP -> procesa.
 type PayProps = NativeStackScreenProps<StoreStackParamList, 'ServicePay'>;
 export function ServicePayScreen({ route, navigation }: PayProps) {
   const { serviceId, serviceName } = route.params;

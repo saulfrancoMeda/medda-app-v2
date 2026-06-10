@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-// Countdown used to rate-limit SMS resends: after start(), the action stays disabled for `seconds`.
 export function useResendCooldown(seconds: number) {
   const [secondsLeft, setSecondsLeft] = useState(0);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);

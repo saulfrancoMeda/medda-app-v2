@@ -34,13 +34,11 @@ export function useStackScreenOptions(): NativeStackNavigationOptions {
     headerStyle: { backgroundColor: bg },
     headerShadowVisible: false,
     headerBackButtonDisplayMode: 'minimal',
-    // Avoid native-stack's "removed natively but not from JS state" warning: the iOS long-press
-    // back menu can pop several screens at once, which native-stack doesn't sync back to JS state.
     headerBackButtonMenuEnabled: false,
     headerLeft:
       Platform.OS === 'android'
         ? ({ canGoBack, tintColor }) =>
-            canGoBack ? <HeaderBackButton tint={tintColor ?? tint} /> : null
+          canGoBack ? <HeaderBackButton tint={tintColor ?? tint} /> : null
         : undefined,
   };
 }

@@ -21,7 +21,6 @@ const button = cva('flex-row items-center justify-center gap-sm rounded-pill', {
     disabled: { true: '' },
     full: { true: 'w-full' },
   },
-  // Deshabilitado + sólido: dorado pálido (paridad con el prototipo standalone), no gris.
   compoundVariants: [
     { variant: 'solid', disabled: true, class: 'bg-brand-100' },
     { variant: ['soft', 'outline', 'ghost', 'link'], disabled: true, class: 'opacity-40' },
@@ -31,7 +30,6 @@ const button = cva('flex-row items-center justify-center gap-sm rounded-pill', {
 
 type ButtonVariants = VariantProps<typeof button>;
 
-// El color del label se decide vía el `tone` del Text. solid/soft -> tinta; outline/ghost/link -> dorado.
 const labelTone = (variant: ButtonProps['variant'], disabled: boolean) => {
   if (disabled && (variant === 'solid' || !variant)) return 'muted' as const;
   return variant === 'outline' || variant === 'ghost' || variant === 'link'
@@ -41,7 +39,7 @@ const labelTone = (variant: ButtonProps['variant'], disabled: boolean) => {
 
 export interface ButtonProps
   extends Omit<PressableProps, 'disabled' | 'children'>,
-    Pick<ButtonVariants, 'variant' | 'size' | 'full'> {
+  Pick<ButtonVariants, 'variant' | 'size' | 'full'> {
   readonly title: string;
   readonly loading?: boolean;
   readonly disabled?: boolean;

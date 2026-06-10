@@ -27,8 +27,6 @@ type Props = NativeStackScreenProps<SectionsStackParamList, 'BeneficiariesEdit'>
 
 const MAX_BENEFICIARIES = 4;
 
-// Canonical 100% distributions per beneficiary count. 3 can't split evenly with discrete values,
-// so we suggest 50/25/25 (the label states the exact numbers, so it never looks like an even split).
 const SPLITS: Record<number, readonly number[]> = {
   1: [100],
   2: [50, 50],
@@ -54,8 +52,6 @@ const initialDrafts = (initial?: readonly Beneficiary[]): BeneficiaryDraft[] => 
   return [makeEmptyBeneficiaryDraft()];
 };
 
-// Mask DD/MM/AAAA while typing: auto-insert a leading zero when the first digit can't begin a valid
-// day/month, and clamp completed segments (day 01–31, month 01–12). Full-date and age checks run on blur.
 const formatBirthDate = (text: string): string => {
   let digits = text.replace(/\D/g, '').slice(0, 8);
   if (digits.length >= 1 && Number(digits[0]) > 3) {
@@ -106,8 +102,6 @@ export function BeneficiariesEditScreen({ route, navigation }: Props) {
 
   const addBeneficiary = () => {
     if (drafts.length >= MAX_BENEFICIARIES) return;
-    // A pre-existing 100% becomes invalid once there is more than one beneficiary; clear it and tell
-    // the user, so the new card isn't stranded behind a frozen, now-illegal 100%.
     const hadHundred = drafts.some((draft) => draft.percent === 100);
     setDrafts((prev) => [
       ...prev.map((draft) => (draft.percent === 100 ? { ...draft, percent: null } : draft)),

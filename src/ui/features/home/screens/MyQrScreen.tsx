@@ -3,7 +3,6 @@ import QRCode from 'react-native-qrcode-svg';
 import { useAuth } from '@ui/providers/AuthProvider';
 import { Text } from '@ui/design-system/components';
 
-// Muestra el QR del usuario (su identificador) para recibir dinero de otro usuario Medá.
 export function MyQrScreen() {
   const { session } = useAuth();
   const value = session?.username ?? '';

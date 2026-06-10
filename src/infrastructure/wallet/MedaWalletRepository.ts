@@ -60,7 +60,7 @@ const toWalletError = (e: HttpError): WalletError => {
 };
 
 export class MedaWalletRepository implements WalletRepository {
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient) { }
 
   async getDefaultAccount(): Promise<Result<Account, WalletError>> {
     const res = await this.http.request<RawAccount>(endpoints.walletDefaultAccount, {
@@ -116,8 +116,6 @@ export class MedaWalletRepository implements WalletRepository {
   }
 
   async getSpeiBanks(): Promise<Result<readonly Bank[], WalletError>> {
-    // El backend devuelve un mapa { code: name } (como en el legacy), no un array.
-    // Aceptamos tanto { banks: {..} } como el objeto en la raíz.
     const res = await this.http.request<{ banks?: Record<string, unknown> }>(
       endpoints.walletStpBanks,
     );
@@ -178,8 +176,6 @@ export class MedaWalletRepository implements WalletRepository {
   }
 
   async sendSpei(input: SpeiSendInput): Promise<Result<TransactionResult, WalletError>> {
-    // El backend espera SIEMPRE estos campos; si se omiten (undefined), lanza
-    // "Undefined array key" (408). Enviamos cadena vacía cuando son opcionales.
     const res = await this.http.request<{
       id?: string;
       date?: string;

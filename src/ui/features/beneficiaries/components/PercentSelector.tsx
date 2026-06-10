@@ -9,9 +9,7 @@ import { cn } from '@ui/lib/cn';
 interface PercentSelectorProps {
   readonly value: number | null;
   readonly onSelect: (percent: BeneficiaryPercent) => void;
-  // Largest share still available for this beneficiary (100 minus what the others already hold).
   readonly maxPercent: number;
-  // 100% is only valid for a sole beneficiary.
   readonly allowHundred: boolean;
   readonly error?: string;
 }
@@ -33,8 +31,6 @@ export function PercentSelector({
       <View className="flex-row gap-sm">
         {OPTIONS.map((option) => {
           const selected = value === option;
-          // The current selection is always tappable; everything that would overflow is dimmed so
-          // the user can see the ceiling without getting trapped (lowering another card re-enables it).
           const disabled = !selected && (option > maxPercent || (option === 100 && !allowHundred));
           return (
             <Pressable
