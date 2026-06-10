@@ -77,18 +77,7 @@ export function SecurityScreen({ navigation }: SecurityProps) {
         subtitle="Usas este correo para recibir toda la información de tu cuenta"
         onPress={() => navigation.navigate('ChangeEmail')}
       />
-      <Row
-        icon="shield-checkmark-outline"
-        title="Validar mi correo"
-        subtitle="Confirma tu correo para activar todos los beneficios"
-        onPress={() => navigation.navigate('ValidateEmail', {})}
-      />
-      <Row
-        icon="key-outline"
-        title="Establecer mi NIP"
-        subtitle="Crea tu NIP de 6 dígitos para autorizar movimientos"
-        onPress={() => navigation.navigate('SetNip')}
-      />
+
     </ScrollView>
   );
 }

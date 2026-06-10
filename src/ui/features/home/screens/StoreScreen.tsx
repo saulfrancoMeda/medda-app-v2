@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -5,11 +6,17 @@ import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { formatCurrency } from '@domain/shared/money';
+import { expensesTotal } from '@domain/wallet/entities/Movement';
 import { AppHeader } from '@ui/navigation/AppHeader';
 import { Text } from '@ui/design-system/components';
 import { BalanceCard } from '@ui/features/wallet/components/BalanceCard';
 import { useProfile } from '@ui/features/account/hooks/useAccount';
-import { useBalance, useDefaultAccount, useSalesTotal, useStpAccount } from '@ui/features/wallet/hooks/useWallet';
+import {
+  useBalance,
+  useDefaultAccount,
+  useMovements,
+  useStpAccount,
+} from '@ui/features/wallet/hooks/useWallet';
 import type { AppTabsParamList, StoreStackParamList } from '@ui/navigation/types';
 
 function QuickAction({
@@ -67,7 +74,8 @@ export function StoreScreen() {
   const profile = useProfile();
   const account = useDefaultAccount();
   const balance = useBalance(account.data?.id);
-  const salesTotal = useSalesTotal();
+  const movements = useMovements(account.data?.id);
+  const expenses = useMemo(() => expensesTotal(movements.data?.movements ?? []), [movements.data]);
   const stp = useStpAccount();
   const p = profile.data;
   const initials = p ? `${p.firstName[0] ?? ''}${p.lastName[0] ?? ''}`.toUpperCase() : '';
@@ -122,7 +130,7 @@ export function StoreScreen() {
           <StatTile
             icon="receipt-outline"
             label="Mis gastos"
-            value={salesTotal.data}
+            value={movements.data ? expenses : undefined}
             onPress={() => tabNav.navigate('Sales')}
           />
           <StatTile
@@ -132,7 +140,6 @@ export function StoreScreen() {
             onPress={() => goWallet('WalletHome')}
           />
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );

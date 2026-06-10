@@ -58,7 +58,7 @@ export type SectionsStackParamList = {
   Profile: undefined;
   Notifications: undefined;
   Legal: undefined;
-  PdfViewer: { title: string; url: string };
+  PdfViewer: { title: string; url: string; web?: boolean };
   Statements: undefined;
   Beneficiaries: undefined;
   BeneficiariesEdit: { initial?: Beneficiary[] } | undefined;

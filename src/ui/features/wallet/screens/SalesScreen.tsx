@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { formatCurrency } from '@domain/shared/money';
-import type { Movement } from '@domain/wallet/entities/Movement';
+import { expensesTotal, isExpense, type Movement } from '@domain/wallet/entities/Movement';
 import { AppHeader } from '@ui/navigation/AppHeader';
 import { Text } from '@ui/design-system/components';
 import { useDefaultAccount, useMovements } from '@ui/features/wallet/hooks/useWallet';
@@ -22,10 +22,12 @@ export function SalesScreen() {
   const tabNav = useNavigation<BottomTabNavigationProp<AppTabsParamList>>();
   const account = useDefaultAccount();
   const movements = useMovements(account.data?.id);
-  const total = useMemo(
-    () => (movements.data?.movements ?? []).reduce((sum, m) => sum + Math.abs(m.amount), 0),
+  // "Mis gastos" son las salidas: enviar SPEI o transferir a cuentas Medá. Los abonos son ingresos.
+  const expenses = useMemo(
+    () => (movements.data?.movements ?? []).filter(isExpense),
     [movements.data],
   );
+  const total = useMemo(() => expensesTotal(expenses), [expenses]);
 
   const openDetail = (movement: Movement) =>
     tabNav.navigate('Wallet', { screen: 'MovementDetail', params: { movement } });
@@ -46,7 +48,7 @@ export function SalesScreen() {
     <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
       <AppHeader />
       <FlatList
-        data={movements.data?.movements ?? []}
+        data={expenses}
         keyExtractor={(m) => m.id}
         contentContainerClassName="p-lg pb-2xl"
         ListHeaderComponent={header}
@@ -72,7 +74,7 @@ export function SalesScreen() {
             <ActivityIndicator className="mt-lg" color="#FCD535" />
           ) : (
             <Text variant="caption" tone="muted">
-              Aún no tienes movimientos.
+              Aún no tienes gastos registrados.
             </Text>
           )
         }

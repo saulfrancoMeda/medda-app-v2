@@ -22,3 +22,10 @@ export const isCredit = (movement: Movement): boolean => movement.channels.inclu
 /** Monto con signo según sea abono o cargo. */
 export const signedAmount = (movement: Movement): number =>
   isCredit(movement) ? Math.abs(movement.amount) : -Math.abs(movement.amount);
+
+/** Un gasto es dinero que sale (cargo); lo que entra (abono) es un ingreso, no un gasto. */
+export const isExpense = (movement: Movement): boolean => !isCredit(movement);
+
+/** Suma de los gastos (salidas). Ignora los abonos. */
+export const expensesTotal = (movements: readonly Movement[]): number =>
+  movements.filter(isExpense).reduce((sum, movement) => sum + Math.abs(movement.amount), 0);

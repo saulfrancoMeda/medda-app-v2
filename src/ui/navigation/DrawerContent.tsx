@@ -85,25 +85,30 @@ export function DrawerContent(props: DrawerContentComponentProps) {
           </Pressable>
           <View className="items-center gap-md pt-lg">
             <View
-              className="h-28 w-28 items-center justify-center rounded-pill bg-neutral-0"
+              className="items-center justify-center bg-neutral-0"
               style={{
+                width: 64,
+                height: 64,
+                borderRadius: 32,
                 borderWidth: 4,
                 borderColor: 'rgba(255,255,255,0.9)',
                 shadowColor: '#000',
                 shadowOpacity: 0.12,
-                shadowRadius: 8,
+                shadowRadius: 3,
                 shadowOffset: { width: 0, height: 3 },
-                elevation: 4,
+                elevation: 4,        // Sombra para Android
+                overflow: 'hidden',  // Evita que cualquier subcontenido deforme las esquinas
               }}
             >
               {initials ? (
-                <Text variant="display" className="text-brand-700" style={{ fontSize: 44 }}>
+                <Text variant="display" className="text-brand-700" style={{ fontSize: 24, fontWeight: 'bold' }}>
                   {initials}
                 </Text>
               ) : (
                 <Ionicons name="person" size={48} color="#97720A" />
               )}
             </View>
+
             <View className="items-center gap-1">
               <Text variant="h1" center className="text-ink" numberOfLines={2}>
                 {name || 'Bienvenido'}
@@ -117,6 +122,7 @@ export function DrawerContent(props: DrawerContentComponentProps) {
           </View>
         </GoldGradient>
 
+        {/* ... resto del código sin cambios ... */}
         <View className="flex-1 p-lg justify-between">
           <View>
             {ITEMS.map((item) => (

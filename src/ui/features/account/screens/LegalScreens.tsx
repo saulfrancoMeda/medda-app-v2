@@ -11,7 +11,7 @@ import {
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { config } from '@config/env';
+import { legalDocuments, legalLinks, type LegalDocument } from '@config/legal';
 import { Text } from '@ui/design-system/components';
 import { accountErrorMessage } from '@ui/features/account/errorMessages';
 import { useNipAuthorization } from '@ui/features/common/useNipAuthorization';
@@ -47,26 +47,29 @@ function Row({
 type LegalProps = NativeStackScreenProps<SectionsStackParamList, 'Legal'>;
 
 export function LegalScreen({ navigation }: LegalProps) {
-  const docs = [
-    { title: 'Términos y condiciones', url: config.legal.termsAndConditions },
-    { title: 'Aviso de privacidad', url: config.legal.privacyAdvice },
-    { title: 'Consulta de costos y comisiones', url: config.legal.commissions },
-    { title: 'Contrato de Adhesión Medá', url: config.legal.adhesionContract },
-  ];
+  const openDocument = (doc: LegalDocument) => {
+    if (doc.kind === 'external') {
+      void Linking.openURL(doc.url);
+      return;
+    }
+    navigation.navigate('PdfViewer', {
+      title: doc.title,
+      url: doc.url,
+      web: doc.kind === 'web',
+    });
+  };
+
   return (
     <ScrollView
       className="flex-1 bg-neutral-0 dark:bg-neutral-950"
-      contentContainerClassName="gap-lg p-lg"
+      contentContainerClassName="gap-md p-lg"
     >
-      {docs.map((d) => (
+      {legalDocuments.map((doc) => (
         <Row
-          key={d.title}
+          key={doc.id}
           icon="document-text-outline"
-          title={d.title}
-          onPress={() => {
-            if (!d.url) return;
-            navigation.navigate('PdfViewer', { title: d.title, url: d.url });
-          }}
+          title={doc.title}
+          onPress={() => openDocument(doc)}
         />
       ))}
       <Row
@@ -80,15 +83,16 @@ export function LegalScreen({ navigation }: LegalProps) {
         onPress={() => navigation.navigate('Beneficiaries')}
       />
 
+      {legalLinks.map((link) => (
+        <Row
+          key={link.id}
+          icon="open-outline"
+          title={link.title}
+          onPress={() => openDocument(link)}
+        />
+      ))}
+
       <View className="mt-md gap-sm rounded-card border border-neutral-200 p-lg dark:border-neutral-800">
-        <Text variant="body" className="font-semibold">
-          Ligas de interés
-        </Text>
-        <Pressable onPress={() => Linking.openURL('https://www.condusef.gob.mx/')}>
-          <Text variant="body" tone="link">
-            CONDUSEF
-          </Text>
-        </Pressable>
         <Text variant="caption" tone="muted">
           Medá es una Institución de Fondos de Pago Electrónico. Los recursos de los clientes no se
           encuentran garantizados por el Gobierno Federal ni por las entidades de la administración
@@ -168,7 +172,7 @@ type PdfViewerProps = NativeStackScreenProps<SectionsStackParamList, 'PdfViewer'
 
 export function PdfViewerScreen({ route }: PdfViewerProps) {
   const [webLoading, setWebLoading] = useState(true);
-  const { url } = route.params;
+  const { url, web } = route.params;
 
   if (!url) {
     return (
@@ -181,9 +185,10 @@ export function PdfViewerScreen({ route }: PdfViewerProps) {
     );
   }
 
-  // Android no renderiza PDFs en WebView nativamente: usamos el visor de Google Docs.
+  // Web pages load as-is. For PDFs, Android can't render them natively in a WebView, so we use the
+  // Google Docs viewer; iOS renders PDFs directly.
   const pdfUrl =
-    Platform.OS === 'ios'
+    web || Platform.OS === 'ios'
       ? url
       : `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`;
 

@@ -95,17 +95,6 @@ export function ProfileScreen({ navigation }: Props) {
         </SectionCard>
       ) : null}
 
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => navigation.navigate('ValidateEmail', { email: p.email })}
-        className="flex-row items-center gap-md rounded-card border border-neutral-200 p-lg dark:border-neutral-800"
-      >
-        <Ionicons name="shield-checkmark-outline" size={22} color="#97720A" />
-        <Text variant="body" className="flex-1">
-          Validar mi correo
-        </Text>
-        <Ionicons name="chevron-forward" size={20} color="#9A9384" />
-      </Pressable>
 
       <Pressable
         accessibilityRole="button"
