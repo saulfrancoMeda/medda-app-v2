@@ -10,6 +10,13 @@ import {
   RecoverPhoneScreen,
 } from '@ui/features/auth/screens/RecoverScreens';
 import { UnlockScreen } from '@ui/features/auth/screens/UnlockScreen';
+import {
+  RegisterLegalScreen,
+  RegisterNipScreen,
+  RegisterOtpScreen,
+  RegisterPersonalScreen,
+  RegisterPhoneScreen,
+} from '@ui/features/auth/screens/RegisterScreens';
 import { LoadingScreen } from '@ui/features/common/LoadingScreen';
 import { AppNavigator } from '@ui/navigation/AppNavigator';
 import type { AuthStackParamList } from '@ui/navigation/types';
@@ -40,6 +47,31 @@ function AuthNavigator() {
         name="Unlock"
         component={UnlockScreen}
         options={{ headerShown: true, title: 'Desbloquear usuario' }}
+      />
+      <AuthStack.Screen
+        name="RegisterPhone"
+        component={RegisterPhoneScreen}
+        options={{ headerShown: true, title: 'Crear cuenta' }}
+      />
+      <AuthStack.Screen
+        name="RegisterOtp"
+        component={RegisterOtpScreen}
+        options={{ headerShown: true, title: 'Verifica tu número' }}
+      />
+      <AuthStack.Screen
+        name="RegisterPersonal"
+        component={RegisterPersonalScreen}
+        options={{ headerShown: true, title: 'Tus datos' }}
+      />
+      <AuthStack.Screen
+        name="RegisterNip"
+        component={RegisterNipScreen}
+        options={{ headerShown: true, title: 'Crea tu NIP' }}
+      />
+      <AuthStack.Screen
+        name="RegisterLegal"
+        component={RegisterLegalScreen}
+        options={{ headerShown: true, title: 'Términos' }}
       />
     </AuthStack.Navigator>
   );

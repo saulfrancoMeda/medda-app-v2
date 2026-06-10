@@ -11,6 +11,11 @@ export type AuthStackParamList = {
   RecoverCode: { phone: string };
   RecoverNewPassword: { phone: string; code: string };
   Unlock: undefined;
+  RegisterPhone: undefined;
+  RegisterOtp: undefined;
+  RegisterPersonal: undefined;
+  RegisterNip: undefined;
+  RegisterLegal: undefined;
 };
 
 // Datos del SPEI recolectados antes de confirmar (sin nip ni location, que se agregan al enviar).

@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "Medá Agentes",
+    "name": "Medá",
     "slug": "medaapp-v2",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/brand/logo_meda.png",
+    "icon": "./assets/brand/icon.png",
     "scheme": "medaagentes",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -18,7 +18,7 @@
       "package": "com.meda.agentes",
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
-        "foregroundImage": "./assets/brand/logo_meda.png"
+        "foregroundImage": "./assets/brand/icon.png"
       },
       "predictiveBackGestureEnabled": false
     },
@@ -29,9 +29,7 @@
       [
         "expo-font",
         {
-          "fonts": [
-            "./assets/fonts/BinancePlex.ttf"
-          ]
+          "fonts": ["./assets/fonts/BinancePlex.ttf"]
         }
       ],
       [

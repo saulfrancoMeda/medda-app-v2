@@ -1,6 +1,7 @@
 import type { AuthError } from '@domain/auth/ports/AuthGateway';
 import type { LookupError } from '@domain/auth/ports/UserDirectory';
 import type { RecoveryError } from '@domain/auth/ports/PasswordRecovery';
+import type { RegistrationError } from '@domain/registration/ports/RegistrationGateway';
 
 export const authErrorMessage = (error: AuthError): string => {
   switch (error.type) {
@@ -27,6 +28,19 @@ export const lookupErrorMessage = (error: LookupError): string => {
       return 'Revisa tu conexión a internet e intenta de nuevo.';
     case 'unknown':
       return 'No pudimos validar tu número. Intenta de nuevo.';
+  }
+};
+
+export const registrationErrorMessage = (e: RegistrationError): string => {
+  switch (e.type) {
+    case 'phone_taken':
+      return 'Ese número ya tiene una cuenta. Inicia sesión.';
+    case 'invalid_code':
+      return 'Código incorrecto. Verifícalo e intenta de nuevo.';
+    case 'network':
+      return 'Revisa tu conexión a internet e intenta de nuevo.';
+    case 'unknown':
+      return e.message || 'No se pudo completar el registro. Intenta de nuevo.';
   }
 };
 

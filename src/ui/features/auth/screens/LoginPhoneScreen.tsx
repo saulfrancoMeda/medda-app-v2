@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Button, Input, Logo, Text } from '@ui/design-system/components';
@@ -62,15 +62,26 @@ export function LoginPhoneScreen({ navigation }: Props) {
         <View className="flex-1" />
 
         <View className="gap-md pb-lg">
-          <Button title="Iniciar sesión" full disabled={!valid} loading={loading} onPress={onContinue} />
+          <Button
+            title="Iniciar sesión"
+            full
+            disabled={!valid}
+            loading={loading}
+            onPress={onContinue}
+          />
 
           <View className="flex-row justify-center gap-xs">
             <Text variant="body" tone="muted">
               No tengo cuenta.
             </Text>
-            <Text variant="body" tone="link" className="font-semibold">
-              Regístrate
-            </Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => navigation.navigate('RegisterPhone')}
+            >
+              <Text variant="body" tone="link" className="font-semibold">
+                Regístrate
+              </Text>
+            </Pressable>
           </View>
         </View>
       </View>

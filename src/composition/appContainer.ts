@@ -5,6 +5,12 @@ import {
   makeLookupPostalCode,
   makeSaveBeneficiaries,
 } from '@application/beneficiaries/useCases/manageBeneficiaries';
+import {
+  makeCheckPhoneAvailable,
+  makeRegister,
+  makeSendVerificationCode,
+  makeValidateVerificationCode,
+} from '@application/registration/useCases/manageRegistration';
 import { createAuthGateway } from '@infrastructure/auth/createAuthGateway';
 import { AnonymousTokenProvider } from '@infrastructure/auth/AnonymousTokenProvider';
 import { MedaUserDirectory } from '@infrastructure/auth/MedaUserDirectory';
@@ -16,6 +22,8 @@ import { MedaAccountRepository } from '@infrastructure/account/MedaAccountReposi
 import { MedaSupportRepository } from '@infrastructure/support/MedaSupportRepository';
 import { MedaNotificationRepository } from '@infrastructure/notifications/MedaNotificationRepository';
 import { MedaBeneficiaryRepository } from '@infrastructure/beneficiaries/MedaBeneficiaryRepository';
+import { MedaRegistrationGateway } from '@infrastructure/registration/MedaRegistrationGateway';
+import { SecureRegistrationDraftStore } from '@infrastructure/storage/SecureRegistrationDraftStore';
 import { MedaPasswordRecovery } from '@infrastructure/auth/MedaPasswordRecovery';
 import type { AuthGateway } from '@domain/auth/ports/AuthGateway';
 import type { PasswordRecovery } from '@domain/auth/ports/PasswordRecovery';
@@ -25,6 +33,8 @@ import type { AccountRepository } from '@domain/account/ports/AccountRepository'
 import type { SupportRepository } from '@domain/support/ports/SupportRepository';
 import type { NotificationRepository } from '@domain/notifications/ports/NotificationRepository';
 import type { BeneficiaryRepository } from '@domain/beneficiaries/ports/BeneficiaryRepository';
+import type { RegistrationGateway } from '@domain/registration/ports/RegistrationGateway';
+import type { RegistrationDraftStore } from '@domain/registration/ports/RegistrationDraftStore';
 
 export interface AppContainer {
   readonly gateway: AuthGateway;
@@ -40,6 +50,12 @@ export interface AppContainer {
   readonly listBeneficiaries: ReturnType<typeof makeListBeneficiaries>;
   readonly saveBeneficiaries: ReturnType<typeof makeSaveBeneficiaries>;
   readonly lookupPostalCode: ReturnType<typeof makeLookupPostalCode>;
+  readonly registrationDraftStore: RegistrationDraftStore;
+  readonly registrationGateway: RegistrationGateway;
+  readonly checkPhoneAvailable: ReturnType<typeof makeCheckPhoneAvailable>;
+  readonly sendVerificationCode: ReturnType<typeof makeSendVerificationCode>;
+  readonly validateVerificationCode: ReturnType<typeof makeValidateVerificationCode>;
+  readonly register: ReturnType<typeof makeRegister>;
   readonly passwordRecovery: PasswordRecovery;
 }
 
@@ -66,6 +82,8 @@ export const createAppContainer = (): AppContainer => {
   const supportRepository = new MedaSupportRepository(http);
   const notificationRepository = new MedaNotificationRepository(http);
   const beneficiaryRepository = new MedaBeneficiaryRepository(http);
+  const registrationGateway = new MedaRegistrationGateway(http);
+  const registrationDraftStore = new SecureRegistrationDraftStore();
   const passwordRecovery = new MedaPasswordRecovery(http);
 
   return {
@@ -82,6 +100,12 @@ export const createAppContainer = (): AppContainer => {
     listBeneficiaries: makeListBeneficiaries({ repository: beneficiaryRepository }),
     saveBeneficiaries: makeSaveBeneficiaries({ repository: beneficiaryRepository }),
     lookupPostalCode: makeLookupPostalCode({ repository: beneficiaryRepository }),
+    registrationDraftStore,
+    registrationGateway,
+    checkPhoneAvailable: makeCheckPhoneAvailable({ gateway: registrationGateway }),
+    sendVerificationCode: makeSendVerificationCode({ gateway: registrationGateway }),
+    validateVerificationCode: makeValidateVerificationCode({ gateway: registrationGateway }),
+    register: makeRegister({ gateway: registrationGateway }),
     passwordRecovery,
   };
 };

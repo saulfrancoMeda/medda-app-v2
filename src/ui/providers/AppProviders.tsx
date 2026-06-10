@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ContainerProvider } from '@ui/providers/ContainerProvider';
 import { AuthProvider } from '@ui/providers/AuthProvider';
+import { RegistrationProvider } from '@ui/features/registration/RegistrationProvider';
 import { SecurityMonitor } from '@ui/providers/SecurityMonitor';
 import { LocationGate } from '@ui/providers/LocationGate';
 import { ToastProvider } from '@ui/providers/ToastProvider';
@@ -19,9 +20,11 @@ export function AppProviders({ children }: { children: ReactNode }) {
           <ToastProvider>
             <QueryClientProvider client={queryClient}>
               <AuthProvider>
-                <SecurityMonitor>
-                  <LocationGate>{children}</LocationGate>
-                </SecurityMonitor>
+                <RegistrationProvider>
+                  <SecurityMonitor>
+                    <LocationGate>{children}</LocationGate>
+                  </SecurityMonitor>
+                </RegistrationProvider>
               </AuthProvider>
             </QueryClientProvider>
           </ToastProvider>
