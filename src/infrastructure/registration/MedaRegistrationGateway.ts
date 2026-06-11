@@ -70,7 +70,7 @@ const buildFormData = (form: FormData, data: unknown, parentKey?: string): void 
 };
 
 export class MedaRegistrationGateway implements RegistrationGateway {
-  constructor(private readonly http: HttpClient) { }
+  constructor(private readonly http: HttpClient) {}
 
   async isPhoneAvailable(phone: string): Promise<Result<true, RegistrationError>> {
     const res = await this.http.request<{ user?: string }>(endpoints.getUserName, {
@@ -146,7 +146,6 @@ export class MedaRegistrationGateway implements RegistrationGateway {
     });
   }
 
-
   async getTransactionalProfileQuestions(): Promise<
     Result<readonly TransactionalQuestion[], RegistrationError>
   > {
@@ -191,7 +190,8 @@ export class MedaRegistrationGateway implements RegistrationGateway {
       nipSignature: draft.nip,
       birthDate: draft.birthDate,
       occupation: draft.occupation,
-      genre: draft.gender === 'Masculino' ? 'M' : 'F',
+      // Backend ChoiceType uses array_flip(GENRES), so the submit value is the index: 0=Masculino, 1=Femenino.
+      genre: draft.gender === 'Femenino' ? 1 : 0,
       nationality: draft.nationality === 'mexicana' ? 'mx' : 'ext',
       curp: draft.curp,
       resident: draft.resident === 'fm',
@@ -224,6 +224,12 @@ export class MedaRegistrationGateway implements RegistrationGateway {
         noticeOfPrivacyCheck: draft.acceptedPrivacy,
       },
     };
+
+    // TEMP debug: log the exact body sent to /public/register/v2 (secrets redacted).
+    console.log(
+      '[REGISTER body]',
+      JSON.stringify({ ...data, password: '***', nip: '***', nipSignature: '***' }),
+    );
 
     if (!hasDocuments) {
       const res = await this.http.request<unknown>(endpoints.register, { body: data });

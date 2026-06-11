@@ -453,6 +453,7 @@ export function RegisterDemographicsScreen({ navigation }: DemographicsProps) {
   const [curp, setCurp] = useState(draft.curp);
   const [occupation, setOccupation] = useState(draft.occupation);
   const [occupationLabel, setOccupationLabel] = useState(draft.occupationLabel);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const birthDateComplete = birthDate.length === 10;
   const birthDateError =
@@ -461,15 +462,25 @@ export function RegisterDemographicsScreen({ navigation }: DemographicsProps) {
     nationality === 'mexicana' && curp.length > 0 && !isValidCurp(curp)
       ? 'CURP inválida.'
       : undefined;
-  const valid =
-    birthDateComplete &&
-    !birthDateError &&
-    gender !== '' &&
-    occupation !== '' &&
-    (nationality === 'mexicana' ? isValidCurp(curp) : resident !== '');
+
+  // Returns the first missing/invalid field so the button can say exactly what's pending.
+  const missingMessage = (): string | null => {
+    if (!birthDateComplete || birthDateError) return 'Ingresa una fecha de nacimiento válida.';
+    if (gender !== 'Masculino' && gender !== 'Femenino') return 'Selecciona tu género.';
+    if (nationality === 'mexicana' && !isValidCurp(curp)) return 'Captura una CURP válida.';
+    if (nationality === 'extranjera' && resident === '')
+      return 'Selecciona tu situación migratoria.';
+    if (occupation === '') return 'Selecciona tu ocupación.';
+    return null;
+  };
 
   const onContinue = () => {
-    if (!valid) return;
+    const message = missingMessage();
+    if (message) {
+      setFormError(message);
+      return;
+    }
+    setFormError(null);
     update({
       birthDate,
       gender,
@@ -547,11 +558,17 @@ export function RegisterDemographicsScreen({ navigation }: DemographicsProps) {
           onSelect={(key, optionLabel) => {
             setOccupation(key);
             setOccupationLabel(optionLabel);
+            setFormError(null);
           }}
         />
       </ScrollView>
       <StepFooter>
-        <Button title="Continuar" full disabled={!valid} onPress={onContinue} />
+        {formError ? (
+          <Text variant="caption" tone="danger" center>
+            {formError}
+          </Text>
+        ) : null}
+        <Button title="Continuar" full onPress={onContinue} />
       </StepFooter>
     </SafeAreaView>
   );
