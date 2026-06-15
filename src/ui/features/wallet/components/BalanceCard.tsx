@@ -1,12 +1,21 @@
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { formatCurrency } from '@domain/shared/money';
 import { GoldGradient, Text } from '@ui/design-system/components';
+
+export interface BalanceCardAction {
+  readonly icon: keyof typeof Ionicons.glyphMap;
+  readonly label: string;
+  readonly onPress: () => void;
+}
 
 interface BalanceCardProps {
   readonly balance?: number;
   readonly loading?: boolean;
   readonly clabe?: string;
   readonly label?: string;
+  /** Quick actions rendered inside the card (balance + what you can do with it = one unit). */
+  readonly actions?: readonly BalanceCardAction[];
 }
 
 const maskClabe = (clabe?: string): string => {
@@ -19,6 +28,7 @@ export function BalanceCard({
   loading = false,
   clabe,
   label = 'Tu saldo disponible',
+  actions,
 }: BalanceCardProps) {
   const masked = maskClabe(clabe);
   return (
@@ -27,11 +37,12 @@ export function BalanceCard({
         <Text className="text-ink" style={{ opacity: 0.72 }}>
           {label}
         </Text>
-        <View
-          className="rounded-pill"
-          style={{ backgroundColor: '#1B1812', padding: 4 }}
-        >
-          <Text variant="caption" className="font-bold tracking-widest" style={{ color: '#FCD535', fontSize: 12 }}>
+        <View className="rounded-pill px-sm py-1" style={{ backgroundColor: '#1B1812' }}>
+          <Text
+            variant="caption"
+            className="font-bold tracking-widest"
+            style={{ color: '#FCD535' }}
+          >
             MXN
           </Text>
         </View>
@@ -48,9 +59,37 @@ export function BalanceCard({
       )}
 
       {masked ? (
-        <Text variant="caption" className="font-mono text-ink" style={{ opacity: 0.66, marginTop: 12 }}>
+        <Text
+          variant="caption"
+          className="font-mono text-ink"
+          style={{ opacity: 0.66, marginTop: 12 }}
+        >
           {masked}
         </Text>
+      ) : null}
+
+      {actions && actions.length > 0 ? (
+        <View className="flex-row justify-between" style={{ marginTop: 16 }}>
+          {actions.map((action) => (
+            <Pressable
+              key={action.label}
+              accessibilityRole="button"
+              accessibilityLabel={action.label}
+              onPress={action.onPress}
+              className="flex-1 items-center gap-xs active:opacity-80"
+            >
+              <View
+                className="h-12 w-12 items-center justify-center rounded-pill"
+                style={{ backgroundColor: '#1B1812' }}
+              >
+                <Ionicons name={action.icon} size={22} color="#FCD535" />
+              </View>
+              <Text variant="caption" className="text-ink" style={{ opacity: 0.72 }}>
+                {action.label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
       ) : null}
     </GoldGradient>
   );

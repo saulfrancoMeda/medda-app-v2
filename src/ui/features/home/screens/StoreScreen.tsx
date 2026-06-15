@@ -6,10 +6,11 @@ import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { formatCurrency } from '@domain/shared/money';
-import { expensesTotal } from '@domain/wallet/entities/Movement';
+import { expensesTotal, type Movement } from '@domain/wallet/entities/Movement';
 import { AppHeader } from '@ui/navigation/AppHeader';
 import { Text } from '@ui/design-system/components';
 import { BalanceCard } from '@ui/features/wallet/components/BalanceCard';
+import { MovementRow, MovementRowSkeleton } from '@ui/features/wallet/components/MovementRow';
 import { useProfile } from '@ui/features/account/hooks/useAccount';
 import {
   useBalance,
@@ -19,54 +20,7 @@ import {
 } from '@ui/features/wallet/hooks/useWallet';
 import type { AppTabsParamList, StoreStackParamList } from '@ui/navigation/types';
 
-function QuickAction({
-  icon,
-  label,
-  onPress,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable className="flex-1 items-center gap-xs" accessibilityRole="button" onPress={onPress}>
-      <View className="h-14 w-14 items-center justify-center rounded-card bg-brand-100">
-        <Ionicons name={icon} size={24} color="#97720A" />
-      </View>
-      <Text variant="caption" tone="muted" center>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-function StatTile({
-  icon,
-  label,
-  value,
-  onPress,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  value?: number;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      className="flex-1 gap-sm rounded-card border border-neutral-200 bg-neutral-0 p-lg dark:border-neutral-800 dark:bg-neutral-900"
-    >
-      <View className="h-10 w-10 items-center justify-center rounded-md bg-neutral-100 dark:bg-neutral-800">
-        <Ionicons name={icon} size={20} color="#97720A" />
-      </View>
-      <Text variant="caption" tone="muted">
-        {label}
-      </Text>
-      <Text variant="h2">{value !== undefined ? formatCurrency(value) : '—'}</Text>
-    </Pressable>
-  );
-}
+const RECENT_MOVEMENTS = 5;
 
 export function StoreScreen() {
   const tabNav = useNavigation<BottomTabNavigationProp<AppTabsParamList>>();
@@ -76,40 +30,50 @@ export function StoreScreen() {
   const balance = useBalance(account.data?.id);
   const movements = useMovements(account.data?.id);
   const expenses = useMemo(() => expensesTotal(movements.data?.movements ?? []), [movements.data]);
+  const recent = useMemo(
+    () => (movements.data?.movements ?? []).slice(0, RECENT_MOVEMENTS),
+    [movements.data],
+  );
   const stp = useStpAccount();
   const p = profile.data;
   const initials = p ? `${p.firstName[0] ?? ''}${p.lastName[0] ?? ''}`.toUpperCase() : '';
 
   const goWallet = (screen: 'CashInMethods' | 'CashOutMethods' | 'WalletHome') =>
     tabNav.navigate('Wallet', { screen });
+  const openDetail = (movement: Movement) =>
+    tabNav.navigate('Wallet', { screen: 'MovementDetail', params: { movement } });
+
+  const loadingMovements = movements.isPending && Boolean(account.data);
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
       <AppHeader />
-      <ScrollView contentContainerClassName="gap-lg p-lg">
+      <ScrollView contentContainerClassName="gap-lg px-md pb-2xl pt-lg">
         <View className="flex-row items-center gap-md">
-          <View className="h-12 w-12 items-center justify-center rounded-pill bg-neutral-100 dark:bg-neutral-800">
+          <View className="h-10 w-10 items-center justify-center rounded-pill bg-brand-100 dark:bg-neutral-800">
             {initials ? (
-              <Text variant="body" className="font-bold text-brand-700">
+              <Text variant="caption" className="font-bold text-brand-700">
                 {initials}
               </Text>
             ) : (
-              <Ionicons name="person" size={22} color="#9A9384" />
+              <Ionicons name="person" size={20} color="#9A9384" />
             )}
           </View>
           <View className="flex-1">
             <Text variant="caption" tone="muted">
               Hola de nuevo
             </Text>
-            <Text variant="h2">{p ? `${p.firstName} ${p.lastName}` : 'Bienvenido'}</Text>
+            <Text variant="body" className="font-semibold">
+              {p ? `${p.firstName} ${p.lastName}` : 'Bienvenido'}
+            </Text>
           </View>
           <Pressable
-            className="h-12 w-12 items-center justify-center rounded-card bg-brand-100"
+            className="h-11 w-11 items-center justify-center rounded-pill bg-neutral-100 dark:bg-neutral-800"
             accessibilityRole="button"
             accessibilityLabel="Mi QR"
             onPress={() => stackNav.navigate('MyQr')}
           >
-            <Ionicons name="qr-code" size={22} color="#97720A" />
+            <Ionicons name="qr-code" size={22} color="#6C6555" />
           </Pressable>
         </View>
 
@@ -117,28 +81,68 @@ export function StoreScreen() {
           balance={balance.data}
           loading={balance.isPending && Boolean(account.data)}
           clabe={stp.data?.clabe}
+          actions={[
+            { icon: 'arrow-down', label: 'Abonar', onPress: () => goWallet('CashInMethods') },
+            { icon: 'arrow-up', label: 'Enviar', onPress: () => goWallet('CashOutMethods') },
+            { icon: 'qr-code', label: 'Cobrar', onPress: () => stackNav.navigate('MyQr') },
+            { icon: 'time-outline', label: 'Movim.', onPress: () => goWallet('WalletHome') },
+          ]}
         />
 
-        <View className="flex-row gap-sm">
-          <QuickAction icon="arrow-down" label="Abonar" onPress={() => goWallet('CashInMethods')} />
-          <QuickAction icon="arrow-up" label="Enviar" onPress={() => goWallet('CashOutMethods')} />
-          <QuickAction icon="qr-code" label="Cobrar" onPress={() => stackNav.navigate('MyQr')} />
-          <QuickAction icon="time-outline" label="Movim." onPress={() => goWallet('WalletHome')} />
-        </View>
+        <Pressable
+          onPress={() => tabNav.navigate('Sales')}
+          accessibilityRole="button"
+          accessibilityLabel={`Mis gastos, ${movements.data ? formatCurrency(expenses) : 'sin datos'}`}
+          className="flex-row items-center gap-md rounded-card border border-neutral-200 p-md active:opacity-70 dark:border-neutral-800"
+        >
+          <View className="h-10 w-10 items-center justify-center rounded-pill bg-neutral-100 dark:bg-neutral-800">
+            <Ionicons name="receipt-outline" size={20} color="#6C6555" />
+          </View>
+          <View className="flex-1">
+            <Text variant="caption" tone="muted">
+              Mis gastos
+            </Text>
+            <Text variant="h2">{movements.data ? formatCurrency(expenses) : '—'}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#9A9384" />
+        </Pressable>
 
-        <View className="flex-row gap-md">
-          <StatTile
-            icon="receipt-outline"
-            label="Mis gastos"
-            value={movements.data ? expenses : undefined}
-            onPress={() => tabNav.navigate('Sales')}
-          />
-          <StatTile
-            icon="wallet-outline"
-            label="Mi billetera"
-            value={balance.data}
-            onPress={() => goWallet('WalletHome')}
-          />
+        <View>
+          <View className="flex-row items-center justify-between pb-sm">
+            <Text variant="h2">Transacciones</Text>
+            <Pressable
+              accessibilityRole="button"
+              hitSlop={12}
+              onPress={() => goWallet('WalletHome')}
+            >
+              <Text variant="body" tone="link" className="font-semibold">
+                Ver todas
+              </Text>
+            </Pressable>
+          </View>
+
+          {loadingMovements ? (
+            <View>
+              {Array.from({ length: 3 }, (_, i) => (
+                <MovementRowSkeleton key={i} />
+              ))}
+            </View>
+          ) : recent.length > 0 ? (
+            <View>
+              {recent.map((movement, index) => (
+                <View key={movement.id}>
+                  {index > 0 ? <View className="h-px bg-neutral-100 dark:bg-neutral-800" /> : null}
+                  <MovementRow movement={movement} onPress={() => openDetail(movement)} />
+                </View>
+              ))}
+            </View>
+          ) : (
+            <Text variant="caption" tone="muted">
+              {movements.isError
+                ? 'No pudimos cargar tus transacciones.'
+                : 'Tus depósitos y envíos aparecerán aquí.'}
+            </Text>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>

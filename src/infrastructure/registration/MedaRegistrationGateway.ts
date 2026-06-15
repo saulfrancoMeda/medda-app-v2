@@ -70,7 +70,7 @@ const buildFormData = (form: FormData, data: unknown, parentKey?: string): void 
 };
 
 export class MedaRegistrationGateway implements RegistrationGateway {
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient) { }
 
   async isPhoneAvailable(phone: string): Promise<Result<true, RegistrationError>> {
     const res = await this.http.request<{ user?: string }>(endpoints.getUserName, {

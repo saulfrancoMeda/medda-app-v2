@@ -18,6 +18,7 @@ const text = cva('font-sans', {
       brand: 'text-brand-700 dark:text-brand-400',
       link: 'text-link',
       danger: 'text-danger',
+      success: 'text-success',
       inverse: 'text-neutral-0',
     },
     center: { true: 'text-center' },
@@ -27,7 +28,7 @@ const text = cva('font-sans', {
 
 type TextVariants = VariantProps<typeof text>;
 
-export interface TextProps extends RNTextProps, TextVariants { }
+export interface TextProps extends RNTextProps, TextVariants {}
 
 export const Text = forwardRef<RNText, TextProps>(
   ({ variant, tone, center, className, ...rest }, ref) => (
