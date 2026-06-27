@@ -1,8 +1,3 @@
-/**
- * Branded types: IDs que son string en runtime pero distintos en compilación, para que
- * no se pueda pasar un AgentId donde se espera un ProspectId. Mapean a value classes de
- * Kotlin / structs de Swift al portar.
- */
 declare const __brand: unique symbol;
 type Brand<T, B> = T & { readonly [__brand]: B };
 

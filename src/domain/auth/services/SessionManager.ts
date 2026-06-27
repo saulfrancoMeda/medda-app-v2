@@ -1,21 +1,16 @@
-import type { OAuthTokens, Session } from '@domain/auth/entities/Session';
+import type { AnonymousToken, Session } from '@domain/auth/entities/Session';
 
-/** Margen para refrescar antes de la expiración real (evita carreras con la red). */
 export const REFRESH_SKEW_MS = 60_000;
-
-/**
- * Lógica pura de sesión. Recibe `now` como parámetro (no llama a Date.now()) para ser
- * determinista y 100% testeable, y para trasladarse sin cambios a Kotlin/Swift.
- */
-export const isOAuthExpired = (tokens: OAuthTokens, now: number): boolean =>
-  now >= tokens.expiresAt;
-
-export const oauthNeedsRefresh = (tokens: OAuthTokens, now: number): boolean =>
-  now >= tokens.expiresAt - REFRESH_SKEW_MS;
+export const isSessionExpired = (session: Session, now: number): boolean =>
+  now >= session.expiresAt;
 
 export const sessionNeedsRefresh = (session: Session, now: number): boolean =>
-  oauthNeedsRefresh(session.oauth, now);
+  now >= session.expiresAt - REFRESH_SKEW_MS;
 
-/** Header Authorization que la capa HTTP debe enviar para llamadas autenticadas por OAuth. */
-export const authorizationHeader = (session: Session): string =>
-  `${session.oauth.tokenType} ${session.oauth.accessToken}`;
+export const authorizationHeader = (session: Session): string => session.accessToken;
+
+export const anonymousAuthorizationHeader = (token: AnonymousToken): string =>
+  `${token.tokenType} ${token.accessToken}`;
+
+export const isAnonymousExpired = (token: AnonymousToken, now: number): boolean =>
+  now >= token.expiresAt;

@@ -3,20 +3,22 @@ import { Text as RNText, type TextProps as RNTextProps } from 'react-native';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@ui/lib/cn';
 
-const text = cva('text-neutral-900', {
+const text = cva('font-sans', {
   variants: {
     variant: {
       display: 'text-display font-bold',
       h1: 'text-h1 font-bold',
       h2: 'text-h2 font-semibold',
       body: 'text-body',
-      caption: 'text-caption text-neutral-500',
+      caption: 'text-caption',
     },
     tone: {
-      default: '',
-      muted: 'text-neutral-500',
-      brand: 'text-brand-600',
+      default: 'text-neutral-900 dark:text-neutral-50',
+      muted: 'text-neutral-500 dark:text-neutral-400',
+      brand: 'text-brand-700 dark:text-brand-400',
+      link: 'text-link',
       danger: 'text-danger',
+      success: 'text-success',
       inverse: 'text-neutral-0',
     },
     center: { true: 'text-center' },

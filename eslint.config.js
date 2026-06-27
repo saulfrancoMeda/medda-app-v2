@@ -1,7 +1,3 @@
-// ESLint flat config. Extiende la config de Expo y añade la regla de ARQUITECTURA:
-// import/no-restricted-paths fuerza la dirección de dependencias entre capas.
-// Si violas el aislamiento (p.ej. domain importa de ui), el lint falla. Este es el
-// guardrail mecánico que hace que un cambio en una capa no pueda romper otra.
 const expoConfig = require('eslint-config-expo/flat');
 
 module.exports = [
