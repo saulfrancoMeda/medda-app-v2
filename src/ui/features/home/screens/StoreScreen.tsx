@@ -141,13 +141,15 @@ export function StoreScreen() {
 
         <View>
           <View className="flex-row items-center justify-between pb-sm">
-            <Text variant="h2">Transacciones</Text>
+            <Text variant="caption" className="font-bold text-neutral-900 dark:text-neutral-100" style={{ letterSpacing: 0.5 }}>
+              TRANSACCIONES RECIENTES
+            </Text>
             <Pressable
               accessibilityRole="button"
               hitSlop={12}
               onPress={() => goWallet('WalletHome')}
             >
-              <Text variant="body" tone="link" className="font-semibold">
+              <Text variant="caption" tone="link" className="font-semibold">
                 Ver todas
               </Text>
             </Pressable>

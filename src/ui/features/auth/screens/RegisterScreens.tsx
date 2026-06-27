@@ -1234,8 +1234,7 @@ export function RegisterLegalScreen({ navigation }: LegalProps) {
       return;
     }
     reset();
-    toast.success('¡Cuenta creada! Inicia sesión con tu número y contraseña.');
-    navigation.popToTop();
+    navigation.navigate('RegisterSuccess');
   };
 
   return (
@@ -1295,6 +1294,67 @@ export function RegisterLegalScreen({ navigation }: LegalProps) {
           onClose={() => setModalUrl(null)}
         />
       ) : null}
+    </SafeAreaView>
+  );
+}
+
+function FeatureRow({ icon, text }: { icon: string; text: string }) {
+  return (
+    <View className="flex-row items-center gap-md">
+      <View className="h-9 w-9 items-center justify-center rounded-xl bg-brand-100">
+        <Ionicons name={icon as never} size={18} color="#97720A" />
+      </View>
+      <Text variant="body" className="flex-1 font-medium">{text}</Text>
+      <Ionicons name="checkmark" size={16} color="#2E8C6A" />
+    </View>
+  );
+}
+
+type RegisterSuccessProps = NativeStackScreenProps<AuthStackParamList, 'RegisterSuccess'>;
+
+export function RegisterSuccessScreen({ navigation }: RegisterSuccessProps) {
+  return (
+    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
+      <ScrollView
+        contentContainerClassName="flex-1 items-center justify-center gap-xl px-xl py-2xl"
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="items-center gap-xl w-full">
+          <View className="items-center gap-lg">
+            <View className="h-28 w-28 items-center justify-center rounded-full bg-brand-400">
+              <Ionicons name="checkmark" size={64} color="#1B1812" />
+            </View>
+            <View className="items-center gap-sm">
+              <Text variant="display" center className="font-bold">
+                ¡Listo!
+              </Text>
+              <Text variant="h1" center>
+                Tu cuenta está creada
+              </Text>
+              <Text variant="body" tone="muted" center>
+                Bienvenido a Medá. Tu cuenta digital está activa y lista para usar.
+              </Text>
+            </View>
+          </View>
+
+          <View className="w-full gap-sm rounded-2xl border border-neutral-200 px-lg py-md dark:border-neutral-800">
+            <FeatureRow icon="shield-checkmark-outline" text="Cuenta verificada y segura" />
+            <View className="h-px bg-neutral-100 dark:bg-neutral-800" />
+            <FeatureRow icon="wallet-outline" text="Billetera digital activada" />
+            <View className="h-px bg-neutral-100 dark:bg-neutral-800" />
+            <FeatureRow icon="swap-horizontal-outline" text="Envía y recibe dinero al instante" />
+            <View className="h-px bg-neutral-100 dark:bg-neutral-800" />
+            <FeatureRow icon="qr-code-outline" text="Cobra con tu código QR personal" />
+          </View>
+
+          <View className="w-full gap-sm">
+            <Button title="Comenzar" full onPress={() => navigation.popToTop()} />
+            <Text variant="caption" tone="muted" center>
+              Inicia sesión con tu número y contraseña
+            </Text>
+          </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

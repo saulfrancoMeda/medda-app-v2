@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { FlatList, Pressable, RefreshControl, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { FlatList, Pressable, RefreshControl, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import { Ionicons } from '@expo/vector-icons';
@@ -63,6 +63,7 @@ export function WalletScreen() {
   const balance = useBalance(account.data?.id);
   const stp = useStpAccount();
   const movements = useMovements(account.data?.id);
+  const [query, setQuery] = useState('');
 
   const refreshing = balance.isRefetching || movements.isRefetching;
   const onRefresh = () => {
@@ -73,10 +74,18 @@ export function WalletScreen() {
   };
 
   const loadingMovements = movements.isPending && Boolean(account.data);
-  const groups = useMemo(
-    () => groupByDate(movements.data?.movements ?? []),
-    [movements.data],
-  );
+  const filteredMovements = useMemo(() => {
+    const all = movements.data?.movements ?? [];
+    if (!query.trim()) return all;
+    const q = query.trim().toLowerCase();
+    return all.filter(
+      (m) =>
+        m.description?.toLowerCase().includes(q) ||
+        m.provider?.toLowerCase().includes(q) ||
+        m.reference?.toLowerCase().includes(q),
+    );
+  }, [movements.data, query]);
+  const groups = useMemo(() => groupByDate(filteredMovements), [filteredMovements]);
 
   const openDetail = (m: Movement) =>
     navigation.navigate('MovementDetail', { movement: m });
@@ -105,6 +114,25 @@ export function WalletScreen() {
         ) : null}
         <CopyRow label="Número de cuenta" value={account.data?.accountNumber ?? ''} icon="wallet-outline" />
       </View>
+
+      {!loadingMovements && !movements.isError && (movements.data?.movements?.length ?? 0) > 0 ? (
+        <View className="flex-row items-center gap-sm overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50 px-md dark:border-neutral-800 dark:bg-neutral-900">
+          <Ionicons name="search-outline" size={16} color="#9A9384" />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Buscar movimientos…"
+            placeholderTextColor="#9A9384"
+            returnKeyType="search"
+            style={{ flex: 1, fontSize: 14, height: 44, color: '#1B1812' }}
+          />
+          {query.length > 0 ? (
+            <Pressable onPress={() => setQuery('')} hitSlop={8} accessibilityLabel="Limpiar búsqueda">
+              <Ionicons name="close-circle" size={16} color="#9A9384" />
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
 
       {movements.isError ? (
         <View className="items-start gap-sm">
@@ -154,7 +182,17 @@ export function WalletScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#97720A" />
         }
         ListEmptyComponent={
-          loadingMovements || movements.isError ? null : (
+          loadingMovements || movements.isError ? null : query.trim() ? (
+            <View className="items-center gap-sm pt-xl">
+              <View className="h-14 w-14 items-center justify-center rounded-2xl bg-neutral-100 dark:bg-neutral-800">
+                <Ionicons name="search-outline" size={26} color="#9A9384" />
+              </View>
+              <Text variant="body" className="font-semibold">Sin resultados</Text>
+              <Text variant="caption" tone="muted" center>
+                {'No hay movimientos que coincidan con "' + query + '".'}
+              </Text>
+            </View>
+          ) : (
             <View className="items-center gap-sm pt-xl">
               <View className="h-14 w-14 items-center justify-center rounded-2xl bg-neutral-100 dark:bg-neutral-800">
                 <Ionicons name="receipt-outline" size={26} color="#9A9384" />

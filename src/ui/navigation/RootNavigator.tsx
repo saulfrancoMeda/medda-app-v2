@@ -20,6 +20,7 @@ import {
   RegisterOtpScreen,
   RegisterPersonalScreen,
   RegisterPhoneScreen,
+  RegisterSuccessScreen,
   RegisterSurveyScreen,
 } from '@ui/features/auth/screens/RegisterScreens';
 import { LoadingScreen } from '@ui/features/common/LoadingScreen';
@@ -103,6 +104,11 @@ function AuthNavigator() {
         name="RegisterLegal"
         component={RegisterLegalScreen}
         options={{ headerShown: true, title: 'Términos' }}
+      />
+      <AuthStack.Screen
+        name="RegisterSuccess"
+        component={RegisterSuccessScreen}
+        options={{ headerShown: false, gestureEnabled: false }}
       />
     </AuthStack.Navigator>
   );
