@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Button, Input, Logo, Text } from '@ui/design-system/components';
+import { Button, GoldGradient, Input, Text } from '@ui/design-system/components';
 import { useAuth } from '@ui/providers/AuthProvider';
 import { useToast } from '@ui/providers/ToastProvider';
 import { authErrorMessage } from '@ui/features/auth/authMessages';
@@ -34,73 +34,91 @@ export function LoginPasswordScreen({ route, navigation }: Props) {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
-      <View className="flex-1 px-lg pt-2xl">
-        <View className="items-center pb-2xl pt-lg">
-          <Logo width={96} height={96} />
-        </View>
-
-        <View className="gap-xs">
-          <Text variant="h1">Bienvenido</Text>
-          <Text variant="h2" tone="muted" className="font-normal" numberOfLines={2}>
-            {name}
-          </Text>
-        </View>
-
-        <View className="pt-2xl">
-          <Input
-            label="Contraseña"
-            placeholder="Ingresa tu contraseña"
-            leftIcon="lock-closed-outline"
-            secureTextEntry={secure}
-            value={password}
-            onChangeText={setPassword}
-            rightSlot={
-              <Pressable
-                onPress={() => setSecure((s) => !s)}
-                hitSlop={8}
-                accessibilityRole="button"
-                accessibilityLabel={secure ? 'Mostrar contraseña' : 'Ocultar contraseña'}
-              >
-                <Ionicons
-                  name={secure ? 'eye-outline' : 'eye-off-outline'}
-                  size={22}
-                  color="#9A9384"
-                />
-              </Pressable>
-            }
-          />
-        </View>
-
-        <View className="items-end pt-md">
-          <Text
-            variant="body"
-            tone="link"
-            className="font-semibold"
-            onPress={() => navigation.navigate('RecoverPhone')}
-          >
-            Recuperar contraseña
-          </Text>
-        </View>
-
-        <Text variant="caption" tone="muted" className="pt-lg">
-          Si tus iniciales no son correctas, verifica que hayas ingresado correctamente tu número
-          celular o comunícate a nuestro Centro de Atención.
+      {/* Compressed amber header — carries the brand + personalizes the session */}
+      <GoldGradient
+        radius={0}
+        style={styles.header}
+      >
+        <Text variant="h2" style={styles.hi}>
+          Hola,
         </Text>
+        <Text variant="h1" style={styles.name} numberOfLines={1}>
+          {name}
+        </Text>
+      </GoldGradient>
 
-        <View className="flex-1" />
-        <View className="gap-md pb-lg">
-          <Button title="Iniciar sesión" full disabled={!valid} loading={loading} onPress={onSubmit} />
+      {/* Password form */}
+      <View className="flex-1 px-lg" style={{ paddingTop: 32, gap: 12 }}>
+        <Input
+          label="Contraseña"
+          placeholder="Ingresa tu contraseña"
+          leftIcon="lock-closed-outline"
+          secureTextEntry={secure}
+          value={password}
+          onChangeText={setPassword}
+          rightSlot={
+            <Pressable
+              onPress={() => setSecure((s) => !s)}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={secure ? 'Mostrar contraseña' : 'Ocultar contraseña'}
+            >
+              <Ionicons
+                name={secure ? 'eye-outline' : 'eye-off-outline'}
+                size={22}
+                color="#9A9384"
+              />
+            </Pressable>
+          }
+        />
 
-          <Pressable className="flex-row justify-center gap-xs" onPress={() => navigation.goBack()}>
-            <Text variant="body" tone="muted">
-              ¿Otro número?
-            </Text>
-            <Text variant="body" tone="link" className="font-semibold">
-              Cambiar
-            </Text>
-          </Pressable>
-        </View>
+        <Pressable
+          className="items-end"
+          onPress={() => navigation.navigate('RecoverPhone')}
+        >
+          <Text variant="body" tone="link" className="font-semibold">
+            ¿Olvidaste tu contraseña?
+          </Text>
+        </Pressable>
+      </View>
+
+      <View className="gap-md px-lg pb-lg">
+        <Button
+          title="Iniciar sesión"
+          full
+          disabled={!valid}
+          loading={loading}
+          onPress={onSubmit}
+        />
+
+        <Pressable
+          className="flex-row justify-center gap-xs"
+          onPress={() => navigation.goBack()}
+        >
+          <Text variant="body" tone="muted">
+            ¿Otro número?
+          </Text>
+          <Text variant="body" tone="link" className="font-semibold">
+            Cambiar
+          </Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 32,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+  },
+  hi: {
+    color: '#1B1812',
+  },
+  name: {
+    color: '#1B1812',
+  },
+});

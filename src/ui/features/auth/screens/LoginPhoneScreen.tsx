@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Button, Input, Logo, Text } from '@ui/design-system/components';
+import { Button, GoldGradient, Input, Logo, Text } from '@ui/design-system/components';
 import { useAuth } from '@ui/providers/AuthProvider';
 import { useToast } from '@ui/providers/ToastProvider';
 import { lookupErrorMessage } from '@ui/features/auth/authMessages';
@@ -33,33 +33,38 @@ export function LoginPhoneScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
-      <View className="flex-1 px-lg pt-2xl">
-        <View className="items-center pb-2xl pt-lg">
-          <Logo width={96} height={96} />
-        </View>
+      {/* Gold gradient — type is the hero, logo confirms brand context */}
+      <GoldGradient
+        radius={0}
+        style={{
+          flex: 1,
+          justifyContent: 'space-between',
+          paddingHorizontal: 24,
+          paddingTop: 24,
+          paddingBottom: 32,
+          borderBottomLeftRadius: 32,
+          borderBottomRightRadius: 32,
+        }}
+      >
+        <Logo width={40} height={40} />
+        <Text variant="display" style={{ color: '#1B1812', lineHeight: 48 }}>
+          {'Tu dinero,\nsiempre\ncontigo.'}
+        </Text>
+      </GoldGradient>
 
-        <View className="gap-xs">
-          <Text variant="h1">Bienvenido,</Text>
-          <Text variant="h2" tone="muted" className="font-normal" numberOfLines={2}>
-            inicia sesión
-          </Text>
-        </View>
+      {/* Form anchored at bottom */}
+      <View className="gap-xl px-lg pb-lg" style={{ paddingTop: 32 }}>
+        <Input
+          label="Número de celular"
+          placeholder="10 dígitos"
+          leftIcon="call-outline"
+          keyboardType="number-pad"
+          maxLength={PHONE_LENGTH}
+          value={phone}
+          onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, ''))}
+        />
 
-        <View className="pt-2xl">
-          <Input
-            label="Número de celular"
-            placeholder="Ingresa tu número de celular"
-            leftIcon="call-outline"
-            keyboardType="number-pad"
-            maxLength={PHONE_LENGTH}
-            value={phone}
-            onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, ''))}
-          />
-        </View>
-
-        <View className="flex-1" />
-
-        <View className="gap-md pb-lg">
+        <View className="gap-md">
           <Button
             title="Iniciar sesión"
             full
