@@ -30,8 +30,9 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
+# local env files — todos los .env.* son ignorados; solo .env.example puede commitearse
+.env*
+!.env.example
 
 # typescript
 *.tsbuildinfo
@@ -41,5 +42,4 @@ yarn-error.*
 /android
 
 # secrets locales
-.env
 .idea/
