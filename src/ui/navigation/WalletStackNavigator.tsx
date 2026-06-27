@@ -6,7 +6,9 @@ import {
   CashOutMedaAmountScreen,
   CashOutMedaScanScreen,
   CashOutMethodsScreen,
-  CashOutSpeiFormScreen,
+  CashOutNipScreen,
+  CashOutSpeiAmountScreen,
+  CashOutSpeiRecipientScreen,
   TransactionSuccessScreen,
 } from '@ui/features/wallet/screens/CashOutScreens';
 import { MovementDetailScreen } from '@ui/features/wallet/screens/MovementDetailScreen';
@@ -23,8 +25,10 @@ export function WalletStackNavigator() {
       <Stack.Screen name="CashInMethods" component={CashInMethodsScreen} options={{ title: 'Abonar dinero' }} />
       <Stack.Screen name="CashInSpei" component={CashInSpeiScreen} options={{ title: 'Transferencia SPEI' }} />
       <Stack.Screen name="CashOutMethods" component={CashOutMethodsScreen} options={{ title: 'Enviar dinero' }} />
-      <Stack.Screen name="CashOutSpeiForm" component={CashOutSpeiFormScreen} options={{ title: 'SPEI a terceros' }} />
+      <Stack.Screen name="CashOutSpeiRecipient" component={CashOutSpeiRecipientScreen} options={{ title: 'Datos del destinatario' }} />
+      <Stack.Screen name="CashOutSpeiAmount" component={CashOutSpeiAmountScreen} options={{ title: 'Monto a enviar' }} />
       <Stack.Screen name="CashOutConfirm" component={CashOutConfirmScreen} options={{ title: 'Confirmar envío' }} />
+      <Stack.Screen name="CashOutNip" component={CashOutNipScreen} options={{ title: 'Autorizar envío', gestureEnabled: false }} />
       <Stack.Screen name="CashOutMedaScan" component={CashOutMedaScanScreen} options={{ title: 'Escanear QR' }} />
       <Stack.Screen name="CashOutMedaAmount" component={CashOutMedaAmountScreen} options={{ title: 'Enviar a usuario Medá' }} />
       <Stack.Screen
