@@ -36,12 +36,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       {toast ? (
         <SafeAreaView
-          edges={['bottom']}
-          className="absolute inset-x-0 bottom-0"
+          edges={['top']}
+          className="absolute inset-x-0 top-0"
           pointerEvents="none"
         >
           <View
-            className="mx-5 mb-16 flex-row items-center gap-sm rounded-xl px-md py-sm"
+            className="mx-5 mt-4 flex-row items-center gap-sm rounded-xl px-md py-sm"
             style={{ backgroundColor: '#1B1812' }}
           >
             <Ionicons

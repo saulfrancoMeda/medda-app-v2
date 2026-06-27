@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, Pressable, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { isValidPostalCode, type PostalCodeInfo } from '@domain/beneficiaries/entities/Beneficiary';
 import { Text } from '@ui/design-system/components';
@@ -23,6 +24,7 @@ export function ColonyPicker({ postalCode, value, onSelect, error }: ColonyPicke
   const lookupPostalCode = useLookupPostalCode();
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
+  const insets = useSafeAreaInsets();
 
   const disabled = !isValidPostalCode(postalCode);
 
@@ -76,11 +78,12 @@ export function ColonyPicker({ postalCode, value, onSelect, error }: ColonyPicke
       ) : null}
 
       <Modal visible={open} transparent animationType="slide" onRequestClose={close}>
-        <Pressable className="flex-1 bg-black/50" onPress={close} />
-        <View
-          className="max-h-[75%] gap-md bg-neutral-0 px-lg pb-10 pt-lg dark:bg-neutral-900"
-          style={{ borderTopLeftRadius: 26, borderTopRightRadius: 26 }}
-        >
+        <View className="flex-1 justify-end">
+          <Pressable className="absolute inset-0 bg-black/50" onPress={close} />
+          <View
+            className="h-[75%] gap-md bg-neutral-0 px-lg pt-md dark:bg-neutral-900"
+            style={{ borderTopLeftRadius: 26, borderTopRightRadius: 26, paddingBottom: Math.max(insets.bottom, 24) }}
+          >
           <Text variant="h2">Colonia</Text>
           {status.kind === 'loading' ? (
             <View className="items-center gap-sm py-lg">
@@ -122,6 +125,7 @@ export function ColonyPicker({ postalCode, value, onSelect, error }: ColonyPicke
               )}
             />
           ) : null}
+          </View>
         </View>
       </Modal>
     </View>

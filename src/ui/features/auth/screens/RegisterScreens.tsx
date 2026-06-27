@@ -3,7 +3,10 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  KeyboardAvoidingView,
+  Linking,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   View,
@@ -32,6 +35,7 @@ import type {
   CatalogItem,
   TransactionalQuestion,
 } from '@domain/registration/ports/RegistrationGateway';
+
 import { Button, Input, Text, type InputProps } from '@ui/design-system/components';
 import { cn } from '@ui/lib/cn';
 import { ColonyPicker } from '@ui/features/beneficiaries/components/ColonyPicker';
@@ -41,7 +45,9 @@ import { useRegistration } from '@ui/features/registration/RegistrationProvider'
 import { useResendCooldown } from '@ui/features/registration/hooks/useResendCooldown';
 import { useContainer } from '@ui/providers/ContainerProvider';
 import { useToast } from '@ui/providers/ToastProvider';
+import { legalDocuments } from '@config/legal';
 import type { AuthStackParamList } from '@ui/navigation/types';
+
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const POSTAL_RE = /^\d{5}$/;
@@ -383,7 +389,8 @@ export function RegisterPersonalScreen({ navigation }: PersonalProps) {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950" edges={['bottom']}>
-      <ScrollView contentContainerClassName="gap-md p-lg" keyboardShouldPersistTaps="handled">
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+      <ScrollView contentContainerClassName="gap-md p-lg" keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
         <View className="gap-xs pb-sm">
           <Text variant="h1">Tus datos</Text>
           <Text variant="body" tone="muted">
@@ -435,7 +442,9 @@ export function RegisterPersonalScreen({ navigation }: PersonalProps) {
           onChangeText={setConfirm}
           error={confirm.length > 0 && confirm !== password ? 'No coincide' : undefined}
         />
+        <View style={{ height: 16 }} />
       </ScrollView>
+      </KeyboardAvoidingView>
       <StepFooter>
         <Button title="Continuar" full disabled={!valid} onPress={onContinue} />
       </StepFooter>
@@ -1100,27 +1109,76 @@ function CheckRow({
   checked,
   onToggle,
   label,
+  linkLabel,
+  onLink,
 }: {
   checked: boolean;
   onToggle: () => void;
   label: string;
+  linkLabel?: string;
+  onLink?: () => void;
 }) {
   return (
-    <Pressable
-      onPress={onToggle}
-      accessibilityRole="checkbox"
-      accessibilityState={{ checked }}
-      className="flex-row items-start gap-sm py-sm"
-    >
-      <Ionicons
-        name={checked ? 'checkbox' : 'square-outline'}
-        size={24}
-        color={checked ? '#97720A' : '#9A9384'}
-      />
-      <Text variant="body" className="flex-1">
-        {label}
-      </Text>
-    </Pressable>
+    <View className="gap-xs py-sm">
+      <Pressable
+        onPress={onToggle}
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked }}
+        className="flex-row items-start gap-sm"
+      >
+        <Ionicons
+          name={checked ? 'checkbox' : 'square-outline'}
+          size={24}
+          color={checked ? '#97720A' : '#9A9384'}
+        />
+        <Text variant="body" className="flex-1">
+          {label}
+        </Text>
+      </Pressable>
+      {linkLabel && onLink ? (
+        <Pressable onPress={onLink} className="ml-8">
+          <Text variant="body" tone="link" className="font-semibold">
+            {linkLabel}
+          </Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+function LegalDocModal({ url, title, onClose }: { url: string; title: string; onClose: () => void }) {
+  const { WebView } = require('react-native-webview');
+  const [loading, setLoading] = useState(true);
+  const pdfUrl =
+    Platform.OS === 'ios'
+      ? url
+      : `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`;
+  return (
+    <Modal visible animationType="slide" onRequestClose={onClose}>
+      <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
+        <View className="flex-row items-center gap-sm border-b border-neutral-200 px-md py-sm dark:border-neutral-800">
+          <Pressable onPress={onClose} hitSlop={12} accessibilityRole="button" accessibilityLabel="Cerrar">
+            <Ionicons name="close" size={26} color="#1B1812" />
+          </Pressable>
+          <Text variant="h2" className="flex-1">{title}</Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <WebView
+            source={{ uri: pdfUrl }}
+            onLoadEnd={() => setLoading(false)}
+            onError={() => setLoading(false)}
+            style={{ flex: 1 }}
+            startInLoadingState
+          />
+          {loading ? (
+            <View className="absolute inset-0 items-center justify-center gap-md bg-neutral-0">
+              <ActivityIndicator size="large" color="#FCD535" />
+              <Text variant="body" tone="muted">Cargando documento…</Text>
+            </View>
+          ) : null}
+        </View>
+      </SafeAreaView>
+    </Modal>
   );
 }
 
@@ -1134,6 +1192,7 @@ export function RegisterLegalScreen({ navigation }: LegalProps) {
   const [opening, setOpening] = useState(draft.acceptedAccountOpening);
   const [coords, setCoords] = useState<{ latitude: string; longitude: string } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [modalUrl, setModalUrl] = useState<{ url: string; title: string } | null>(null);
   const valid = terms && privacy && opening;
 
   useEffect(() => {
@@ -1192,21 +1251,50 @@ export function RegisterLegalScreen({ navigation }: LegalProps) {
           checked={terms}
           onToggle={() => setTerms((v) => !v)}
           label="He leído y acepto los Términos y Condiciones de uso."
+          linkLabel="Leer términos y condiciones"
+          onLink={() => setModalUrl({ url: legalDocuments.find(d => d.id === 'terms')?.url ?? '', title: 'Términos y Condiciones' })}
         />
         <CheckRow
           checked={privacy}
           onToggle={() => setPrivacy((v) => !v)}
-          label="He leído y acepto el Aviso de Privacidad."
+          label="He leído y acepto los términos del Aviso de Privacidad y que mis datos sean utilizados con fines publicitarios conforme a los mismos."
+          linkLabel="Leer aviso de privacidad"
+          onLink={() => setModalUrl({ url: legalDocuments.find(d => d.id === 'privacy')?.url ?? '', title: 'Aviso de Privacidad' })}
         />
         <CheckRow
           checked={opening}
           onToggle={() => setOpening((v) => !v)}
-          label="Acepto la apertura de mi cuenta con Medá, Institución de Fondos de Pago Electrónico."
+          label="Acepto la apertura de cuenta con Programas de Relacionamiento Medá, S.A.P.I. de C.V., Institución de Fondos de Pago Electrónico."
         />
+        <View className="gap-sm pt-sm">
+          <Text variant="caption" tone="muted">
+            Al proporcionar tu correo electrónico aceptas recibir por parte de Medá noticias y comunicaciones promocionales. Podrás revocar dicho consentimiento en cualquier momento, para más detalles consulta nuestro Aviso de Privacidad.
+          </Text>
+          <Text variant="caption" tone="muted">
+            Ni el Gobierno Federal ni las entidades de la administración pública paraestatal podrán responsabilizarse o garantizar los recursos de los Clientes que sean utilizados en las operaciones que celebren con Medá o frente a otros, así como tampoco asumir alguna responsabilidad por las obligaciones contraídas con Medá o por algún Cliente frente a otro, en virtud de las operaciones que celebren.
+          </Text>
+        </View>
+        <View className="items-center gap-md pt-sm">
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => void Linking.openURL('mailto:soporte@meda.com.mx')}
+          >
+            <Text variant="body" tone="link" className="font-semibold">
+              ¿Problemas para registrarte?
+            </Text>
+          </Pressable>
+        </View>
       </ScrollView>
       <StepFooter>
         <Button title="Crear cuenta" full loading={loading} disabled={!valid} onPress={onCreate} />
       </StepFooter>
+      {modalUrl ? (
+        <LegalDocModal
+          url={modalUrl.url}
+          title={modalUrl.title}
+          onClose={() => setModalUrl(null)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }

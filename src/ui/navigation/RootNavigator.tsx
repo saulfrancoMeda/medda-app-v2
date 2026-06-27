@@ -31,7 +31,7 @@ const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 
 function AuthNavigator() {
   return (
-    <AuthStack.Navigator screenOptions={{ ...useStackScreenOptions(), headerShown: false }}>
+    <AuthStack.Navigator screenOptions={{ ...useStackScreenOptions({ showBell: false }), headerShown: false }}>
       <AuthStack.Screen name="LoginPhone" component={LoginPhoneScreen} />
       <AuthStack.Screen name="LoginPassword" component={LoginPasswordScreen} />
       <AuthStack.Screen

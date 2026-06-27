@@ -257,13 +257,15 @@ export class MedaRegistrationGateway implements RegistrationGateway {
   private async blackListSign(
     draft: RegistrationDraft,
   ): Promise<{ ok: true; sign: unknown } | { ok: false; error: RegistrationError }> {
+    const blackListBody = {
+      cellphone: draft.phone,
+      firstName: draft.firstName,
+      lastName: draft.lastName,
+      lastName2: draft.lastName2,
+    };
+    console.log('[BLACK-LIST body]', JSON.stringify(blackListBody, null, 2));
     const res = await this.http.request<{ validationSign?: unknown }>(endpoints.blackListCheck, {
-      body: {
-        cellphone: draft.phone,
-        firstName: draft.firstName,
-        lastName: draft.lastName,
-        lastName2: draft.lastName2,
-      },
+      body: blackListBody,
     });
     if (res.ok) return { ok: true, sign: res.value.validationSign ?? null };
     if (res.error.kind === 'network') return { ok: false, error: { type: 'network' } };

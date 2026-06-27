@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { FlatList, Modal, Pressable, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import type { Bank } from '@domain/wallet/entities/Transfer';
 import { Text } from '@ui/design-system/components';
@@ -13,6 +14,7 @@ interface BankPickerProps {
 export function BankPicker({ value, onSelect }: BankPickerProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const insets = useSafeAreaInsets();
   const banks = useSpeiBanks();
 
   const filtered = useMemo(() => {
@@ -45,11 +47,12 @@ export function BankPicker({ value, onSelect }: BankPickerProps) {
       </Pressable>
 
       <Modal visible={open} transparent animationType="slide" onRequestClose={close}>
-        <Pressable className="flex-1 bg-black/50" onPress={close} />
-        <View
-          className="max-h-[75%] gap-md bg-neutral-0 px-lg pb-10 pt-lg dark:bg-neutral-900"
-          style={{ borderTopLeftRadius: 26, borderTopRightRadius: 26 }}
-        >
+        <View className="flex-1 justify-end">
+          <Pressable className="absolute inset-0 bg-black/50" onPress={close} />
+          <View
+            className="h-[75%] gap-md bg-neutral-0 px-lg pt-md dark:bg-neutral-900"
+            style={{ borderTopLeftRadius: 26, borderTopRightRadius: 26, paddingBottom: Math.max(insets.bottom, 24) }}
+          >
           <Text variant="h2">Banco destino</Text>
           <View
             style={{ height: 56 }}
@@ -86,6 +89,7 @@ export function BankPicker({ value, onSelect }: BankPickerProps) {
               </Pressable>
             )}
           />
+          </View>
         </View>
       </Modal>
     </View>

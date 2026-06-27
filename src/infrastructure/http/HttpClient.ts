@@ -47,6 +47,15 @@ export class HttpClient {
           : isMultipart
             ? (options.body as FormData)
             : JSON.stringify(options.body);
+
+      if (__DEV__ && options.body !== undefined && !isMultipart) {
+        const redacted = JSON.parse(JSON.stringify(options.body));
+        if (redacted.password) redacted.password = '***';
+        if (redacted.nip) redacted.nip = '***';
+        if (redacted.nipSignature) redacted.nipSignature = '***';
+        console.log(`[API →] ${endpoint.method} ${endpoint.path}`, JSON.stringify(redacted, null, 2));
+      }
+
       const response = await fetch(url, {
         method: endpoint.method,
         headers,

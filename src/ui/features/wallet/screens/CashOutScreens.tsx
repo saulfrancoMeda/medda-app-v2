@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -120,7 +120,15 @@ export function CashOutSpeiFormScreen({ navigation }: FormProps) {
   };
 
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+    >
+    <ScrollView
+      className="flex-1 bg-neutral-0 dark:bg-neutral-950"
+      contentContainerClassName="gap-lg p-lg"
+      keyboardShouldPersistTaps="handled"
+    >
       <Input
         label="CLABE destino (18 dígitos)"
         leftIcon="card-outline"
@@ -159,6 +167,7 @@ export function CashOutSpeiFormScreen({ navigation }: FormProps) {
       />
       <Button title="Continuar" full disabled={!valid} onPress={onContinue} />
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

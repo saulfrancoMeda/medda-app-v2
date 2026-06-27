@@ -1,3 +1,4 @@
+import { View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,7 +15,13 @@ import type { AppDrawerParamList, AppTabsParamList } from '@ui/navigation/types'
 const Tabs = createBottomTabNavigator<AppTabsParamList>();
 const Drawer = createDrawerNavigator<AppDrawerParamList>();
 
-const TAB_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
+const TAB_ICON_ACTIVE: Record<string, keyof typeof Ionicons.glyphMap> = {
+  Store: 'home',
+  Sales: 'receipt',
+  Wallet: 'wallet',
+  Faq: 'help-circle',
+};
+const TAB_ICON_INACTIVE: Record<string, keyof typeof Ionicons.glyphMap> = {
   Store: 'home-outline',
   Sales: 'receipt-outline',
   Wallet: 'wallet-outline',
@@ -25,38 +32,60 @@ function MainTabs() {
   const { colorScheme } = useColorScheme();
   const dark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
-  const bottomInset = Math.max(insets.bottom, 12);
+  const bottomInset = Math.max(insets.bottom, 8);
+  const bg = dark ? '#1B1812' : '#ffffff';
+  const borderColor = dark ? '#2A2520' : '#F0EDE8';
+
   return (
     <Tabs.Navigator
       initialRouteName="Store"
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: '#97720A',
-        tabBarInactiveTintColor: dark ? '#9A9384' : '#6C6555',
+        tabBarInactiveTintColor: dark ? '#9A9384' : '#9A9384',
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600', marginTop: 2 },
         tabBarStyle: {
           height: 64 + bottomInset,
-          paddingTop: 12,
+          paddingTop: 10,
           paddingBottom: bottomInset,
-          borderTopWidth: 0,
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
-          backgroundColor: dark ? '#1B1812' : '#ffffff',
+          backgroundColor: bg,
+          borderTopWidth: 1,
+          borderTopColor: borderColor,
+          elevation: 12,
           shadowColor: '#000',
-          shadowOpacity: 0.08,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: -4 },
-          elevation: 16,
+          shadowOpacity: 0.06,
+          shadowRadius: 8,
+          shadowOffset: { width: 0, height: -2 },
         },
-        tabBarIcon: ({ color, size }) => {
-          const name = TAB_ICON[route.name];
-          return name ? <Ionicons name={name} size={size} color={color} /> : null;
+        tabBarBackground: () => (
+          <View style={{ flex: 1, backgroundColor: bg, borderTopWidth: 1, borderTopColor: borderColor }} />
+        ),
+        tabBarIcon: ({ color, focused }) => {
+          const name = focused
+            ? TAB_ICON_ACTIVE[route.name]
+            : TAB_ICON_INACTIVE[route.name];
+          return name ? <Ionicons name={name} size={22} color={color} /> : null;
         },
       })}
     >
-      <Tabs.Screen name="Store" component={StoreStackNavigator} options={{ title: 'Inicio' }} />
+      <Tabs.Screen
+        name="Store"
+        component={StoreStackNavigator}
+        options={{ title: 'Inicio' }}
+        listeners={({ navigation }) => ({
+          // @ts-expect-error nested screen reset on tab press
+          tabPress: () => { navigation.navigate('Store', { screen: 'StoreHome' }); },
+        })}
+      />
       <Tabs.Screen name="Sales" component={SalesScreen} options={{ title: 'Mis gastos' }} />
-      <Tabs.Screen name="Wallet" component={WalletStackNavigator} options={{ title: 'Mi Billetera' }} />
+      <Tabs.Screen
+        name="Wallet"
+        component={WalletStackNavigator}
+        options={{ title: 'Mi Billetera' }}
+        listeners={({ navigation }) => ({
+          tabPress: () => { navigation.navigate('Wallet', { screen: 'WalletHome' } as never); },
+        })}
+      />
       <Tabs.Screen name="Faq" component={FaqStackNavigator} options={{ title: 'Ayuda' }} />
       <Tabs.Screen
         name="Sections"

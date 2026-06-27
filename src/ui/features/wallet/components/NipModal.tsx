@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@ui/design-system/components';
 import { NIP_LENGTH, NipKeypad } from '@ui/features/wallet/components/NipKeypad';
 
@@ -29,6 +30,7 @@ function NipEntry({
 }
 
 export function NipModal({ visible, loading = false, error, onSubmit, onClose }: NipModalProps) {
+  const insets = useSafeAreaInsets();
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View className="flex-1 justify-end">
@@ -37,8 +39,8 @@ export function NipModal({ visible, loading = false, error, onSubmit, onClose }:
           onPress={loading ? undefined : onClose}
         />
         <View
-          className="gap-lg bg-neutral-0 px-lg pb-10 pt-md dark:bg-neutral-900"
-          style={{ borderTopLeftRadius: 26, borderTopRightRadius: 26 }}
+          className="gap-lg bg-neutral-0 px-lg pt-md dark:bg-neutral-900"
+          style={{ borderTopLeftRadius: 26, borderTopRightRadius: 26, paddingBottom: Math.max(insets.bottom, 24) }}
         >
           <View className="items-center gap-md">
             <View className="h-1 w-10 rounded-pill bg-neutral-200 dark:bg-neutral-700" />
