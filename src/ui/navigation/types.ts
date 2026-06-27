@@ -21,6 +21,7 @@ export type AuthStackParamList = {
   RegisterSurvey: undefined;
   RegisterNip: undefined;
   RegisterLegal: undefined;
+  RegisterSuccess: undefined;
 };
 
 export type SpeiDraft = Omit<SpeiSendInput, 'nip' | 'location'>;

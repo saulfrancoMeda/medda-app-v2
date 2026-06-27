@@ -20,6 +20,7 @@ import {
   RegisterOtpScreen,
   RegisterPersonalScreen,
   RegisterPhoneScreen,
+  RegisterSuccessScreen,
   RegisterSurveyScreen,
 } from '@ui/features/auth/screens/RegisterScreens';
 import { LoadingScreen } from '@ui/features/common/LoadingScreen';
@@ -31,7 +32,7 @@ const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 
 function AuthNavigator() {
   return (
-    <AuthStack.Navigator screenOptions={{ ...useStackScreenOptions(), headerShown: false }}>
+    <AuthStack.Navigator screenOptions={{ ...useStackScreenOptions({ showBell: false }), headerShown: false }}>
       <AuthStack.Screen name="LoginPhone" component={LoginPhoneScreen} />
       <AuthStack.Screen name="LoginPassword" component={LoginPasswordScreen} />
       <AuthStack.Screen
@@ -103,6 +104,11 @@ function AuthNavigator() {
         name="RegisterLegal"
         component={RegisterLegalScreen}
         options={{ headerShown: true, title: 'Términos' }}
+      />
+      <AuthStack.Screen
+        name="RegisterSuccess"
+        component={RegisterSuccessScreen}
+        options={{ headerShown: false, gestureEnabled: false }}
       />
     </AuthStack.Navigator>
   );

@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -10,7 +10,7 @@ import { expensesTotal, type Movement } from '@domain/wallet/entities/Movement';
 import { AppHeader } from '@ui/navigation/AppHeader';
 import { Text } from '@ui/design-system/components';
 import { BalanceCard } from '@ui/features/wallet/components/BalanceCard';
-import { MovementRow, MovementRowSkeleton } from '@ui/features/wallet/components/MovementRow';
+import { MovementGroupCard, MovementRowSkeleton, getDateLabel } from '@ui/features/wallet/components/MovementRow';
 import { useProfile } from '@ui/features/account/hooks/useAccount';
 import {
   useBalance,
@@ -25,6 +25,7 @@ const RECENT_MOVEMENTS = 5;
 export function StoreScreen() {
   const tabNav = useNavigation<BottomTabNavigationProp<AppTabsParamList>>();
   const stackNav = useNavigation<NativeStackNavigationProp<StoreStackParamList>>();
+  const [showMaintenance, setShowMaintenance] = useState(false);
   const profile = useProfile();
   const account = useDefaultAccount();
   const balance = useBalance(account.data?.id);
@@ -34,6 +35,21 @@ export function StoreScreen() {
     () => (movements.data?.movements ?? []).slice(0, RECENT_MOVEMENTS),
     [movements.data],
   );
+
+  type RecentGroup = { label: string; movements: Movement[] };
+  const recentGroups = useMemo<RecentGroup[]>(() => {
+    const groups: RecentGroup[] = [];
+    let current: RecentGroup | null = null;
+    for (const m of recent) {
+      const label = getDateLabel(m.date);
+      if (!current || current.label !== label) {
+        current = { label, movements: [] };
+        groups.push(current);
+      }
+      current.movements.push(m);
+    }
+    return groups;
+  }, [recent]);
   const stp = useStpAccount();
   const p = profile.data;
   const initials = p ? `${p.firstName[0] ?? ''}${p.lastName[0] ?? ''}`.toUpperCase() : '';
@@ -107,33 +123,58 @@ export function StoreScreen() {
           <Ionicons name="chevron-forward" size={20} color="#9A9384" />
         </Pressable>
 
+        <Pressable
+          onPress={() => setShowMaintenance(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Servicios"
+          className="flex-row items-center gap-md rounded-card border border-neutral-200 p-md active:opacity-70 dark:border-neutral-800"
+        >
+          <View className="h-10 w-10 items-center justify-center rounded-pill bg-brand-100">
+            <Ionicons name="apps-outline" size={20} color="#97720A" />
+          </View>
+          <View className="flex-1">
+            <Text variant="caption" tone="muted">Acceso rápido</Text>
+            <Text variant="body" className="font-semibold">Servicios</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#9A9384" />
+        </Pressable>
+
         <View>
           <View className="flex-row items-center justify-between pb-sm">
-            <Text variant="h2">Transacciones</Text>
+            <Text variant="caption" className="font-bold text-neutral-900 dark:text-neutral-100" style={{ letterSpacing: 0.5 }}>
+              TRANSACCIONES RECIENTES
+            </Text>
             <Pressable
               accessibilityRole="button"
               hitSlop={12}
               onPress={() => goWallet('WalletHome')}
             >
-              <Text variant="body" tone="link" className="font-semibold">
+              <Text variant="caption" tone="link" className="font-semibold">
                 Ver todas
               </Text>
             </Pressable>
           </View>
 
           {loadingMovements ? (
-            <View>
-              {Array.from({ length: 3 }, (_, i) => (
-                <MovementRowSkeleton key={i} />
-              ))}
+            <View className="overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800">
+              <View className="bg-neutral-50 px-md py-xs dark:bg-neutral-900">
+                <View className="h-3 w-10 rounded-sm bg-neutral-200 dark:bg-neutral-700" />
+              </View>
+              <View className="px-md">
+                {Array.from({ length: 3 }, (_, i) => (
+                  <MovementRowSkeleton key={i} />
+                ))}
+              </View>
             </View>
-          ) : recent.length > 0 ? (
-            <View>
-              {recent.map((movement, index) => (
-                <View key={movement.id}>
-                  {index > 0 ? <View className="h-px bg-neutral-100 dark:bg-neutral-800" /> : null}
-                  <MovementRow movement={movement} onPress={() => openDetail(movement)} />
-                </View>
+          ) : recentGroups.length > 0 ? (
+            <View className="gap-sm">
+              {recentGroups.map((group) => (
+                <MovementGroupCard
+                  key={group.label}
+                  label={group.label}
+                  movements={group.movements}
+                  onPress={openDetail}
+                />
               ))}
             </View>
           ) : (
@@ -145,6 +186,33 @@ export function StoreScreen() {
           )}
         </View>
       </ScrollView>
+
+      <Modal visible={showMaintenance} transparent animationType="fade" onRequestClose={() => setShowMaintenance(false)}>
+        <Pressable
+          className="absolute inset-0 bg-black/50"
+          onPress={() => setShowMaintenance(false)}
+        />
+        <View className="flex-1 items-center justify-center px-lg">
+          <View className="w-full gap-lg rounded-2xl bg-neutral-0 p-xl dark:bg-neutral-900">
+            <View className="items-center gap-md">
+              <View className="h-16 w-16 items-center justify-center rounded-pill bg-brand-100">
+                <Ionicons name="construct-outline" size={32} color="#97720A" />
+              </View>
+              <Text variant="h2" center>En mantenimiento</Text>
+              <Text variant="body" tone="muted" center>
+                Estamos mejorando los servicios para darte una mejor experiencia. Pronto estarán disponibles.
+              </Text>
+            </View>
+            <Pressable
+              onPress={() => setShowMaintenance(false)}
+              accessibilityRole="button"
+              className="items-center rounded-pill bg-brand-400 py-md"
+            >
+              <Text variant="body" className="font-semibold text-neutral-900">Entendido</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
