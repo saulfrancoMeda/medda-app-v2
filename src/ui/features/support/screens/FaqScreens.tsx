@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { config } from '@config/env';
 import { AppHeader } from '@ui/navigation/AppHeader';
 import { Input, Text } from '@ui/design-system/components';
@@ -13,6 +14,7 @@ import type { FaqStackParamList } from '@ui/navigation/types';
 type ListProps = NativeStackScreenProps<FaqStackParamList, 'FaqList'>;
 
 export function FaqListScreen({ navigation }: ListProps) {
+  const tabBarHeight = useBottomTabBarHeight();
   const faqs = useFaqs();
   const [query, setQuery] = useState('');
 
@@ -26,12 +28,13 @@ export function FaqListScreen({ navigation }: ListProps) {
   }, [faqs.data, query]);
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
+    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950" edges={[]}>
       <AppHeader />
       <FlatList
         data={filtered}
         keyExtractor={(f) => f.id}
         contentContainerClassName="gap-lg p-lg"
+        contentContainerStyle={{ paddingBottom: tabBarHeight }}
         ListHeaderComponent={
           <View className="gap-md pb-sm">
             <Text variant="h1">¿En qué te podemos ayudar?</Text>

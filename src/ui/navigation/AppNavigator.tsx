@@ -83,10 +83,10 @@ function MainTabs() {
         component={WalletStackNavigator}
         options={({ route }) => {
           const focused = getFocusedRouteNameFromRoute(route) ?? 'WalletHome';
-          return {
-            title: 'Mi Billetera',
-            tabBarStyle: focused === 'WalletHome' ? undefined : { display: 'none' },
-          };
+          if (focused !== 'WalletHome') {
+            return { title: 'Mi Billetera', tabBarStyle: { display: 'none' } };
+          }
+          return { title: 'Mi Billetera' };
         }}
         listeners={({ navigation }) => ({
           tabPress: () => { navigation.navigate('Wallet', { screen: 'WalletHome' } as never); },

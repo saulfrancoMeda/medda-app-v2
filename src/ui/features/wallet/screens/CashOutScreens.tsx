@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
@@ -121,50 +121,54 @@ export function CashOutSpeiRecipientScreen({ navigation }: RecipientProps) {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-      <ScrollView
-        className="flex-1 bg-neutral-0 dark:bg-neutral-950"
-        contentContainerClassName="gap-lg p-lg"
-        keyboardShouldPersistTaps="handled"
-      >
-        <Input
-          label="CLABE destino (18 dígitos)"
-          leftIcon="card-outline"
-          placeholder="18 dígitos"
-          keyboardType="number-pad"
-          maxLength={18}
-          value={clabe}
-          onChangeText={onClabeChange}
-          error={clabe.length > 0 && !isValidClabe(clabe) ? 'CLABE inválida' : undefined}
-        />
-        <BankPicker value={bank} onSelect={setBank} />
-        <Input
-          label="Nombre del beneficiario"
-          leftIcon="person-outline"
-          placeholder="Nombre completo"
-          value={name}
-          onChangeText={setName}
-        />
-        <Input
-          label="Email del beneficiario (opcional)"
-          leftIcon="mail-outline"
-          placeholder="correo@ejemplo.com"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <Input
-          label="Concepto (opcional)"
-          leftIcon="chatbubble-ellipses-outline"
-          placeholder="Ej. Renta, préstamo…"
-          maxLength={25}
-          value={comment}
-          onChangeText={setComment}
-        />
-        <Button title="Continuar" full disabled={!valid} onPress={onContinue} />
-      </ScrollView>
-    </KeyboardAvoidingView>
+    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950" edges={['bottom']}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.flex}>
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="gap-lg p-lg"
+          keyboardShouldPersistTaps="handled"
+        >
+          <Input
+            label="CLABE destino (18 dígitos)"
+            leftIcon="card-outline"
+            placeholder="18 dígitos"
+            keyboardType="number-pad"
+            maxLength={18}
+            value={clabe}
+            onChangeText={onClabeChange}
+            error={clabe.length > 0 && !isValidClabe(clabe) ? 'CLABE inválida' : undefined}
+          />
+          <BankPicker value={bank} onSelect={setBank} />
+          <Input
+            label="Nombre del beneficiario"
+            leftIcon="person-outline"
+            placeholder="Nombre completo"
+            value={name}
+            onChangeText={setName}
+          />
+          <Input
+            label="Email del beneficiario (opcional)"
+            leftIcon="mail-outline"
+            placeholder="correo@ejemplo.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
+          />
+          <Input
+            label="Concepto (opcional)"
+            leftIcon="chatbubble-ellipses-outline"
+            placeholder="Ej. Renta, préstamo…"
+            maxLength={25}
+            value={comment}
+            onChangeText={setComment}
+          />
+        </ScrollView>
+        <View style={styles.footer}>
+          <Button title="Continuar" full disabled={!valid} onPress={onContinue} />
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -179,8 +183,9 @@ export function CashOutSpeiAmountScreen({ route, navigation }: AmountProps) {
 
   const availableBalance = balance.data ?? 0;
   const amountNum = parseFloat(amount) || 0;
-  const overBalance = amountNum > availableBalance && availableBalance > 0;
-  const canContinue = amountNum > 0 && !overBalance;
+  const noFunds = !balance.isPending && Boolean(account.data) && availableBalance === 0;
+  const overBalance = amountNum > availableBalance;
+  const canContinue = amountNum > 0 && !overBalance && !noFunds;
 
   const onMax = () => setAmount(availableBalance.toFixed(2));
 
@@ -204,49 +209,62 @@ export function CashOutSpeiAmountScreen({ route, navigation }: AmountProps) {
         <Text variant="caption" tone="muted" className="font-mono">{maskedClabe}</Text>
       </View>
 
-      {/* Héroe: monto */}
+      {/* Héroe: monto o estado sin saldo */}
       <View className="flex-1 items-center justify-center gap-md px-lg">
-        <Text
-          style={{
-            fontSize: 52,
-            fontWeight: '700',
-            textAlign: 'center',
-            color: overBalance ? '#C24A30' : undefined,
-            fontVariant: ['tabular-nums'],
-          }}
-          variant="display"
-        >
-          {formatAmountDisplay(amount)}
-        </Text>
-
-        <View className="flex-row items-center gap-sm">
-          <Text variant="caption" tone="muted">
-            Disponible: {balance.data !== undefined ? formatCurrency(availableBalance) : '—'}
-          </Text>
-          {availableBalance > 0 ? (
-            <Pressable
-              onPress={onMax}
-              accessibilityRole="button"
-              accessibilityLabel="Usar saldo máximo"
-              className="rounded-pill bg-brand-100 px-sm py-xs"
+        {noFunds ? (
+          <View className="items-center gap-md">
+            <View className="h-16 w-16 items-center justify-center rounded-2xl bg-neutral-100 dark:bg-neutral-800">
+              <Ionicons name="wallet-outline" size={32} color="#9A9384" />
+            </View>
+            <Text variant="h2" center>Sin saldo disponible</Text>
+            <Text variant="body" tone="muted" center>
+              Necesitas abonar dinero a tu cuenta antes de realizar un envío.
+            </Text>
+            <Button
+              title="Abonar dinero"
+              variant="soft"
+              onPress={() => navigation.navigate('CashInMethods')}
+            />
+          </View>
+        ) : (
+          <>
+            <Text
+              style={[styles.amountDisplay, overBalance && styles.amountError]}
+              variant="display"
             >
-              <Text variant="caption" className="font-bold text-brand-700">MAX</Text>
-            </Pressable>
-          ) : null}
+              {formatAmountDisplay(amount)}
+            </Text>
+
+            <View className="flex-row items-center gap-sm">
+              <Text variant="caption" tone="muted">
+                Disponible: {balance.data !== undefined ? formatCurrency(availableBalance) : '—'}
+              </Text>
+              <Pressable
+                onPress={onMax}
+                accessibilityRole="button"
+                accessibilityLabel="Usar saldo máximo"
+                className="rounded-pill bg-brand-100 px-sm py-xs"
+              >
+                <Text variant="caption" className="font-bold text-brand-700">MAX</Text>
+              </Pressable>
+            </View>
+
+            {overBalance ? (
+              <Text variant="caption" tone="danger" center>
+                El monto supera tu saldo disponible.
+              </Text>
+            ) : null}
+          </>
+        )}
+      </View>
+
+      {/* Teclado numérico y CTA — solo si hay saldo */}
+      {!noFunds ? (
+        <View style={styles.keypadFooter}>
+          <AmountKeypad value={amount} onChange={setAmount} />
+          <Button title="Continuar" full disabled={!canContinue} onPress={onContinue} />
         </View>
-
-        {overBalance ? (
-          <Text variant="caption" tone="danger" center>
-            El monto supera tu saldo disponible.
-          </Text>
-        ) : null}
-      </View>
-
-      {/* Teclado numérico y CTA */}
-      <View className="gap-sm px-lg pb-lg">
-        <AmountKeypad value={amount} onChange={setAmount} />
-        <Button title="Continuar" full disabled={!canContinue} onPress={onContinue} />
-      </View>
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -502,3 +520,28 @@ export function CashOutMedaAmountScreen({ route, navigation }: MedaAmountProps) 
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  flex: { flex: 1 },
+  footer: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F0EDE8',
+  },
+  amountDisplay: {
+    fontSize: 52,
+    fontWeight: '700',
+    textAlign: 'center',
+    fontVariant: ['tabular-nums'],
+  },
+  amountError: {
+    color: '#C24A30',
+  },
+  keypadFooter: {
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+});
