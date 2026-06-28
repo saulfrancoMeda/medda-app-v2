@@ -1,6 +1,6 @@
-import { View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
@@ -42,8 +42,11 @@ function MainTabs() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: '#97720A',
-        tabBarInactiveTintColor: dark ? '#9A9384' : '#9A9384',
+        tabBarInactiveTintColor: '#9A9384',
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600', marginTop: 2 },
+        tabBarActiveBackgroundColor: 'transparent',
+        tabBarInactiveBackgroundColor: 'transparent',
+        tabBarItemStyle: { overflow: 'hidden' },
         tabBarStyle: {
           height: 64 + bottomInset,
           paddingTop: 10,
@@ -51,15 +54,12 @@ function MainTabs() {
           backgroundColor: bg,
           borderTopWidth: 1,
           borderTopColor: borderColor,
-          elevation: 12,
+          elevation: 8,
           shadowColor: '#000',
           shadowOpacity: 0.06,
           shadowRadius: 8,
           shadowOffset: { width: 0, height: -2 },
         },
-        tabBarBackground: () => (
-          <View style={{ flex: 1, backgroundColor: bg, borderTopWidth: 1, borderTopColor: borderColor }} />
-        ),
         tabBarIcon: ({ color, focused }) => {
           const name = focused
             ? TAB_ICON_ACTIVE[route.name]
@@ -81,7 +81,13 @@ function MainTabs() {
       <Tabs.Screen
         name="Wallet"
         component={WalletStackNavigator}
-        options={{ title: 'Mi Billetera' }}
+        options={({ route }) => {
+          const focused = getFocusedRouteNameFromRoute(route) ?? 'WalletHome';
+          return {
+            title: 'Mi Billetera',
+            tabBarStyle: focused === 'WalletHome' ? undefined : { display: 'none' },
+          };
+        }}
         listeners={({ navigation }) => ({
           tabPress: () => { navigation.navigate('Wallet', { screen: 'WalletHome' } as never); },
         })}

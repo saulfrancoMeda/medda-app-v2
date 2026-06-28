@@ -33,22 +33,36 @@ export function LoginPhoneScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
-      {/* Gold gradient — type is the hero, logo confirms brand context */}
+      {/* Gold gradient — logo visible arriba, headline display abajo */}
       <GoldGradient
         radius={0}
         style={{
           flex: 1,
           justifyContent: 'space-between',
           paddingHorizontal: 24,
-          paddingTop: 24,
+          paddingTop: 28,
           paddingBottom: 32,
           borderBottomLeftRadius: 32,
           borderBottomRightRadius: 32,
         }}
       >
-        <Logo width={40} height={40} />
+        <View
+          style={{
+            backgroundColor: 'white',
+            borderRadius: 16,
+            padding: 10,
+            alignSelf: 'flex-start',
+            shadowColor: '#000',
+            shadowOpacity: 0.10,
+            shadowRadius: 8,
+            shadowOffset: { width: 0, height: 2 },
+            elevation: 3,
+          }}
+        >
+          <Logo width={52} height={52} />
+        </View>
         <Text variant="display" style={{ color: '#1B1812', lineHeight: 48 }}>
-          {'Tu dinero,\nsiempre\ncontigo.'}
+          {'Simplifica\ntus finanzas.'}
         </Text>
       </GoldGradient>
 

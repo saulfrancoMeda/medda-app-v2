@@ -1,10 +1,16 @@
 import { useEffect, useRef } from 'react';
-import { ActivityIndicator, Pressable, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Text } from '@ui/design-system/components';
 
 export const NIP_LENGTH = 6;
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'] as const;
+
+const styles = StyleSheet.create({
+  dot: { width: 14, height: 14, borderRadius: 7 },
+  dotFilled: { backgroundColor: '#1B1812' },
+  dotEmpty: { backgroundColor: 'transparent', borderWidth: 2, borderColor: '#D6D1C7' },
+});
 
 interface NipKeypadProps {
   readonly value: string;
@@ -46,9 +52,7 @@ export function NipKeypad({ value, onChange, onComplete, loading = false, error 
           Array.from({ length: NIP_LENGTH }, (_, i) => (
             <View
               key={i}
-              className={`h-4 w-4 rounded-full ${
-                i < value.length ? 'bg-brand-500' : 'bg-neutral-200 dark:bg-neutral-700'
-              }`}
+              style={[styles.dot, i < value.length ? styles.dotFilled : styles.dotEmpty]}
             />
           ))
         )}

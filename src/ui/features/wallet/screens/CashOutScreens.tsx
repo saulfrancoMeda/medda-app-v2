@@ -271,30 +271,36 @@ export function CashOutConfirmScreen({ route, navigation }: ConfirmProps) {
   const { draft } = route.params;
 
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
-      <View className="gap-xs rounded-card bg-brand-500 p-lg">
-        <Text className="text-ink" variant="caption">Vas a enviar</Text>
-        <Text variant="display" className="text-ink" style={{ fontVariant: ['tabular-nums'] }}>
-          {formatCurrency(Number(draft.monto))}
+    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950" edges={['bottom']}>
+      <ScrollView className="flex-1" contentContainerClassName="gap-lg p-lg">
+        <View className="gap-xs rounded-card bg-brand-500 p-lg">
+          <Text className="text-ink" variant="caption">Vas a enviar</Text>
+          <Text variant="display" className="text-ink" style={{ fontVariant: ['tabular-nums'] }}>
+            {formatCurrency(Number(draft.monto))}
+          </Text>
+        </View>
+
+        <View className="rounded-card border border-neutral-200 p-lg dark:border-neutral-800">
+          <Row label="Beneficiario" value={draft.nombreBeneficiario} />
+          <Row label="CLABE destino" value={draft.cuentaBeneficiario} />
+          {draft.emailBeneficiario ? <Row label="Email" value={draft.emailBeneficiario} /> : null}
+          {draft.comment ? <Row label="Concepto" value={draft.comment} /> : null}
+        </View>
+
+        <Text variant="caption" tone="muted">
+          Al continuar, autorizarás la transferencia con tu NIP de 6 dígitos.
         </Text>
-      </View>
+      </ScrollView>
 
-      <View className="rounded-card border border-neutral-200 p-lg dark:border-neutral-800">
-        <Row label="Beneficiario" value={draft.nombreBeneficiario} />
-        <Row label="CLABE destino" value={draft.cuentaBeneficiario} />
-        {draft.emailBeneficiario ? <Row label="Email" value={draft.emailBeneficiario} /> : null}
-        {draft.comment ? <Row label="Concepto" value={draft.comment} /> : null}
+      {/* CTA anclado al fondo — nunca dentro del scroll */}
+      <View className="gap-md px-lg pb-lg">
+        <Button
+          title="Autorizar con NIP"
+          full
+          onPress={() => navigation.navigate('CashOutNip', { draft })}
+        />
       </View>
-
-      <Text variant="caption" tone="muted">
-        Al continuar, autorizarás la transferencia con tu NIP de 6 dígitos.
-      </Text>
-      <Button
-        title="Autorizar con NIP"
-        full
-        onPress={() => navigation.navigate('CashOutNip', { draft })}
-      />
-    </ScrollView>
+    </SafeAreaView>
   );
 }
 

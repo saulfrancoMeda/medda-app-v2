@@ -8,7 +8,7 @@ export default function App() {
   return (
     <AppProviders>
       <RootNavigator />
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
     </AppProviders>
   );
 }

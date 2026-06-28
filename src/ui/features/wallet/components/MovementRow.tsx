@@ -78,7 +78,7 @@ export function MovementRow({ movement, onPress }: { movement: Movement; onPress
         <Text
           variant="body"
           className="font-bold"
-          style={{ color: credit ? '#2E8C6A' : '#1B1812' }}
+          style={{ color: credit ? '#2E8C6A' : '#1B1812', fontVariant: ['tabular-nums'] }}
         >
           {amount}
         </Text>
