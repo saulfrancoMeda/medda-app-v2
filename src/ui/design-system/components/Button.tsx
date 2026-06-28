@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, View, type PressableProps } from 'react-n
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Text } from '@ui/design-system/components/Text';
 import { cn } from '@ui/lib/cn';
+import { palette } from '@ui/design-system/tokens/palette';
 
 const button = cva('flex-row items-center justify-center gap-sm rounded-pill', {
   variants: {
@@ -65,7 +66,7 @@ export const Button = forwardRef<View, ButtonProps>(
         {...rest}
       >
         {loading ? (
-          <ActivityIndicator color={isSolid ? '#1B1812' : '#fcd535'} />
+          <ActivityIndicator color={isSolid ? palette.neutral[900] : palette.brand[500]} />
         ) : (
           <Text
             tone={labelTone(variant, isDisabled)}

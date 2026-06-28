@@ -20,6 +20,7 @@ import {
   useSaveBeneficiaries,
 } from '@ui/features/beneficiaries/hooks/useBeneficiaries';
 import type { SectionsStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 type Props = NativeStackScreenProps<SectionsStackParamList, 'Beneficiaries'>;
 
@@ -142,7 +143,7 @@ export function BeneficiariesScreen({ navigation }: Props) {
   if (beneficiaries.isPending) {
     return (
       <View className="flex-1 items-center justify-center bg-neutral-0 dark:bg-neutral-950">
-        <ActivityIndicator color="#FCD535" />
+        <ActivityIndicator color={palette.brand[500]} />
       </View>
     );
   }
@@ -150,7 +151,7 @@ export function BeneficiariesScreen({ navigation }: Props) {
   if (beneficiaries.isError) {
     return (
       <View className="flex-1 items-center justify-center gap-md bg-neutral-0 p-lg dark:bg-neutral-950">
-        <Ionicons name="cloud-offline-outline" size={48} color="#9A9384" />
+        <Ionicons name="cloud-offline-outline" size={48} color={palette.neutral[400]} />
         <Text variant="body" tone="muted" center>
           No se pudieron cargar tus beneficiarios.
         </Text>
@@ -171,7 +172,7 @@ export function BeneficiariesScreen({ navigation }: Props) {
           <RefreshControl
             refreshing={beneficiaries.isRefetching}
             onRefresh={() => void beneficiaries.refetch()}
-            tintColor="#FCD535"
+            tintColor={palette.brand[500]}
           />
         }
         ListHeaderComponent={
@@ -183,7 +184,7 @@ export function BeneficiariesScreen({ navigation }: Props) {
             ) : null}
             {actionError ? (
               <View className="flex-row items-center gap-sm rounded-md bg-danger/10 p-md">
-                <Ionicons name="alert-circle-outline" size={20} color="#C24A30" />
+                <Ionicons name="alert-circle-outline" size={20} color={palette.danger} />
                 <Text variant="caption" tone="danger" className="flex-1">
                   {actionError}
                 </Text>
@@ -193,7 +194,7 @@ export function BeneficiariesScreen({ navigation }: Props) {
         }
         ListEmptyComponent={
           <View className="items-center gap-md py-2xl">
-            <Ionicons name="people-outline" size={48} color="#9A9384" />
+            <Ionicons name="people-outline" size={48} color={palette.neutral[400]} />
             <Text variant="body" tone="muted" center>
               Aún no tienes beneficiarios registrados.
             </Text>
@@ -222,7 +223,7 @@ export function BeneficiariesScreen({ navigation }: Props) {
               style={{ minHeight: 44 }}
               className="mt-sm flex-row items-center gap-sm self-start"
             >
-              <Ionicons name="trash-outline" size={18} color="#C24A30" />
+              <Ionicons name="trash-outline" size={18} color={palette.danger} />
               <Text variant="caption" tone="danger" className="font-medium">
                 Eliminar
               </Text>

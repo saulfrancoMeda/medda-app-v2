@@ -23,6 +23,7 @@ import {
 import { useContainer } from '@ui/providers/ContainerProvider';
 import { useToast } from '@ui/providers/ToastProvider';
 import type { WalletStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 type MethodsProps = NativeStackScreenProps<WalletStackParamList, 'CashOutMethods'>;
 
@@ -58,7 +59,7 @@ function MethodRow({
           </Text>
         ) : null}
       </View>
-      <Ionicons name="chevron-forward" size={20} color="#9A9384" />
+      <Ionicons name="chevron-forward" size={20} color={palette.neutral[400]} />
     </Pressable>
   );
 }
@@ -72,14 +73,14 @@ export function CashOutMethodsScreen({ navigation }: MethodsProps) {
       </Text>
       <MethodRow
         icon="person-circle"
-        iconColor="#97720A"
+        iconColor={palette.brand[700]}
         title="Envía a un usuario Medá"
         subtitle="Escanea el QR del destinatario"
         onPress={() => navigation.navigate('CashOutMedaScan')}
       />
       <MethodRow
         icon="paper-plane"
-        iconColor="#97720A"
+        iconColor={palette.brand[700]}
         title="Transferencia SPEI a Terceros"
         onPress={() => navigation.navigate('CashOutSpeiRecipient')}
       />
@@ -214,7 +215,7 @@ export function CashOutSpeiAmountScreen({ route, navigation }: AmountProps) {
         {noFunds ? (
           <View className="items-center gap-md">
             <View className="h-16 w-16 items-center justify-center rounded-2xl bg-neutral-100 dark:bg-neutral-800">
-              <Ionicons name="wallet-outline" size={32} color="#9A9384" />
+              <Ionicons name="wallet-outline" size={32} color={palette.neutral[400]} />
             </View>
             <Text variant="h2" center>Sin saldo disponible</Text>
             <Text variant="body" tone="muted" center>
@@ -236,7 +237,7 @@ export function CashOutSpeiAmountScreen({ route, navigation }: AmountProps) {
             </Text>
 
             <View className="flex-row items-center gap-sm">
-              <Text variant="caption" tone="muted">
+              <Text variant="caption" tone="muted" style={{ fontVariant: ['tabular-nums'] }}>
                 Disponible: {balance.data !== undefined ? formatCurrency(availableBalance) : '—'}
               </Text>
               <Pressable
@@ -399,7 +400,7 @@ export function TransactionSuccessScreen({ route, navigation }: SuccessProps) {
   return (
     <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="flex-1 justify-center gap-lg p-lg">
       <View className="items-center gap-sm">
-        <Ionicons name="checkmark-circle" size={72} color="#2E8C6A" />
+        <Ionicons name="checkmark-circle" size={72} color={palette.success} />
         <Text variant="h1" center>
           ¡Envío exitoso!
         </Text>
@@ -431,7 +432,7 @@ export function CashOutMedaScanScreen({ navigation }: ScanProps) {
   if (!permission.granted) {
     return (
       <View className="flex-1 items-center justify-center gap-md bg-neutral-0 px-lg dark:bg-neutral-950">
-        <Ionicons name="camera-outline" size={48} color="#97720A" />
+        <Ionicons name="camera-outline" size={48} color={palette.brand[700]} />
         <Text variant="h2" center>
           Permite la cámara
         </Text>
@@ -537,7 +538,7 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   amountError: {
-    color: '#C24A30',
+    color: palette.danger,
   },
   keypadFooter: {
     gap: 8,

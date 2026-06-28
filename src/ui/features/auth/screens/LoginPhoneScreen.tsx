@@ -7,6 +7,7 @@ import { useAuth } from '@ui/providers/AuthProvider';
 import { useToast } from '@ui/providers/ToastProvider';
 import { lookupErrorMessage } from '@ui/features/auth/authMessages';
 import type { AuthStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'LoginPhone'>;
 
@@ -61,7 +62,7 @@ export function LoginPhoneScreen({ navigation }: Props) {
         >
           <Logo width={52} height={52} />
         </View>
-        <Text variant="display" style={{ color: '#1B1812', lineHeight: 48 }}>
+        <Text variant="display" style={{ color: palette.neutral[900], lineHeight: 48 }}>
           {'Simplifica\ntus finanzas.'}
         </Text>
       </GoldGradient>

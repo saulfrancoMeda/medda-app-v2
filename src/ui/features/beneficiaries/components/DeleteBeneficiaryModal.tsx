@@ -1,6 +1,7 @@
 import { Modal, Pressable, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Button, Text } from '@ui/design-system/components';
+import { palette } from '@ui/design-system/tokens/palette';
 
 interface DeleteBeneficiaryModalProps {
   readonly visible: boolean;
@@ -31,7 +32,7 @@ export function DeleteBeneficiaryModal({
       >
         <Text variant="h2">{title}</Text>
         <View className="flex-row items-start gap-sm rounded-md bg-danger/10 p-md">
-          <Ionicons name="warning-outline" size={20} color="#C24A30" />
+          <Ionicons name="warning-outline" size={20} color={palette.danger} />
           <Text variant="caption" tone="danger" className="flex-1">
             {message}
           </Text>

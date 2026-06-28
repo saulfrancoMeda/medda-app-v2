@@ -8,6 +8,7 @@ import { useAuth } from '@ui/providers/AuthProvider';
 import { useToast } from '@ui/providers/ToastProvider';
 import { authErrorMessage } from '@ui/features/auth/authMessages';
 import type { AuthStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'LoginPassword'>;
 
@@ -66,7 +67,7 @@ export function LoginPasswordScreen({ route, navigation }: Props) {
               <Ionicons
                 name={secure ? 'eye-outline' : 'eye-off-outline'}
                 size={22}
-                color="#9A9384"
+                color={palette.neutral[400]}
               />
             </Pressable>
           }
@@ -116,9 +117,9 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 32,
   },
   hi: {
-    color: '#1B1812',
+    color: palette.neutral[900],
   },
   name: {
-    color: '#1B1812',
+    color: palette.neutral[900],
   },
 });

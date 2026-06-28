@@ -5,6 +5,7 @@ import NetInfo from '@react-native-community/netinfo';
 import { Ionicons } from '@expo/vector-icons';
 import { Button, Text } from '@ui/design-system/components';
 import { useAuth } from '@ui/providers/AuthProvider';
+import { palette } from '@ui/design-system/tokens/palette';
 
 const INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000;
 
@@ -92,7 +93,7 @@ export function SecurityMonitor({ children }: { children: ReactNode }) {
       {offline ? (
         <SafeAreaView edges={['bottom']} className="absolute inset-x-0 bottom-0">
           <View className="m-md flex-row items-center gap-sm rounded-card bg-danger/10 p-md">
-            <Ionicons name="warning-outline" size={20} color="#C24A30" />
+            <Ionicons name="warning-outline" size={20} color={palette.danger} />
             <Text variant="body" tone="danger">
               Se perdió la conexión
             </Text>
@@ -104,7 +105,7 @@ export function SecurityMonitor({ children }: { children: ReactNode }) {
         <View className="flex-1 items-center justify-center bg-black/50 px-lg">
           <View className="w-full items-center gap-md rounded-xl bg-neutral-0 p-xl dark:bg-neutral-900">
             <View className="h-20 w-20 items-center justify-center rounded-pill bg-brand-500">
-              <Ionicons name="lock-closed" size={36} color="#1B1812" />
+              <Ionicons name="lock-closed" size={36} color={palette.neutral[900]} />
             </View>
             <Text variant="h2" center>
               Tu sesión expiró

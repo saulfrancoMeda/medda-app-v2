@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Button, Text } from '@ui/design-system/components';
+import { palette } from '@ui/design-system/tokens/palette';
 
 interface SuccessViewProps {
   readonly title: string;
@@ -14,7 +15,7 @@ export function SuccessView({ title, description, buttonTitle = 'Listo', onPress
     <View className="flex-1 justify-center gap-lg bg-neutral-0 p-lg dark:bg-neutral-950">
       <View className="items-center gap-md">
         <View className="h-20 w-20 items-center justify-center rounded-pill bg-success/15">
-          <Ionicons name="checkmark-circle" size={56} color="#2E8C6A" />
+          <Ionicons name="checkmark-circle" size={56} color={palette.success} />
         </View>
         <Text variant="h1" center>
           {title}

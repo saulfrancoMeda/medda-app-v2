@@ -19,6 +19,7 @@ import {
   useStpAccount,
 } from '@ui/features/wallet/hooks/useWallet';
 import type { AppTabsParamList, StoreStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 const RECENT_MOVEMENTS = 5;
 
@@ -91,7 +92,7 @@ export function StoreScreen() {
               accessibilityRole="button"
               accessibilityLabel="Mi QR"
             >
-              <Ionicons name="qr-code" size={20} color="#1B1812" />
+              <Ionicons name="qr-code" size={20} color={palette.neutral[900]} />
             </Pressable>
           </View>
 
@@ -105,7 +106,7 @@ export function StoreScreen() {
             </View>
             {loadingBalance ? (
               <View style={styles.loadingRow}>
-                <ActivityIndicator color="#1B1812" />
+                <ActivityIndicator color={palette.neutral[900]} />
               </View>
             ) : (
               <Text variant="display" style={[styles.ink, styles.amount]}>
@@ -131,7 +132,7 @@ export function StoreScreen() {
                 accessibilityLabel={action.label}
               >
                 <View style={styles.actionCircle}>
-                  <Ionicons name={action.icon} size={22} color="#FCD535" />
+                  <Ionicons name={action.icon} size={22} color={palette.brand[500]} />
                 </View>
                 <Text style={styles.actionLabel}>{action.label}</Text>
               </Pressable>
@@ -148,7 +149,7 @@ export function StoreScreen() {
             className="flex-row items-center gap-md rounded-card border border-neutral-200 p-md active:opacity-70 dark:border-neutral-800"
           >
             <View className="h-10 w-10 items-center justify-center rounded-pill bg-neutral-100 dark:bg-neutral-800">
-              <Ionicons name="receipt-outline" size={20} color="#6C6555" />
+              <Ionicons name="receipt-outline" size={20} color={palette.neutral[500]} />
             </View>
             <View className="flex-1">
               <Text variant="caption" tone="muted">Mis gastos</Text>
@@ -156,7 +157,7 @@ export function StoreScreen() {
                 {movements.data ? formatCurrency(expenses) : '—'}
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#9A9384" />
+            <Ionicons name="chevron-forward" size={20} color={palette.neutral[400]} />
           </Pressable>
 
           <Pressable
@@ -166,13 +167,13 @@ export function StoreScreen() {
             className="flex-row items-center gap-md rounded-card border border-neutral-200 p-md active:opacity-70 dark:border-neutral-800"
           >
             <View className="h-10 w-10 items-center justify-center rounded-pill bg-brand-100">
-              <Ionicons name="apps-outline" size={20} color="#97720A" />
+              <Ionicons name="apps-outline" size={20} color={palette.brand[700]} />
             </View>
             <View className="flex-1">
               <Text variant="caption" tone="muted">Acceso rápido</Text>
               <Text variant="body" className="font-semibold">Servicios</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#9A9384" />
+            <Ionicons name="chevron-forward" size={20} color={palette.neutral[400]} />
           </Pressable>
 
           {/* Recent transactions */}
@@ -235,7 +236,7 @@ export function StoreScreen() {
           <View className="w-full gap-lg rounded-2xl bg-neutral-0 p-xl dark:bg-neutral-900">
             <View className="items-center gap-md">
               <View className="h-16 w-16 items-center justify-center rounded-pill bg-brand-100">
-                <Ionicons name="construct-outline" size={32} color="#97720A" />
+                <Ionicons name="construct-outline" size={32} color={palette.brand[700]} />
               </View>
               <Text variant="h2" center>En mantenimiento</Text>
               <Text variant="body" tone="muted" center>
@@ -269,7 +270,7 @@ const styles = StyleSheet.create({
   cardsSection: { paddingHorizontal: 16, paddingTop: 16, gap: 12 },
   // Hero internals
   greetingRow: { flexDirection: 'row', alignItems: 'center' },
-  ink: { color: '#1B1812' },
+  ink: { color: palette.neutral[900] },
   caption: { color: 'rgba(27,24,18,0.60)', fontSize: 13 },
   qrButton: {
     height: 40,
@@ -281,8 +282,8 @@ const styles = StyleSheet.create({
   },
   balanceSection: { marginTop: 20 },
   balanceHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  mxnBadge: { backgroundColor: '#1B1812', borderRadius: 99, paddingHorizontal: 8, paddingVertical: 2 },
-  mxnText: { color: '#FCD535', fontSize: 11, fontWeight: '700', letterSpacing: 1.5 },
+  mxnBadge: { backgroundColor: palette.neutral[900], borderRadius: 99, paddingHorizontal: 8, paddingVertical: 2 },
+  mxnText: { color: palette.brand[500], fontSize: 11, fontWeight: '700', letterSpacing: 1.5 },
   loadingRow: { height: 52, justifyContent: 'center' },
   amount: { marginTop: 4, fontVariant: ['tabular-nums'] },
   clabe: { color: 'rgba(27,24,18,0.55)', fontSize: 12, fontFamily: 'monospace', marginTop: 6 },
@@ -292,7 +293,7 @@ const styles = StyleSheet.create({
     height: 48,
     width: 48,
     borderRadius: 24,
-    backgroundColor: '#1B1812',
+    backgroundColor: palette.neutral[900],
     alignItems: 'center',
     justifyContent: 'center',
   },

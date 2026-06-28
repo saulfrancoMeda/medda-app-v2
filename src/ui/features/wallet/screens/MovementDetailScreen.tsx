@@ -7,6 +7,7 @@ import { isCredit, signedAmount } from '@domain/wallet/entities/Movement';
 import { Text } from '@ui/design-system/components';
 import { useToast } from '@ui/providers/ToastProvider';
 import type { WalletStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 const formatDateTime = (iso: string): string => {
   if (!iso) return '';
@@ -23,7 +24,11 @@ function DetailRow({ label, value, mono }: { label: string; value?: string; mono
       <Text variant="caption" tone="muted">
         {label}
       </Text>
-      <Text variant="body" className={mono ? 'flex-1 text-right font-mono' : 'flex-1 text-right'}>
+      <Text
+        variant="body"
+        className={mono ? 'flex-1 text-right font-mono' : 'flex-1 text-right'}
+        style={{ fontVariant: ['tabular-nums'] }}
+      >
         {value}
       </Text>
     </View>
@@ -53,10 +58,10 @@ export function MovementDetailScreen({ route }: Props) {
           <Ionicons
             name={credit ? 'arrow-down' : 'arrow-up'}
             size={28}
-            color={credit ? '#2E8C6A' : '#97720A'}
+            color={credit ? palette.success : palette.brand[700]}
           />
         </View>
-        <Text variant="display" className={credit ? 'text-success' : undefined}>
+        <Text variant="display" className={credit ? 'text-success' : undefined} style={{ fontVariant: ['tabular-nums'] }}>
           {formatCurrency(signedAmount(movement))}
         </Text>
         <Text variant="body" tone="muted">
@@ -93,7 +98,7 @@ export function MovementDetailScreen({ route }: Props) {
         accessibilityRole="button"
         className="flex-row items-center justify-center gap-sm py-sm"
       >
-        <Ionicons name="copy-outline" size={18} color="#97720A" />
+        <Ionicons name="copy-outline" size={18} color={palette.brand[700]} />
         <Text variant="body" tone="link" className="font-semibold">
           Copiar no. de transacción
         </Text>

@@ -6,6 +6,7 @@ import { useColorScheme } from 'nativewind';
 import { unreadCount } from '@domain/notifications/entities/Notification';
 import { Logo, Text } from '@ui/design-system/components';
 import { useNotifications } from '@ui/features/notifications/hooks/useNotifications';
+import { palette } from '@ui/design-system/tokens/palette';
 
 export interface GradientHeaderRowProps {
   readonly onMenuPress: () => void;
@@ -26,7 +27,7 @@ export function GradientHeaderRow({
         accessibilityRole="button"
         accessibilityLabel="Abrir menú"
       >
-        <Ionicons name="menu" size={26} color="#1B1812" />
+        <Ionicons name="menu" size={26} color={palette.neutral[900]} />
       </Pressable>
       <Logo width={70} height={28} />
       <View style={{ width: 36, alignItems: 'flex-end' }}>
@@ -36,7 +37,7 @@ export function GradientHeaderRow({
           accessibilityRole="button"
           accessibilityLabel="Notificaciones"
         >
-          <Ionicons name="notifications-outline" size={26} color="#1B1812" />
+          <Ionicons name="notifications-outline" size={26} color={palette.neutral[900]} />
           {unread > 0 ? (
             <View
               style={{
@@ -48,8 +49,8 @@ export function GradientHeaderRow({
                 paddingHorizontal: 3,
                 borderRadius: 8,
                 borderWidth: 1.5,
-                borderColor: '#FCD535',
-                backgroundColor: '#C24A30',
+                borderColor: palette.brand[500],
+                backgroundColor: palette.danger,
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
@@ -71,7 +72,7 @@ export function AppHeader() {
   const { top } = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colorScheme } = useColorScheme();
-  const iconColor = colorScheme === 'dark' ? '#FAFAF9' : '#1B1812';
+  const iconColor = colorScheme === 'dark' ? palette.neutral[50] : palette.neutral[900];
   const notifications = useNotifications();
   const unread = unreadCount(notifications.data ?? []);
 
@@ -110,7 +111,7 @@ export function AppHeader() {
                 height: 18,
                 paddingHorizontal: 4,
                 borderWidth: 2,
-                borderColor: colorScheme === 'dark' ? '#131110' : '#ffffff',
+                borderColor: colorScheme === 'dark' ? palette.neutral[950] : palette.neutral[0],
               }}
             >
               <Text

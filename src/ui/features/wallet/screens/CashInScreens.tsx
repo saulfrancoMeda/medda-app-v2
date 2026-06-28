@@ -5,6 +5,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Text } from '@ui/design-system/components';
 import { useStpAccount } from '@ui/features/wallet/hooks/useWallet';
 import type { WalletStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 function MethodRow({ title, subtitle, onPress }: { title: string; subtitle: string; onPress: () => void }) {
   return (
@@ -13,7 +14,7 @@ function MethodRow({ title, subtitle, onPress }: { title: string; subtitle: stri
       accessibilityRole="button"
       className="flex-row items-center gap-md rounded-card border border-neutral-200 p-lg dark:border-neutral-800"
     >
-      <Ionicons name="swap-horizontal" size={24} color="#97720A" />
+      <Ionicons name="swap-horizontal" size={24} color={palette.brand[700]} />
       <View className="flex-1">
         <Text variant="body" className="font-semibold">
           {title}
@@ -22,7 +23,7 @@ function MethodRow({ title, subtitle, onPress }: { title: string; subtitle: stri
           {subtitle}
         </Text>
       </View>
-      <Ionicons name="chevron-forward" size={20} color="#9A9384" />
+      <Ionicons name="chevron-forward" size={20} color={palette.neutral[400]} />
     </Pressable>
   );
 }
@@ -67,7 +68,7 @@ export function CashInSpeiScreen() {
             <Text variant="caption" tone="muted">
               CLABE Medá
             </Text>
-            <Text variant="h2">{clabe || '—'}</Text>
+            <Text variant="h2" style={{ fontVariant: ['tabular-nums'] }}>{clabe || '—'}</Text>
           </View>
           <Pressable
             hitSlop={8}
@@ -75,7 +76,7 @@ export function CashInSpeiScreen() {
             accessibilityRole="button"
             accessibilityLabel="Copiar CLABE"
           >
-            <Ionicons name="copy-outline" size={22} color="#9A9384" />
+            <Ionicons name="copy-outline" size={22} color={palette.neutral[400]} />
           </Pressable>
         </View>
       </View>

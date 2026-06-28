@@ -47,6 +47,7 @@ import { useContainer } from '@ui/providers/ContainerProvider';
 import { useToast } from '@ui/providers/ToastProvider';
 import { legalDocuments } from '@config/legal';
 import type { AuthStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -81,7 +82,7 @@ function RegistrationProgress({ step }: { step: number }) {
               flex: 1,
               height: 3,
               borderRadius: 99,
-              backgroundColor: pos < step ? '#1B1812' : pos === step ? '#97720A' : '#E8E3DC',
+              backgroundColor: pos < step ? palette.neutral[900] : pos === step ? palette.brand[700] : '#E8E3DC',
             }}
           />
         );
@@ -102,7 +103,7 @@ function SecureInput(props: InputProps) {
           hitSlop={8}
           onPress={() => setHidden((value) => !value)}
         >
-          <Ionicons name={hidden ? 'eye-outline' : 'eye-off-outline'} size={20} color="#9A9384" />
+          <Ionicons name={hidden ? 'eye-outline' : 'eye-off-outline'} size={20} color={palette.neutral[400]} />
         </Pressable>
       }
     />
@@ -146,11 +147,11 @@ function OccupationField({
         style={{ height: 56 }}
         className="flex-row items-center gap-sm rounded-md border-2 border-transparent bg-neutral-100 px-md dark:bg-neutral-800"
       >
-        <Ionicons name="briefcase-outline" size={20} color="#9A9384" />
+        <Ionicons name="briefcase-outline" size={20} color={palette.neutral[400]} />
         <Text variant="body" tone={label ? 'default' : 'muted'} className="flex-1">
           {label || '¿A qué te dedicas?'}
         </Text>
-        <Ionicons name="chevron-down" size={18} color="#9A9384" />
+        <Ionicons name="chevron-down" size={18} color={palette.neutral[400]} />
       </Pressable>
 
       <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
@@ -160,7 +161,7 @@ function OccupationField({
           style={{ borderTopLeftRadius: 26, borderTopRightRadius: 26 }}
         >
           <Text variant="h2">Ocupación</Text>
-          {loading ? <ActivityIndicator color="#FCD535" /> : null}
+          {loading ? <ActivityIndicator color={palette.brand[500]} /> : null}
           <FlatList
             data={items}
             keyExtractor={(item) => item.key}
@@ -787,7 +788,7 @@ export function RegisterDocumentScreen({ navigation }: DocumentProps) {
     if (!permission?.granted) {
       return (
         <SafeAreaView className="flex-1 items-center justify-center gap-md bg-neutral-0 px-lg dark:bg-neutral-950">
-          <Ionicons name="camera-outline" size={48} color="#97720A" />
+          <Ionicons name="camera-outline" size={48} color={palette.brand[700]} />
           <Text variant="h2" center>
             Permite la cámara
           </Text>
@@ -816,9 +817,9 @@ export function RegisterDocumentScreen({ navigation }: DocumentProps) {
             className="h-16 w-16 items-center justify-center rounded-pill bg-neutral-0"
           >
             {busy ? (
-              <ActivityIndicator color="#1B1812" />
+              <ActivityIndicator color={palette.neutral[900]} />
             ) : (
-              <Ionicons name="camera" size={28} color="#1B1812" />
+              <Ionicons name="camera" size={28} color={palette.neutral[900]} />
             )}
           </Pressable>
         </View>
@@ -876,7 +877,7 @@ function DocumentTile({
         <Image source={{ uri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
       ) : (
         <>
-          <Ionicons name="camera-outline" size={32} color="#97720A" />
+          <Ionicons name="camera-outline" size={32} color={palette.brand[700]} />
           <Text variant="caption" tone="muted">
             {label} — tocar para capturar
           </Text>
@@ -951,7 +952,7 @@ export function RegisterBeneficiariesScreen({ navigation }: BeneficiariesProps) 
                     style={{ minHeight: 44 }}
                     className="flex-row items-center gap-sm"
                   >
-                    <Ionicons name="trash-outline" size={18} color="#C24A30" />
+                    <Ionicons name="trash-outline" size={18} color={palette.danger} />
                     <Text variant="caption" tone="danger" className="font-medium">
                       Quitar
                     </Text>
@@ -1066,7 +1067,7 @@ export function RegisterSurveyScreen({ navigation }: SurveyProps) {
           ]}
         />
         {loading ? (
-          <ActivityIndicator color="#FCD535" />
+          <ActivityIndicator color={palette.brand[500]} />
         ) : (
           questions.map((q) => (
             <ChoiceGroup
@@ -1161,7 +1162,7 @@ function CheckRow({
         <Ionicons
           name={checked ? 'checkbox' : 'square-outline'}
           size={24}
-          color={checked ? '#97720A' : '#9A9384'}
+          color={checked ? palette.brand[700] : palette.neutral[400]}
         />
         <Text variant="body" className="flex-1">
           {label}
@@ -1190,7 +1191,7 @@ function LegalDocModal({ url, title, onClose }: { url: string; title: string; on
       <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
         <View className="flex-row items-center gap-sm border-b border-neutral-200 px-md py-sm dark:border-neutral-800">
           <Pressable onPress={onClose} hitSlop={12} accessibilityRole="button" accessibilityLabel="Cerrar">
-            <Ionicons name="close" size={26} color="#1B1812" />
+            <Ionicons name="close" size={26} color={palette.neutral[900]} />
           </Pressable>
           <Text variant="h2" className="flex-1">{title}</Text>
         </View>
@@ -1204,7 +1205,7 @@ function LegalDocModal({ url, title, onClose }: { url: string; title: string; on
           />
           {loading ? (
             <View className="absolute inset-0 items-center justify-center gap-md bg-neutral-0">
-              <ActivityIndicator size="large" color="#FCD535" />
+              <ActivityIndicator size="large" color={palette.brand[500]} />
               <Text variant="body" tone="muted">Cargando documento…</Text>
             </View>
           ) : null}
@@ -1335,10 +1336,10 @@ function FeatureRow({ icon, text }: { icon: string; text: string }) {
   return (
     <View className="flex-row items-center gap-md">
       <View className="h-9 w-9 items-center justify-center rounded-xl bg-brand-100">
-        <Ionicons name={icon as never} size={18} color="#97720A" />
+        <Ionicons name={icon as never} size={18} color={palette.brand[700]} />
       </View>
       <Text variant="body" className="flex-1 font-medium">{text}</Text>
-      <Ionicons name="checkmark" size={16} color="#2E8C6A" />
+      <Ionicons name="checkmark" size={16} color={palette.success} />
     </View>
   );
 }
@@ -1355,7 +1356,7 @@ export function RegisterSuccessScreen({ navigation }: RegisterSuccessProps) {
         <View className="items-center gap-xl w-full">
           <View className="items-center gap-lg">
             <View className="h-28 w-28 items-center justify-center rounded-full bg-brand-400">
-              <Ionicons name="checkmark" size={64} color="#1B1812" />
+              <Ionicons name="checkmark" size={64} color={palette.neutral[900]} />
             </View>
             <View className="items-center gap-sm">
               <Text variant="display" center className="font-bold">

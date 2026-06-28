@@ -1,6 +1,7 @@
 import { Pressable, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Text } from '@ui/design-system/components';
+import { palette } from '@ui/design-system/tokens/palette';
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '⌫'] as const;
 
@@ -42,7 +43,7 @@ export function AmountKeypad({ value, onChange }: AmountKeypadProps) {
               className="h-14 flex-1 items-center justify-center rounded-card bg-neutral-100 active:bg-neutral-200 dark:bg-neutral-800 dark:active:bg-neutral-700"
             >
               {key === '⌫' ? (
-                <Ionicons name="backspace-outline" size={22} color="#6C6555" />
+                <Ionicons name="backspace-outline" size={22} color={palette.neutral[500]} />
               ) : (
                 <Text variant="h2">{key}</Text>
               )}

@@ -19,6 +19,7 @@ import {
   useStpAccount,
 } from '@ui/features/wallet/hooks/useWallet';
 import type { WalletStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 type MovementGroup = { label: string; movements: Movement[] };
 
@@ -47,13 +48,13 @@ function CopyRow({ label, value, icon }: { label: string; value: string; icon: s
       className="flex-row items-center gap-md py-md active:opacity-70"
     >
       <View className="h-9 w-9 items-center justify-center rounded-xl bg-brand-100">
-        <Ionicons name={icon as never} size={18} color="#97720A" />
+        <Ionicons name={icon as never} size={18} color={palette.brand[700]} />
       </View>
       <View className="flex-1">
         <Text variant="caption" tone="muted">{label}</Text>
         <Text variant="body" className="font-mono text-sm">{value}</Text>
       </View>
-      <Ionicons name="copy-outline" size={18} color="#9A9384" />
+      <Ionicons name="copy-outline" size={18} color={palette.neutral[400]} />
     </Pressable>
   );
 }
@@ -117,7 +118,7 @@ export function WalletScreen() {
 
         {loadingBalance ? (
           <View style={styles.loadingRow}>
-            <ActivityIndicator color="#1B1812" />
+            <ActivityIndicator color={palette.neutral[900]} />
           </View>
         ) : (
           <Text variant="display" style={[styles.ink, styles.amount]}>
@@ -140,7 +141,7 @@ export function WalletScreen() {
               accessibilityLabel={action.label}
             >
               <View style={styles.actionCircle}>
-                <Ionicons name={action.icon} size={22} color="#FCD535" />
+                <Ionicons name={action.icon} size={22} color={palette.brand[500]} />
               </View>
               <Text style={styles.actionLabel}>{action.label}</Text>
             </Pressable>
@@ -170,18 +171,18 @@ export function WalletScreen() {
         {/* Search */}
         {!loadingMovements && !movementsQuery.isError && allMovements.length > 0 ? (
           <View className="flex-row items-center gap-sm overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50 px-md dark:border-neutral-800 dark:bg-neutral-900">
-            <Ionicons name="search-outline" size={16} color="#9A9384" />
+            <Ionicons name="search-outline" size={16} color={palette.neutral[400]} />
             <TextInput
               value={query}
               onChangeText={setQuery}
               placeholder="Buscar movimientos…"
-              placeholderTextColor="#9A9384"
+              placeholderTextColor={palette.neutral[400]}
               returnKeyType="search"
-              style={{ flex: 1, fontSize: 14, height: 44, color: '#1B1812' }}
+              style={{ flex: 1, fontSize: 14, height: 44, color: palette.neutral[900] }}
             />
             {query.length > 0 ? (
               <Pressable onPress={() => setQuery('')} hitSlop={8} accessibilityLabel="Limpiar búsqueda">
-                <Ionicons name="close-circle" size={16} color="#9A9384" />
+                <Ionicons name="close-circle" size={16} color={palette.neutral[400]} />
               </Pressable>
             ) : null}
           </View>
@@ -223,7 +224,7 @@ export function WalletScreen() {
 
   const listFooter = movementsQuery.isFetchingNextPage ? (
     <View style={{ padding: 16, alignItems: 'center' }}>
-      <ActivityIndicator color="#97720A" />
+      <ActivityIndicator color={palette.brand[700]} />
     </View>
   ) : null;
 
@@ -254,13 +255,13 @@ export function WalletScreen() {
         onEndReached={onEndReached}
         onEndReachedThreshold={0.5}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#97720A" />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.brand[700]} />
         }
         ListEmptyComponent={
           loadingMovements || movementsQuery.isError ? null : query.trim() ? (
             <View className="items-center gap-sm pt-xl px-lg">
               <View className="h-14 w-14 items-center justify-center rounded-2xl bg-neutral-100 dark:bg-neutral-800">
-                <Ionicons name="search-outline" size={26} color="#9A9384" />
+                <Ionicons name="search-outline" size={26} color={palette.neutral[400]} />
               </View>
               <Text variant="body" className="font-semibold">Sin resultados</Text>
               <Text variant="caption" tone="muted" center>
@@ -270,7 +271,7 @@ export function WalletScreen() {
           ) : (
             <View className="items-center gap-sm pt-xl px-lg">
               <View className="h-14 w-14 items-center justify-center rounded-2xl bg-neutral-100 dark:bg-neutral-800">
-                <Ionicons name="receipt-outline" size={26} color="#9A9384" />
+                <Ionicons name="receipt-outline" size={26} color={palette.neutral[400]} />
               </View>
               <Text variant="body" className="font-semibold">Sin movimientos todavía</Text>
               <Text variant="caption" tone="muted" center>
@@ -299,11 +300,11 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
   },
-  ink: { color: '#1B1812' },
+  ink: { color: palette.neutral[900] },
   caption: { color: 'rgba(27,24,18,0.60)', fontSize: 13 },
   balanceHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  mxnBadge: { backgroundColor: '#1B1812', borderRadius: 99, paddingHorizontal: 8, paddingVertical: 2 },
-  mxnText: { color: '#FCD535', fontSize: 11, fontWeight: '700', letterSpacing: 1.5 },
+  mxnBadge: { backgroundColor: palette.neutral[900], borderRadius: 99, paddingHorizontal: 8, paddingVertical: 2 },
+  mxnText: { color: palette.brand[500], fontSize: 11, fontWeight: '700', letterSpacing: 1.5 },
   loadingRow: { height: 52, justifyContent: 'center' },
   amount: { marginTop: 4, fontVariant: ['tabular-nums'] },
   clabe: { color: 'rgba(27,24,18,0.55)', fontSize: 12, fontFamily: 'monospace', marginTop: 6 },
@@ -313,7 +314,7 @@ const styles = StyleSheet.create({
     height: 48,
     width: 48,
     borderRadius: 24,
-    backgroundColor: '#1B1812',
+    backgroundColor: palette.neutral[900],
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -19,6 +19,7 @@ import { NipModal } from '@ui/features/wallet/components/NipModal';
 import { useStatements } from '@ui/features/account/hooks/useAccount';
 import { useContainer } from '@ui/providers/ContainerProvider';
 import type { SectionsStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 function Row({
   icon,
@@ -35,11 +36,11 @@ function Row({
       accessibilityRole="button"
       className="flex-row items-center gap-md rounded-card border border-neutral-200 p-lg dark:border-neutral-800"
     >
-      <Ionicons name={icon} size={22} color="#97720A" />
+      <Ionicons name={icon} size={22} color={palette.brand[700]} />
       <Text variant="body" className="flex-1">
         {title}
       </Text>
-      <Ionicons name="chevron-forward" size={20} color="#9A9384" />
+      <Ionicons name="chevron-forward" size={20} color={palette.neutral[400]} />
     </Pressable>
   );
 }
@@ -125,7 +126,7 @@ export function StatementsScreen() {
   if (statements.isPending) {
     return (
       <View className="flex-1 items-center justify-center bg-neutral-0 dark:bg-neutral-950">
-        <ActivityIndicator color="#FCD535" />
+        <ActivityIndicator color={palette.brand[500]} />
       </View>
     );
   }
@@ -149,11 +150,11 @@ export function StatementsScreen() {
             accessibilityRole="button"
             className="flex-row items-center gap-md rounded-card border border-neutral-200 p-lg dark:border-neutral-800"
           >
-            <Ionicons name="document-outline" size={22} color="#97720A" />
+            <Ionicons name="document-outline" size={22} color={palette.brand[700]} />
             <Text variant="body" className="flex-1">
               {item.from.slice(0, 10)} – {item.to.slice(0, 10)}
             </Text>
-            <Ionicons name="download-outline" size={20} color="#9A9384" />
+            <Ionicons name="download-outline" size={20} color={palette.neutral[400]} />
           </Pressable>
         )}
       />
@@ -177,7 +178,7 @@ export function PdfViewerScreen({ route }: PdfViewerProps) {
   if (!url) {
     return (
       <View className="flex-1 items-center justify-center gap-md bg-neutral-0 p-lg dark:bg-neutral-950">
-        <Ionicons name="document-outline" size={48} color="#9A9384" />
+        <Ionicons name="document-outline" size={48} color={palette.neutral[400]} />
         <Text variant="body" tone="muted" center>
           Este documento no está disponible por ahora.
         </Text>
@@ -201,7 +202,7 @@ export function PdfViewerScreen({ route }: PdfViewerProps) {
       />
       {webLoading ? (
         <View className="absolute inset-0 items-center justify-center gap-md bg-neutral-0 dark:bg-neutral-950">
-          <ActivityIndicator size="large" color="#FCD535" />
+          <ActivityIndicator size="large" color={palette.brand[500]} />
           <Text variant="body" tone="muted">
             Cargando documento…
           </Text>

@@ -5,6 +5,7 @@ import { fullName } from '@domain/account/entities/Profile';
 import { Text } from '@ui/design-system/components';
 import { useProfile } from '@ui/features/account/hooks/useAccount';
 import type { SectionsStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 function Field({ label, value, mono }: { label: string; value?: string; mono?: boolean }) {
   if (!value) return null;
@@ -41,7 +42,7 @@ export function ProfileScreen({ navigation }: Props) {
   if (profile.isPending) {
     return (
       <View className="flex-1 items-center justify-center bg-neutral-0 dark:bg-neutral-950">
-        <ActivityIndicator color="#FCD535" />
+        <ActivityIndicator color={palette.brand[500]} />
       </View>
     );
   }
@@ -101,11 +102,11 @@ export function ProfileScreen({ navigation }: Props) {
         onPress={() => navigation.navigate('CancelAccount')}
         className="flex-row items-center gap-md rounded-card border border-danger/30 p-lg"
       >
-        <Ionicons name="trash-outline" size={22} color="#C24A30" />
+        <Ionicons name="trash-outline" size={22} color={palette.danger} />
         <Text variant="body" tone="danger" className="flex-1">
           Cancelar mi cuenta
         </Text>
-        <Ionicons name="chevron-forward" size={20} color="#C24A30" />
+        <Ionicons name="chevron-forward" size={20} color={palette.danger} />
       </Pressable>
     </ScrollView>
   );

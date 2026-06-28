@@ -3,6 +3,7 @@ import { TextInput, View, type TextInputProps } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Text } from '@ui/design-system/components/Text';
 import { cn } from '@ui/lib/cn';
+import { palette } from '@ui/design-system/tokens/palette';
 
 export interface InputProps extends TextInputProps {
   readonly label?: string;
@@ -12,8 +13,8 @@ export interface InputProps extends TextInputProps {
 }
 
 const BORDER_REST = 'transparent';
-const BORDER_FOCUS = '#FCD535';
-const BORDER_ERROR = '#C24A30';
+const BORDER_FOCUS = palette.brand[500];
+const BORDER_ERROR = palette.danger;
 
 export const Input = forwardRef<TextInput, InputProps>(
   ({ label, error, leftIcon, rightSlot, className, onFocus, onBlur, ...rest }, ref) => {
@@ -31,11 +32,11 @@ export const Input = forwardRef<TextInput, InputProps>(
           className="flex-row items-center gap-sm rounded-md bg-neutral-100 px-md dark:bg-neutral-800"
         >
           {leftIcon ? (
-            <Ionicons name={leftIcon} size={20} color={focused ? '#97720A' : '#9A9384'} />
+            <Ionicons name={leftIcon} size={20} color={focused ? palette.brand[700] : palette.neutral[400]} />
           ) : null}
           <TextInput
             ref={ref}
-            placeholderTextColor="#9A9384"
+            placeholderTextColor={palette.neutral[400]}
             onFocus={(e) => {
               setFocused(true);
               onFocus?.(e);

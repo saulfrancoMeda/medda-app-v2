@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 import { StyleSheet, View, type ViewProps } from 'react-native';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+import { palette } from '@ui/design-system/tokens/palette';
 
 interface GoldGradientProps extends ViewProps {
   readonly radius?: number;
@@ -10,7 +11,7 @@ interface GoldGradientProps extends ViewProps {
 export function GoldGradient({ radius = 26, style, children, ...rest }: GoldGradientProps) {
   return (
     <View
-      style={[{ borderRadius: radius, backgroundColor: '#FCD535', overflow: 'hidden' }, style]}
+      style={[{ borderRadius: radius, backgroundColor: palette.brand[500], overflow: 'hidden' }, style]}
       {...rest}
     >
       <Svg style={StyleSheet.absoluteFill} pointerEvents="none">

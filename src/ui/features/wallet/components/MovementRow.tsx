@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { formatCurrency } from '@domain/shared/money';
 import { isCredit, type Movement } from '@domain/wallet/entities/Movement';
 import { Text } from '@ui/design-system/components';
+import { palette } from '@ui/design-system/tokens/palette';
 
 const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
@@ -61,7 +62,7 @@ export function MovementRow({ movement, onPress }: { movement: Movement; onPress
         <Ionicons
           name={credit ? 'arrow-down' : 'arrow-up'}
           size={20}
-          color={credit ? '#2E8C6A' : '#97720A'}
+          color={credit ? palette.success : palette.brand[700]}
         />
       </View>
       <View className="flex-1 justify-center pr-sm">
@@ -78,7 +79,7 @@ export function MovementRow({ movement, onPress }: { movement: Movement; onPress
         <Text
           variant="body"
           className="font-bold"
-          style={{ color: credit ? '#2E8C6A' : '#1B1812', fontVariant: ['tabular-nums'] }}
+          style={{ color: credit ? palette.success : palette.neutral[900], fontVariant: ['tabular-nums'] }}
         >
           {amount}
         </Text>

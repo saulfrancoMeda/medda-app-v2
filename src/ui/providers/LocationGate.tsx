@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import { Button, Logo, Text } from '@ui/design-system/components';
+import { palette } from '@ui/design-system/tokens/palette';
 
 export function LocationGate({ children }: { children: ReactNode }) {
   const [enabled, setEnabled] = useState<boolean | null>(null);
@@ -32,7 +33,7 @@ export function LocationGate({ children }: { children: ReactNode }) {
   if (enabled === null) {
     return (
       <View className="flex-1 items-center justify-center bg-neutral-0 dark:bg-neutral-950">
-        <ActivityIndicator color="#fcd535" />
+        <ActivityIndicator color={palette.brand[500]} />
       </View>
     );
   }
@@ -42,7 +43,7 @@ export function LocationGate({ children }: { children: ReactNode }) {
       <SafeAreaView className="flex-1 items-center justify-center gap-lg bg-neutral-0 px-lg dark:bg-neutral-950">
         <Logo width={110} height={120} />
         <View className="h-20 w-20 items-center justify-center rounded-pill bg-brand-500">
-          <Ionicons name="location" size={36} color="#1B1812" />
+          <Ionicons name="location" size={36} color={palette.neutral[900]} />
         </View>
         <Text variant="h1" center>
           Activa tu ubicación

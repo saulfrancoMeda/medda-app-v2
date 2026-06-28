@@ -10,6 +10,7 @@ import { AppHeader } from '@ui/navigation/AppHeader';
 import { Input, Text } from '@ui/design-system/components';
 import { useFaqs } from '@ui/features/support/hooks/useSupport';
 import type { FaqStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 type ListProps = NativeStackScreenProps<FaqStackParamList, 'FaqList'>;
 
@@ -48,7 +49,7 @@ export function FaqListScreen({ navigation }: ListProps) {
               accessibilityRole="button"
               className="flex-row items-center gap-md rounded-card bg-brand-500 p-lg"
             >
-              <Ionicons name="chatbubbles" size={26} color="#1B1812" />
+              <Ionicons name="chatbubbles" size={26} color={palette.neutral[900]} />
               <View className="flex-1">
                 <Text variant="body" className="font-semibold text-ink">
                   Chatea con nosotros
@@ -57,7 +58,7 @@ export function FaqListScreen({ navigation }: ListProps) {
                   Para aclarar tus dudas
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#1B1812" />
+              <Ionicons name="chevron-forward" size={20} color={palette.neutral[900]} />
             </Pressable>
             <Text variant="h2">Preguntas frecuentes</Text>
           </View>
@@ -71,7 +72,7 @@ export function FaqListScreen({ navigation }: ListProps) {
             <Text variant="body" className="flex-1">
               {item.question}
             </Text>
-            <Ionicons name="chevron-forward" size={20} color="#9A9384" />
+            <Ionicons name="chevron-forward" size={20} color={palette.neutral[400]} />
           </Pressable>
         )}
         ListEmptyComponent={
@@ -93,7 +94,7 @@ export function FaqListScreen({ navigation }: ListProps) {
               <Text variant="body" className="font-semibold text-brand-700">
                 Ver historial de aclaraciones
               </Text>
-              <Ionicons name="chevron-forward" size={20} color="#97720A" />
+              <Ionicons name="chevron-forward" size={20} color={palette.brand[700]} />
             </Pressable>
             {config.supportPhone ? (
               <Text variant="caption" tone="muted" center>

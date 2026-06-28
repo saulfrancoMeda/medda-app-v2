@@ -11,6 +11,7 @@ import { GoldGradient, Text } from '@ui/design-system/components';
 import { MovementGroupCard, MovementRowSkeleton, getDateLabel } from '@ui/features/wallet/components/MovementRow';
 import { useDefaultAccount, useMovements } from '@ui/features/wallet/hooks/useWallet';
 import type { AppTabsParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 type MovementGroup = { label: string; movements: Movement[] };
 
@@ -131,7 +132,7 @@ export function SalesScreen() {
           loading ? null : (
             <View className="items-center gap-sm pt-xl px-lg">
               <View className="h-14 w-14 items-center justify-center rounded-2xl bg-neutral-100 dark:bg-neutral-800">
-                <Ionicons name="trending-up-outline" size={26} color="#9A9384" />
+                <Ionicons name="trending-up-outline" size={26} color={palette.neutral[400]} />
               </View>
               <Text variant="body" className="font-semibold">Sin gastos registrados</Text>
               <Text variant="caption" tone="muted" center>
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
   },
   heroLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   heroPeriodRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 },
-  ink: { color: '#1B1812' },
+  ink: { color: palette.neutral[900] },
   caption: { color: 'rgba(27,24,18,0.60)', fontSize: 13 },
   muted: { color: 'rgba(27,24,18,0.50)', fontSize: 12 },
   sectionHeader: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4 },

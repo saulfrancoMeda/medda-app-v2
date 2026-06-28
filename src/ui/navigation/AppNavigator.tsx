@@ -11,6 +11,7 @@ import { StoreStackNavigator } from '@ui/navigation/StoreStackNavigator';
 import { SalesScreen } from '@ui/features/wallet/screens/SalesScreen';
 import { DrawerContent } from '@ui/navigation/DrawerContent';
 import type { AppDrawerParamList, AppTabsParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 const Tabs = createBottomTabNavigator<AppTabsParamList>();
 const Drawer = createDrawerNavigator<AppDrawerParamList>();
@@ -33,7 +34,7 @@ function MainTabs() {
   const dark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
   const bottomInset = Math.max(insets.bottom, 8);
-  const bg = dark ? '#1B1812' : '#ffffff';
+  const bg = dark ? palette.neutral[900] : palette.neutral[0];
   const borderColor = dark ? '#2A2520' : '#F0EDE8';
 
   return (
@@ -41,8 +42,8 @@ function MainTabs() {
       initialRouteName="Store"
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: '#97720A',
-        tabBarInactiveTintColor: '#9A9384',
+        tabBarActiveTintColor: palette.brand[700],
+        tabBarInactiveTintColor: palette.neutral[400],
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600', marginTop: 2 },
         tabBarActiveBackgroundColor: 'transparent',
         tabBarInactiveBackgroundColor: 'transparent',
