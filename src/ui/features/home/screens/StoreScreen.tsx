@@ -118,8 +118,8 @@ export function StoreScreen() {
       >
         {/* Saludo — scrollea y desaparece */}
         <View style={styles.greetingRow}>
-          <Text style={styles.caption}>Hola de nuevo</Text>
-          <Text variant="h2" style={styles.greetingName}>{firstName || 'Bienvenido'}</Text>
+          <Text variant="caption" tone="muted">Hola de nuevo</Text>
+          <Text variant="h2">{firstName || 'Bienvenido'}</Text>
         </View>
 
         {/* ── CARDS ── */}
@@ -252,7 +252,6 @@ const styles = StyleSheet.create({
   cardsSection: { paddingHorizontal: 16, paddingTop: 16, gap: 12 },
   // Hero internals
   greetingRow: { flexDirection: 'column', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 4 },
-  greetingName: { color: palette.neutral[900] },
   ink: { color: palette.neutral[900] },
   caption: { color: 'rgba(27,24,18,0.60)', fontSize: 13 },
   balanceSection: { marginTop: 20 },
