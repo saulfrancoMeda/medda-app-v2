@@ -1,17 +1,21 @@
 import { useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { formatCurrency } from '@domain/shared/money';
-import { findBankByClabe, isValidAmount, isValidClabe, type Bank } from '@domain/wallet/entities/Transfer';
+import { findBankByClabe, isValidClabe, type Bank } from '@domain/wallet/entities/Transfer';
 import { Button, Input, Text } from '@ui/design-system/components';
 import { walletErrorMessage } from '@ui/features/wallet/errorMessages';
 import { useNipAuthorization } from '@ui/features/common/useNipAuthorization';
+import { AmountKeypad, formatAmountDisplay } from '@ui/features/wallet/components/AmountKeypad';
 import { BankPicker } from '@ui/features/wallet/components/BankPicker';
-import { MoneyInput } from '@ui/features/wallet/components/MoneyInput';
+import { MethodRow } from '@ui/features/wallet/components/MethodRow';
+import { NipKeypad } from '@ui/features/wallet/components/NipKeypad';
 import { NipModal } from '@ui/features/wallet/components/NipModal';
 import {
+  useBalance,
   useDefaultAccount,
   useInvalidateWallet,
   useSpeiBanks,
@@ -19,45 +23,9 @@ import {
 import { useContainer } from '@ui/providers/ContainerProvider';
 import { useToast } from '@ui/providers/ToastProvider';
 import type { WalletStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 type MethodsProps = NativeStackScreenProps<WalletStackParamList, 'CashOutMethods'>;
-
-function MethodRow({
-  icon,
-  iconColor,
-  title,
-  subtitle,
-  onPress,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  iconColor: string;
-  title: string;
-  subtitle?: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      className="flex-row items-center gap-md border-b border-neutral-100 py-lg dark:border-neutral-800"
-    >
-      <View className="h-10 w-10 items-center justify-center rounded-pill bg-neutral-100 dark:bg-neutral-800">
-        <Ionicons name={icon} size={22} color={iconColor} />
-      </View>
-      <View className="flex-1">
-        <Text variant="body" className="font-semibold">
-          {title}
-        </Text>
-        {subtitle ? (
-          <Text variant="caption" tone="muted">
-            {subtitle}
-          </Text>
-        ) : null}
-      </View>
-      <Ionicons name="chevron-forward" size={20} color="#9A9384" />
-    </Pressable>
-  );
-}
 
 export function CashOutMethodsScreen({ navigation }: MethodsProps) {
   return (
@@ -68,35 +36,33 @@ export function CashOutMethodsScreen({ navigation }: MethodsProps) {
       </Text>
       <MethodRow
         icon="person-circle"
-        iconColor="#97720A"
+        iconColor={palette.brand[700]}
         title="Envía a un usuario Medá"
         subtitle="Escanea el QR del destinatario"
         onPress={() => navigation.navigate('CashOutMedaScan')}
       />
       <MethodRow
         icon="paper-plane"
-        iconColor="#97720A"
+        iconColor={palette.brand[700]}
         title="Transferencia SPEI a Terceros"
-        onPress={() => navigation.navigate('CashOutSpeiForm')}
+        onPress={() => navigation.navigate('CashOutSpeiRecipient')}
       />
     </ScrollView>
   );
 }
 
-// --- Formulario SPEI --------------------------------------------------------
-type FormProps = NativeStackScreenProps<WalletStackParamList, 'CashOutSpeiForm'>;
+// --- Paso 1: Destinatario --------------------------------------------------------
+type RecipientProps = NativeStackScreenProps<WalletStackParamList, 'CashOutSpeiRecipient'>;
 
-export function CashOutSpeiFormScreen({ navigation }: FormProps) {
+export function CashOutSpeiRecipientScreen({ navigation }: RecipientProps) {
   const banks = useSpeiBanks();
   const [clabe, setClabe] = useState('');
   const [bank, setBank] = useState<Bank | undefined>(undefined);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [amount, setAmount] = useState('');
   const [comment, setComment] = useState('');
 
-  const valid =
-    isValidClabe(clabe) && Boolean(bank) && name.trim().length > 0 && isValidAmount(amount);
+  const valid = isValidClabe(clabe) && Boolean(bank) && name.trim().length > 0;
 
   const onClabeChange = (text: string) => {
     const next = text.replace(/[^0-9]/g, '');
@@ -107,67 +73,163 @@ export function CashOutSpeiFormScreen({ navigation }: FormProps) {
 
   const onContinue = () => {
     if (!valid || !bank) return;
-    navigation.navigate('CashOutConfirm', {
-      draft: {
+    navigation.navigate('CashOutSpeiAmount', {
+      recipient: {
         cuentaBeneficiario: clabe,
         institucionContraparte: bank.code,
         nombreBeneficiario: name.trim(),
         emailBeneficiario: email.trim() || undefined,
-        monto: Number(amount).toFixed(2),
         comment: comment.trim() || undefined,
       },
     });
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1 }}
-    >
-    <ScrollView
-      className="flex-1 bg-neutral-0 dark:bg-neutral-950"
-      contentContainerClassName="gap-lg p-lg"
-      keyboardShouldPersistTaps="handled"
-    >
-      <Input
-        label="CLABE destino (18 dígitos)"
-        leftIcon="card-outline"
-        placeholder="18 dígitos"
-        keyboardType="number-pad"
-        maxLength={18}
-        value={clabe}
-        onChangeText={onClabeChange}
-        error={clabe.length > 0 && !isValidClabe(clabe) ? 'CLABE inválida' : undefined}
-      />
-      <BankPicker value={bank} onSelect={setBank} />
-      <Input
-        label="Nombre del beneficiario"
-        leftIcon="person-outline"
-        placeholder="Nombre completo"
-        value={name}
-        onChangeText={setName}
-      />
-      <Input
-        label="Email del beneficiario (opcional)"
-        leftIcon="mail-outline"
-        placeholder="correo@ejemplo.com"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <MoneyInput label="Monto" value={amount} onChangeValue={setAmount} />
-      <Input
-        label="Concepto (opcional)"
-        leftIcon="chatbubble-ellipses-outline"
-        placeholder="Ej. Renta, préstamo…"
-        maxLength={25}
-        value={comment}
-        onChangeText={setComment}
-      />
-      <Button title="Continuar" full disabled={!valid} onPress={onContinue} />
-    </ScrollView>
-    </KeyboardAvoidingView>
+    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950" edges={['bottom']}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.flex}>
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="gap-lg p-lg"
+          keyboardShouldPersistTaps="handled"
+        >
+          <Input
+            label="CLABE destino (18 dígitos)"
+            leftIcon="card-outline"
+            placeholder="18 dígitos"
+            keyboardType="number-pad"
+            maxLength={18}
+            value={clabe}
+            onChangeText={onClabeChange}
+            error={clabe.length > 0 && !isValidClabe(clabe) ? 'CLABE inválida' : undefined}
+          />
+          <BankPicker value={bank} onSelect={setBank} />
+          <Input
+            label="Nombre del beneficiario"
+            leftIcon="person-outline"
+            placeholder="Nombre completo"
+            value={name}
+            onChangeText={setName}
+          />
+          <Input
+            label="Email del beneficiario (opcional)"
+            leftIcon="mail-outline"
+            placeholder="correo@ejemplo.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
+          />
+          <Input
+            label="Concepto (opcional)"
+            leftIcon="chatbubble-ellipses-outline"
+            placeholder="Ej. Renta, préstamo…"
+            maxLength={25}
+            value={comment}
+            onChangeText={setComment}
+          />
+        </ScrollView>
+        <View style={styles.footer}>
+          <Button title="Continuar" full disabled={!valid} onPress={onContinue} />
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+// --- Paso 2: Monto (héroe) --------------------------------------------------------
+type AmountProps = NativeStackScreenProps<WalletStackParamList, 'CashOutSpeiAmount'>;
+
+export function CashOutSpeiAmountScreen({ route, navigation }: AmountProps) {
+  const { recipient } = route.params;
+  const account = useDefaultAccount();
+  const balance = useBalance(account.data?.id);
+  const [amount, setAmount] = useState('0');
+
+  const availableBalance = balance.data ?? 0;
+  const amountNum = parseFloat(amount) || 0;
+  const noFunds = !balance.isPending && Boolean(account.data) && availableBalance === 0;
+  const overBalance = amountNum > availableBalance;
+  const canContinue = amountNum > 0 && !overBalance && !noFunds;
+
+  const onMax = () => setAmount(availableBalance.toFixed(2));
+
+  const onContinue = () => {
+    if (!canContinue) return;
+    navigation.navigate('CashOutConfirm', {
+      draft: { ...recipient, monto: amountNum.toFixed(2) },
+    });
+  };
+
+  const maskedClabe = recipient.cuentaBeneficiario.length >= 4
+    ? `••••${recipient.cuentaBeneficiario.slice(-4)}`
+    : recipient.cuentaBeneficiario;
+
+  return (
+    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950" edges={['bottom']}>
+      {/* Contexto fijo: destinatario */}
+      <View className="border-b border-neutral-100 px-lg py-sm dark:border-neutral-800">
+        <Text variant="caption" tone="muted">Enviando a</Text>
+        <Text variant="body" className="font-semibold">{recipient.nombreBeneficiario}</Text>
+        <Text variant="caption" tone="muted" className="font-mono">{maskedClabe}</Text>
+      </View>
+
+      {/* Héroe: monto o estado sin saldo */}
+      <View className="flex-1 items-center justify-center gap-md px-lg">
+        {noFunds ? (
+          <View className="items-center gap-md">
+            <View className="h-16 w-16 items-center justify-center rounded-2xl bg-neutral-100 dark:bg-neutral-800">
+              <Ionicons name="wallet-outline" size={32} color={palette.neutral[400]} />
+            </View>
+            <Text variant="h2" center>Sin saldo disponible</Text>
+            <Text variant="body" tone="muted" center>
+              Necesitas abonar dinero a tu cuenta antes de realizar un envío.
+            </Text>
+            <Button
+              title="Abonar dinero"
+              variant="soft"
+              onPress={() => navigation.navigate('CashInMethods')}
+            />
+          </View>
+        ) : (
+          <>
+            <Text
+              style={[styles.amountDisplay, overBalance && styles.amountError]}
+              variant="display"
+            >
+              {formatAmountDisplay(amount)}
+            </Text>
+
+            <View className="flex-row items-center gap-sm">
+              <Text variant="caption" tone="muted" style={{ fontVariant: ['tabular-nums'] }}>
+                Disponible: {balance.data !== undefined ? formatCurrency(availableBalance) : '—'}
+              </Text>
+              <Pressable
+                onPress={onMax}
+                accessibilityRole="button"
+                accessibilityLabel="Usar saldo máximo"
+                className="rounded-pill bg-brand-100 px-sm py-xs"
+              >
+                <Text variant="caption" className="font-bold text-brand-700">MAX</Text>
+              </Pressable>
+            </View>
+
+            {overBalance ? (
+              <Text variant="caption" tone="danger" center>
+                El monto supera tu saldo disponible.
+              </Text>
+            ) : null}
+          </>
+        )}
+      </View>
+
+      {/* Teclado numérico y CTA — solo si hay saldo */}
+      {!noFunds ? (
+        <View style={styles.keypadFooter}>
+          <AmountKeypad value={amount} onChange={setAmount} />
+          <Button title="Continuar" full disabled={!canContinue} onPress={onContinue} />
+        </View>
+      ) : null}
+    </SafeAreaView>
   );
 }
 
@@ -184,52 +246,113 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
+// --- Paso 3: Confirmar --------------------------------------------------------
 type ConfirmProps = NativeStackScreenProps<WalletStackParamList, 'CashOutConfirm'>;
 
 export function CashOutConfirmScreen({ route, navigation }: ConfirmProps) {
   const { draft } = route.params;
-  const { walletRepository } = useContainer();
-  const nipAuth = useNipAuthorization(walletErrorMessage);
-  const invalidateWallet = useInvalidateWallet();
 
-  const authorize = (nip: string) => {
-    void nipAuth.submit(
-      () => walletRepository.sendSpei({ ...draft, nip, location: { latitude: 0, longitude: 0 } }),
-      (result) => {
-        invalidateWallet();
-        navigation.navigate('TransactionSuccess', { result, draft });
-      },
-    );
+  return (
+    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950" edges={['bottom']}>
+      <ScrollView className="flex-1" contentContainerClassName="gap-lg p-lg">
+        <View className="gap-xs rounded-card bg-brand-500 p-lg">
+          <Text className="text-ink" variant="caption">Vas a enviar</Text>
+          <Text variant="display" className="text-ink" style={{ fontVariant: ['tabular-nums'] }}>
+            {formatCurrency(Number(draft.monto))}
+          </Text>
+        </View>
+
+        <View className="rounded-card border border-neutral-200 p-lg dark:border-neutral-800">
+          <Row label="Beneficiario" value={draft.nombreBeneficiario} />
+          <Row label="CLABE destino" value={draft.cuentaBeneficiario} />
+          {draft.emailBeneficiario ? <Row label="Email" value={draft.emailBeneficiario} /> : null}
+          {draft.comment ? <Row label="Concepto" value={draft.comment} /> : null}
+        </View>
+
+        <Text variant="caption" tone="muted">
+          Al continuar, autorizarás la transferencia con tu NIP de 6 dígitos.
+        </Text>
+      </ScrollView>
+
+      {/* CTA anclado al fondo — nunca dentro del scroll */}
+      <View className="gap-md px-lg pb-lg">
+        <Button
+          title="Autorizar con NIP"
+          full
+          onPress={() => navigation.navigate('CashOutNip', { draft })}
+        />
+      </View>
+    </SafeAreaView>
+  );
+}
+
+// --- Paso 4: NIP full-screen --------------------------------------------------------
+type NipScreenProps = NativeStackScreenProps<WalletStackParamList, 'CashOutNip'>;
+
+export function CashOutNipScreen({ route, navigation }: NipScreenProps) {
+  const { draft } = route.params;
+  const { walletRepository } = useContainer();
+  const invalidateWallet = useInvalidateWallet();
+  const toast = useToast();
+  const [nip, setNip] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>();
+
+  const authorize = async (completedNip: string) => {
+    setLoading(true);
+    setError(undefined);
+    const res = await walletRepository.sendSpei({
+      ...draft,
+      nip: completedNip,
+      location: { latitude: 0, longitude: 0 },
+    });
+    setLoading(false);
+    if (res.ok) {
+      invalidateWallet();
+      navigation.replace('TransactionSuccess', { result: res.value, draft });
+      return;
+    }
+    setNip('');
+    if (res.error.type === 'unauthorized') {
+      setError('NIP incorrecto. Verifícalo e intenta de nuevo.');
+    } else {
+      toast.error(walletErrorMessage(res.error));
+      navigation.goBack();
+    }
   };
 
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
-      <View className="gap-xs rounded-card bg-brand-500 p-lg">
-        <Text className="text-ink">Vas a enviar</Text>
-        <Text variant="display" className="text-ink">
+    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950" edges={['bottom']}>
+      {/* Resumen fijo — siempre visible mientras se teclea el NIP */}
+      <View className="gap-xs border-b border-neutral-100 px-lg py-md dark:border-neutral-800">
+        <Text variant="caption" tone="muted">Autorizando envío a</Text>
+        <Text variant="body" className="font-semibold">{draft.nombreBeneficiario}</Text>
+        <Text variant="display" className="text-ink dark:text-neutral-50" style={{ fontVariant: ['tabular-nums'] }}>
           {formatCurrency(Number(draft.monto))}
         </Text>
       </View>
 
-      <View className="rounded-card border border-neutral-200 p-lg dark:border-neutral-800">
-        <Row label="Beneficiario" value={draft.nombreBeneficiario} />
-        <Row label="CLABE" value={draft.cuentaBeneficiario} />
-        {draft.comment ? <Row label="Concepto" value={draft.comment} /> : null}
+      {/* Instrucción */}
+      <View className="flex-1 items-center justify-center px-lg">
+        <View className="gap-xs">
+          <Text variant="h2" center>Ingresa tu NIP</Text>
+          <Text variant="caption" tone="muted" center>
+            Autoriza la transferencia con tu NIP de 6 dígitos.
+          </Text>
+        </View>
       </View>
 
-      <Text variant="caption" tone="muted">
-        Al continuar, autoriza la transferencia con tu NIP.
-      </Text>
-      <Button title="Enviar" full onPress={nipAuth.open} />
-
-      <NipModal
-        visible={nipAuth.visible}
-        loading={nipAuth.loading}
-        error={nipAuth.nipError}
-        onSubmit={authorize}
-        onClose={nipAuth.close}
-      />
-    </ScrollView>
+      {/* Teclado NIP */}
+      <View className="px-lg pb-lg">
+        <NipKeypad
+          value={nip}
+          onChange={setNip}
+          onComplete={(completedNip) => void authorize(completedNip)}
+          loading={loading}
+          error={error}
+        />
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -240,7 +363,7 @@ export function TransactionSuccessScreen({ route, navigation }: SuccessProps) {
   return (
     <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="flex-1 justify-center gap-lg p-lg">
       <View className="items-center gap-sm">
-        <Ionicons name="checkmark-circle" size={72} color="#2E8C6A" />
+        <Ionicons name="checkmark-circle" size={72} color={palette.success} />
         <Text variant="h1" center>
           ¡Envío exitoso!
         </Text>
@@ -272,7 +395,7 @@ export function CashOutMedaScanScreen({ navigation }: ScanProps) {
   if (!permission.granted) {
     return (
       <View className="flex-1 items-center justify-center gap-md bg-neutral-0 px-lg dark:bg-neutral-950">
-        <Ionicons name="camera-outline" size={48} color="#97720A" />
+        <Ionicons name="camera-outline" size={48} color={palette.brand[700]} />
         <Text variant="h2" center>
           Permite la cámara
         </Text>
@@ -309,13 +432,21 @@ type MedaAmountProps = NativeStackScreenProps<WalletStackParamList, 'CashOutMeda
 export function CashOutMedaAmountScreen({ route, navigation }: MedaAmountProps) {
   const { resource } = route.params;
   const account = useDefaultAccount();
+  const balance = useBalance(account.data?.id);
   const { walletRepository } = useContainer();
   const toast = useToast();
   const nipAuth = useNipAuthorization(walletErrorMessage);
   const invalidateWallet = useInvalidateWallet();
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState('0');
   const [comment, setComment] = useState('');
-  const valid = isValidAmount(amount) && Boolean(account.data);
+
+  const availableBalance = balance.data ?? 0;
+  const amountNum = parseFloat(amount) || 0;
+  const noFunds = !balance.isPending && Boolean(account.data) && availableBalance === 0;
+  const overBalance = amountNum > availableBalance;
+  const canContinue = amountNum > 0 && !overBalance && !noFunds && Boolean(account.data);
+
+  const onMax = () => setAmount(availableBalance.toFixed(2));
 
   const authorize = (nip: string) => {
     if (!account.data) return;
@@ -324,7 +455,7 @@ export function CashOutMedaAmountScreen({ route, navigation }: MedaAmountProps) 
         walletRepository.transferToUser({
           originAccount: account.data!.id,
           resource,
-          amount: Number(amount).toFixed(2),
+          amount: amountNum.toFixed(2),
           nip,
           comment: comment.trim() || undefined,
         }),
@@ -337,20 +468,75 @@ export function CashOutMedaAmountScreen({ route, navigation }: MedaAmountProps) 
   };
 
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
-      <Text variant="body" tone="muted">
-        Destinatario: {resource}
-      </Text>
-      <MoneyInput label="Monto" value={amount} onChangeValue={setAmount} />
-      <Input
-        label="Concepto (opcional)"
-        leftIcon="chatbubble-ellipses-outline"
-        placeholder="Ej. Renta, préstamo…"
-        maxLength={25}
-        value={comment}
-        onChangeText={setComment}
-      />
-      <Button title="Enviar" full disabled={!valid} onPress={nipAuth.open} />
+    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950" edges={['bottom']}>
+      {/* Contexto fijo: destinatario */}
+      <View className="border-b border-neutral-100 px-lg py-sm dark:border-neutral-800">
+        <Text variant="caption" tone="muted">Enviando a usuario Medá</Text>
+        <Text variant="body" className="font-semibold" numberOfLines={1}>{resource}</Text>
+      </View>
+
+      {/* Héroe: monto o estado sin saldo */}
+      <View className="flex-1 items-center justify-center gap-md px-lg">
+        {noFunds ? (
+          <View className="items-center gap-md">
+            <View className="h-16 w-16 items-center justify-center rounded-2xl bg-neutral-100 dark:bg-neutral-800">
+              <Ionicons name="wallet-outline" size={32} color={palette.neutral[400]} />
+            </View>
+            <Text variant="h2" center>Sin saldo disponible</Text>
+            <Text variant="body" tone="muted" center>
+              Necesitas abonar dinero antes de realizar un envío.
+            </Text>
+            <Button
+              title="Abonar dinero"
+              variant="soft"
+              onPress={() => navigation.navigate('CashInMethods')}
+            />
+          </View>
+        ) : (
+          <>
+            <Text style={[styles.amountDisplay, overBalance && styles.amountError]} variant="display">
+              {formatAmountDisplay(amount)}
+            </Text>
+
+            <View className="flex-row items-center gap-sm">
+              <Text variant="caption" tone="muted" style={{ fontVariant: ['tabular-nums'] }}>
+                Disponible: {balance.data !== undefined ? formatCurrency(availableBalance) : '—'}
+              </Text>
+              <Pressable
+                onPress={onMax}
+                accessibilityRole="button"
+                accessibilityLabel="Usar saldo máximo"
+                className="rounded-pill bg-brand-100 px-sm py-xs"
+              >
+                <Text variant="caption" className="font-bold text-brand-700">MAX</Text>
+              </Pressable>
+            </View>
+
+            {overBalance ? (
+              <Text variant="caption" tone="danger" center>
+                El monto supera tu saldo disponible.
+              </Text>
+            ) : null}
+          </>
+        )}
+      </View>
+
+      {/* Concepto + teclado numérico + CTA — solo si hay saldo */}
+      {!noFunds ? (
+        <View style={styles.keypadFooter}>
+          <Input
+            label="Concepto (opcional)"
+            leftIcon="chatbubble-ellipses-outline"
+            placeholder="Ej. Renta, préstamo…"
+            maxLength={25}
+            value={comment}
+            onChangeText={setComment}
+          />
+          <AmountKeypad value={amount} onChange={setAmount} />
+          <Button title="Enviar" full disabled={!canContinue} onPress={nipAuth.open} />
+        </View>
+      ) : null}
+
       <NipModal
         visible={nipAuth.visible}
         loading={nipAuth.loading}
@@ -358,6 +544,31 @@ export function CashOutMedaAmountScreen({ route, navigation }: MedaAmountProps) 
         onSubmit={authorize}
         onClose={nipAuth.close}
       />
-    </ScrollView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  flex: { flex: 1 },
+  footer: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F0EDE8',
+  },
+  amountDisplay: {
+    fontSize: 52,
+    fontWeight: '700',
+    textAlign: 'center',
+    fontVariant: ['tabular-nums'],
+  },
+  amountError: {
+    color: palette.danger,
+  },
+  keypadFooter: {
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+});

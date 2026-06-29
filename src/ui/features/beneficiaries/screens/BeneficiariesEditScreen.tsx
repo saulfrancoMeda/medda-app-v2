@@ -22,6 +22,7 @@ import { PercentSelector } from '@ui/features/beneficiaries/components/PercentSe
 import { beneficiaryErrorMessage } from '@ui/features/beneficiaries/errorMessages';
 import { useSaveBeneficiaries } from '@ui/features/beneficiaries/hooks/useBeneficiaries';
 import type { SectionsStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 type Props = NativeStackScreenProps<SectionsStackParamList, 'BeneficiariesEdit'>;
 
@@ -208,7 +209,7 @@ export function BeneficiariesEditScreen({ route, navigation }: Props) {
                     style={{ minHeight: 44 }}
                     className="flex-row items-center gap-sm"
                   >
-                    <Ionicons name="trash-outline" size={18} color="#C24A30" />
+                    <Ionicons name="trash-outline" size={18} color={palette.danger} />
                     <Text variant="caption" tone="danger" className="font-medium">
                       Quitar
                     </Text>
@@ -360,7 +361,7 @@ export function BeneficiariesEditScreen({ route, navigation }: Props) {
 
         {saveError ? (
           <View className="flex-row items-center gap-sm rounded-md bg-danger/10 p-md">
-            <Ionicons name="alert-circle-outline" size={20} color="#C24A30" />
+            <Ionicons name="alert-circle-outline" size={20} color={palette.danger} />
             <Text variant="caption" tone="danger" className="flex-1">
               {saveError}
             </Text>

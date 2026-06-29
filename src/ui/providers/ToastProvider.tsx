@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Text } from '@ui/design-system/components';
+import { palette } from '@ui/design-system/tokens/palette';
 
 type ToastType = 'success' | 'error';
 interface ToastState {
@@ -42,12 +43,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         >
           <View
             className="mx-5 mt-4 flex-row items-center gap-sm rounded-xl px-md py-sm"
-            style={{ backgroundColor: '#1B1812' }}
+            style={{ backgroundColor: palette.neutral[900] }}
           >
             <Ionicons
               name={toast.type === 'success' ? 'checkmark-circle' : 'alert-circle'}
               size={22}
-              color="#FCD535"
+              color={palette.brand[500]}
             />
             <Text variant="body" tone="inverse" className="flex-1">
               {toast.message}

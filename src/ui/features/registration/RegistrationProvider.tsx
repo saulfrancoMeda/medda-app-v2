@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   makeEmptyRegistrationDraft,
   type RegistrationDraft,
@@ -50,8 +50,10 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
     void registrationDraftStore.clear();
   }, [registrationDraftStore]);
 
+  const value = useMemo(() => ({ draft, hydrated, update, reset }), [draft, hydrated, update, reset]);
+
   return (
-    <RegistrationContext.Provider value={{ draft, hydrated, update, reset }}>
+    <RegistrationContext.Provider value={value}>
       {children}
     </RegistrationContext.Provider>
   );

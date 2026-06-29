@@ -1,4 +1,5 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query';
+import type { MovementsPage } from '@domain/wallet/ports/WalletRepository';
 import { useContainer } from '@ui/providers/ContainerProvider';
 
 export function useInvalidateWallet() {
@@ -90,6 +91,26 @@ export function useServices(categoryId: string) {
     queryKey: ['wallet', 'services', categoryId],
     queryFn: async () => {
       const res = await walletRepository.getServices(categoryId);
+      if (!res.ok) throw res.error;
+      return res.value;
+    },
+  });
+}
+
+export function useInfiniteMovements(accountId: string | undefined, channels?: readonly string[]) {
+  const { walletRepository } = useContainer();
+  return useInfiniteQuery<MovementsPage, Error, InfiniteData<MovementsPage>, unknown[], number>({
+    queryKey: ['wallet', 'movements-infinite', accountId, channels ?? 'transactional'],
+    enabled: Boolean(accountId),
+    initialPageParam: 0,
+    getNextPageParam: (last: MovementsPage) =>
+      last.page < last.lastPage ? last.page + 1 : undefined,
+    queryFn: async ({ pageParam }) => {
+      const res = await walletRepository.getMovements(
+        accountId as string,
+        pageParam,
+        channels,
+      );
       if (!res.ok) throw res.error;
       return res.value;
     },

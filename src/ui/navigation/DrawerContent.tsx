@@ -7,6 +7,7 @@ import { GoldGradient, Text } from '@ui/design-system/components';
 import { useAuth } from '@ui/providers/AuthProvider';
 import { useProfile } from '@ui/features/account/hooks/useAccount';
 import type { SectionsStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 type IoniconName = keyof typeof Ionicons.glyphMap;
 
@@ -34,12 +35,12 @@ function Row({
       style={({ pressed }) => (pressed ? { opacity: 0.7 } : undefined)}
     >
       <View className="h-11 w-11 items-center justify-center rounded-card bg-brand-100">
-        <Ionicons name={icon} size={20} color="#97720A" />
+        <Ionicons name={icon} size={20} color={palette.brand[700]} />
       </View>
       <Text variant="body" className="flex-1 font-semibold">
         {label}
       </Text>
-      <Ionicons name="chevron-forward" size={20} color="#9A9384" />
+      <Ionicons name="chevron-forward" size={20} color={palette.neutral[400]} />
     </Pressable>
   );
 }
@@ -81,31 +82,33 @@ export function DrawerContent(props: DrawerContentComponentProps) {
             accessibilityRole="button"
             accessibilityLabel="Cerrar menú"
           >
-            <Ionicons name="close" size={24} color="#1B1812" />
+            <Ionicons name="close" size={24} color={palette.neutral[900]} />
           </Pressable>
           <View className="items-center gap-md pt-lg">
             <View
-              className="items-center justify-center bg-neutral-0"
               style={{
                 width: 64,
                 height: 64,
                 borderRadius: 32,
                 borderWidth: 4,
                 borderColor: 'rgba(255,255,255,0.9)',
+                backgroundColor: palette.neutral[0],
                 shadowColor: '#000',
                 shadowOpacity: 0.12,
                 shadowRadius: 3,
                 shadowOffset: { width: 0, height: 3 },
                 elevation: 4,
                 overflow: 'hidden',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               {initials ? (
-                <Text variant="display" className="text-brand-700" style={{ fontSize: 24, fontWeight: 'bold' }}>
+                <Text style={{ fontSize: 24, fontWeight: 'bold', color: palette.brand[700] }}>
                   {initials}
                 </Text>
               ) : (
-                <Ionicons name="person" size={48} color="#97720A" />
+                <Ionicons name="person" size={48} color={palette.brand[700]} />
               )}
             </View>
 
@@ -141,9 +144,9 @@ export function DrawerContent(props: DrawerContentComponentProps) {
             >
               <View
                 className="h-12 w-12 items-center justify-center rounded-card"
-                style={{ backgroundColor: '#FAE8E2' }}
+                style={{ backgroundColor: palette.dangerSoft }}
               >
-                <Ionicons name="log-out-outline" size={22} color="#C24A30" />
+                <Ionicons name="log-out-outline" size={22} color={palette.danger} />
               </View>
               <Text variant="body" tone="danger" className="flex-1 font-semibold">
                 Cerrar sesión

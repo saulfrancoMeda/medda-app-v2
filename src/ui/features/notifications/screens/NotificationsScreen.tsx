@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { AppNotification } from '@domain/notifications/entities/Notification';
 import { Text } from '@ui/design-system/components';
 import { useMarkNotificationRead, useNotifications } from '@ui/features/notifications/hooks/useNotifications';
+import { palette } from '@ui/design-system/tokens/palette';
 
 const formatDate = (iso?: string): string => {
   if (!iso) return '';
@@ -63,7 +64,7 @@ export function NotificationsScreen() {
   if (notifications.isPending) {
     return (
       <View className="flex-1 items-center justify-center bg-neutral-0 dark:bg-neutral-950">
-        <ActivityIndicator color="#FCD535" />
+        <ActivityIndicator color={palette.brand[500]} />
       </View>
     );
   }
@@ -77,13 +78,13 @@ export function NotificationsScreen() {
         <RefreshControl
           refreshing={notifications.isFetching}
           onRefresh={() => void notifications.refetch()}
-          tintColor="#97720A"
+          tintColor={palette.brand[700]}
         />
       }
       ListEmptyComponent={
         <View className="flex-1 items-center justify-center gap-md p-2xl">
           <View className="h-20 w-20 items-center justify-center rounded-pill bg-brand-100">
-            <Ionicons name="notifications-outline" size={36} color="#97720A" />
+            <Ionicons name="notifications-outline" size={36} color={palette.brand[700]} />
           </View>
           <Text variant="h2" center>
             Sin notificaciones

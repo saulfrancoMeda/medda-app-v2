@@ -2,6 +2,7 @@ import { ActivityIndicator, Pressable, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { formatCurrency } from '@domain/shared/money';
 import { GoldGradient, Text } from '@ui/design-system/components';
+import { palette } from '@ui/design-system/tokens/palette';
 
 export interface BalanceCardAction {
   readonly icon: keyof typeof Ionicons.glyphMap;
@@ -37,11 +38,11 @@ export function BalanceCard({
         <Text className="text-ink" style={{ opacity: 0.72 }}>
           {label}
         </Text>
-        <View className="rounded-pill px-sm py-1" style={{ backgroundColor: '#1B1812' }}>
+        <View className="rounded-pill px-sm py-1" style={{ backgroundColor: palette.neutral[900] }}>
           <Text
             variant="caption"
             className="font-bold tracking-widest"
-            style={{ color: '#FCD535' }}
+            style={{ color: palette.brand[500] }}
           >
             MXN
           </Text>
@@ -50,10 +51,10 @@ export function BalanceCard({
 
       {loading ? (
         <View className="h-14 justify-center">
-          <ActivityIndicator color="#1B1812" />
+          <ActivityIndicator color={palette.neutral[900]} />
         </View>
       ) : (
-        <Text variant="display" className="text-ink" style={{ marginTop: 8 }}>
+        <Text variant="display" className="text-ink" style={{ marginTop: 8, fontVariant: ['tabular-nums'] }}>
           {balance !== undefined ? formatCurrency(balance) : '—'}
         </Text>
       )}
@@ -80,9 +81,9 @@ export function BalanceCard({
             >
               <View
                 className="h-12 w-12 items-center justify-center rounded-pill"
-                style={{ backgroundColor: '#1B1812' }}
+                style={{ backgroundColor: palette.neutral[900] }}
               >
-                <Ionicons name={action.icon} size={22} color="#FCD535" />
+                <Ionicons name={action.icon} size={22} color={palette.brand[500]} />
               </View>
               <Text variant="caption" className="text-ink" style={{ opacity: 0.72 }}>
                 {action.label}

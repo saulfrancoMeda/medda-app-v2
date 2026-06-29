@@ -25,14 +25,17 @@ export type AuthStackParamList = {
 };
 
 export type SpeiDraft = Omit<SpeiSendInput, 'nip' | 'location'>;
+export type RecipientDraft = Omit<SpeiDraft, 'monto'>;
 
 export type WalletStackParamList = {
   WalletHome: undefined;
   CashInMethods: undefined;
   CashInSpei: undefined;
   CashOutMethods: undefined;
-  CashOutSpeiForm: undefined;
+  CashOutSpeiRecipient: undefined;
+  CashOutSpeiAmount: { recipient: RecipientDraft };
   CashOutConfirm: { draft: SpeiDraft };
+  CashOutNip: { draft: SpeiDraft };
   TransactionSuccess: { result: TransactionResult; draft: SpeiDraft };
   CashOutMedaScan: undefined;
   CashOutMedaAmount: { resource: string };

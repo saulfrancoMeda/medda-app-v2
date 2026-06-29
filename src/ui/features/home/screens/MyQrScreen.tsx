@@ -2,6 +2,7 @@ import { View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { useAuth } from '@ui/providers/AuthProvider';
 import { Text } from '@ui/design-system/components';
+import { palette } from '@ui/design-system/tokens/palette';
 
 export function MyQrScreen() {
   const { session } = useAuth();
@@ -15,7 +16,7 @@ export function MyQrScreen() {
         Muestra este código para recibir dinero de otro usuario Medá.
       </Text>
       <View className="rounded-card bg-neutral-0 p-lg shadow">
-        {value ? <QRCode value={value} size={220} color="#1B1812" backgroundColor="#ffffff" /> : null}
+        {value ? <QRCode value={value} size={220} color={palette.neutral[900]} backgroundColor={palette.neutral[0]} /> : null}
       </View>
       <Text variant="body" className="font-semibold">
         {value}

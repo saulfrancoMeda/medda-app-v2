@@ -13,6 +13,7 @@ import { SuccessView } from '@ui/features/common/SuccessView';
 import { useContainer } from '@ui/providers/ContainerProvider';
 import { useToast } from '@ui/providers/ToastProvider';
 import type { SectionsStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 const MIN_PASSWORD = 6;
 
@@ -33,7 +34,7 @@ function Row({
       accessibilityRole="button"
       className="flex-row items-center gap-md border-b border-neutral-100 py-lg dark:border-neutral-800"
     >
-      <Ionicons name={icon} size={24} color="#97720A" />
+      <Ionicons name={icon} size={24} color={palette.brand[700]} />
       <View className="flex-1">
         <Text variant="body" className="font-semibold">
           {title}
@@ -42,7 +43,7 @@ function Row({
           {subtitle}
         </Text>
       </View>
-      <Ionicons name="chevron-forward" size={20} color="#9A9384" />
+      <Ionicons name="chevron-forward" size={20} color={palette.neutral[400]} />
     </Pressable>
   );
 }
