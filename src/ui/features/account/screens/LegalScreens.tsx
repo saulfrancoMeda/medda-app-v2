@@ -48,9 +48,10 @@ function Row({
 type LegalProps = NativeStackScreenProps<SectionsStackParamList, 'Legal'>;
 
 export function LegalScreen({ navigation }: LegalProps) {
-  const openDocument = (doc: LegalDocument) => {
+  const openDocument = async (doc: LegalDocument) => {
     if (doc.kind === 'external') {
-      void Linking.openURL(doc.url);
+      const supported = await Linking.canOpenURL(doc.url);
+      if (supported) void Linking.openURL(doc.url);
       return;
     }
     navigation.navigate('PdfViewer', {
@@ -195,6 +196,7 @@ export function PdfViewerScreen({ route }: PdfViewerProps) {
     <View className="flex-1 bg-neutral-0 dark:bg-neutral-950">
       <WebView
         source={{ uri: pdfUrl }}
+        originWhitelist={['https://*']}
         onLoadEnd={() => setWebLoading(false)}
         onError={() => setWebLoading(false)}
         style={{ flex: 1 }}

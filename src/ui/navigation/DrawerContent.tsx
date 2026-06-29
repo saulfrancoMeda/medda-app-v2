@@ -92,7 +92,7 @@ export function DrawerContent(props: DrawerContentComponentProps) {
                 borderRadius: 32,
                 borderWidth: 4,
                 borderColor: 'rgba(255,255,255,0.9)',
-                backgroundColor: '#FFFFFF',
+                backgroundColor: palette.neutral[0],
                 shadowColor: '#000',
                 shadowOpacity: 0.12,
                 shadowRadius: 3,

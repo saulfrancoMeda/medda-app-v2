@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -14,9 +14,7 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'LoginPassword'>;
 const MIN_PASSWORD = 6;
 
 export function LoginPasswordScreen({ route, navigation }: Props) {
-  const { phone, name } = route.params;
-  const rawFirst = name.replace(/\*+/g, '').trim().split(' ')[0] ?? '';
-  const firstName = rawFirst.length > 2 ? rawFirst : 'Bienvenido';
+  const { phone } = route.params;
   const { signIn } = useAuth();
   const [password, setPassword] = useState('');
   const [secure, setSecure] = useState(true);
@@ -42,27 +40,12 @@ export function LoginPasswordScreen({ route, navigation }: Props) {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
-      {/* Hero oscuro con saludo personalizado */}
-      <View
-        style={{
-          backgroundColor: palette.neutral[900],
-          borderBottomLeftRadius: 32,
-          borderBottomRightRadius: 32,
-          paddingHorizontal: 24,
-          paddingTop: 32,
-          paddingBottom: 32,
-        }}
-      >
-        <Text variant="h2" style={{ color: 'rgba(255,255,255,0.65)' }}>
-          Hola,
-        </Text>
-        <Text variant="display" style={{ color: '#FFFFFF', lineHeight: 48 }} numberOfLines={1}>
-          {firstName}
-        </Text>
+      <View style={styles.hero}>
+        <Text variant="h2" style={styles.heroSub}>Ingresa tu</Text>
+        <Text variant="display" style={styles.heroTitle}>contraseña.</Text>
       </View>
 
-      {/* Formulario */}
-      <View className="flex-1 px-lg" style={{ paddingTop: 28, gap: 12 }}>
+      <View className="flex-1 px-lg" style={styles.form}>
         <Input
           label="Contraseña"
           placeholder="Ingresa tu contraseña"
@@ -97,8 +80,7 @@ export function LoginPasswordScreen({ route, navigation }: Props) {
         </Pressable>
       </View>
 
-      {/* Acciones fijas al pie */}
-      <View className="gap-md px-lg pb-lg" style={{ paddingTop: 12 }}>
+      <View className="gap-md px-lg pb-lg" style={styles.footer}>
         <Button
           title="Iniciar sesión"
           full
@@ -118,3 +100,28 @@ export function LoginPasswordScreen({ route, navigation }: Props) {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  hero: {
+    backgroundColor: palette.neutral[900],
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 32,
+  },
+  heroSub: {
+    color: palette.neutral[0] + 'A6',
+  },
+  heroTitle: {
+    color: palette.neutral[0],
+    lineHeight: 48,
+  },
+  form: {
+    paddingTop: 28,
+    gap: 12,
+  },
+  footer: {
+    paddingTop: 12,
+  },
+});

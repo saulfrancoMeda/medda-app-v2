@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Button, Input, Logo, Text } from '@ui/design-system/components';
@@ -39,36 +39,16 @@ export function LoginPhoneScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
-      {/* Hero oscuro — 50% de la pantalla */}
-      <View
-        style={{
-          height: '50%',
-          backgroundColor: palette.neutral[900],
-          borderBottomLeftRadius: 32,
-          borderBottomRightRadius: 32,
-          paddingHorizontal: 24,
-          paddingTop: 36,
-          paddingBottom: 36,
-          justifyContent: 'space-between',
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: '#FFFFFF',
-            borderRadius: 20,
-            padding: 14,
-            alignSelf: 'flex-start',
-          }}
-        >
+      <View style={styles.hero}>
+        <View style={styles.logoCard}>
           <Logo width={72} height={72} />
         </View>
-        <Text variant="display" style={{ color: '#FFFFFF', lineHeight: 52 }}>
+        <Text variant="display" style={styles.heroTitle}>
           {'Simplifica\ntus finanzas.'}
         </Text>
       </View>
 
-      {/* Formulario — ocupa el espacio restante */}
-      <View className="flex-1 px-lg" style={{ paddingTop: 28 }}>
+      <View className="flex-1 px-lg" style={styles.form}>
         <Input
           label="Número de celular"
           placeholder="10 dígitos"
@@ -81,8 +61,7 @@ export function LoginPhoneScreen({ navigation }: Props) {
         />
       </View>
 
-      {/* Acciones fijas al pie */}
-      <View className="gap-md px-lg pb-lg" style={{ paddingTop: 12 }}>
+      <View className="gap-md px-lg pb-lg" style={styles.footer}>
         <Button
           title="Iniciar sesión"
           full
@@ -91,7 +70,6 @@ export function LoginPhoneScreen({ navigation }: Props) {
           onPress={onContinue}
         />
 
-        {/* Divider + registro */}
         <View className="flex-row items-center gap-md">
           <View className="h-px flex-1 bg-neutral-200 dark:bg-neutral-700" />
           <Text variant="caption" tone="muted">o</Text>
@@ -113,3 +91,32 @@ export function LoginPhoneScreen({ navigation }: Props) {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  hero: {
+    height: '50%',
+    backgroundColor: palette.neutral[900],
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    paddingHorizontal: 24,
+    paddingTop: 36,
+    paddingBottom: 36,
+    justifyContent: 'space-between',
+  },
+  logoCard: {
+    backgroundColor: palette.neutral[0],
+    borderRadius: 20,
+    padding: 14,
+    alignSelf: 'flex-start',
+  },
+  heroTitle: {
+    color: palette.neutral[0],
+    lineHeight: 52,
+  },
+  form: {
+    paddingTop: 28,
+  },
+  footer: {
+    paddingTop: 12,
+  },
+});

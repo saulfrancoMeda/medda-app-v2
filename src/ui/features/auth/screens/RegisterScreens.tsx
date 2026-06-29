@@ -1198,6 +1198,7 @@ function LegalDocModal({ url, title, onClose }: { url: string; title: string; on
         <View style={{ flex: 1 }}>
           <WebView
             source={{ uri: pdfUrl }}
+            originWhitelist={['https://*']}
             onLoadEnd={() => setLoading(false)}
             onError={() => setLoading(false)}
             style={{ flex: 1 }}

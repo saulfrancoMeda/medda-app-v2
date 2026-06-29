@@ -166,7 +166,7 @@ export function BeneficiariesScreen({ navigation }: Props) {
     <View className="flex-1 bg-neutral-0 dark:bg-neutral-950">
       <FlatList
         data={data}
-        keyExtractor={(item, index) => `${fullBeneficiaryName(item)}-${index}`}
+        keyExtractor={(item) => `${item.firstName}-${item.lastName}-${item.lastName2}`}
         contentContainerClassName="p-lg gap-md"
         refreshControl={
           <RefreshControl

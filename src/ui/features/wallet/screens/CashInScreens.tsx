@@ -88,7 +88,7 @@ export function CashInSpeiScreen() {
             disabled={!clabe}
             accessibilityRole="button"
             accessibilityLabel="Copiar CLABE"
-            className="flex-1 flex-row items-center justify-center gap-xs rounded-lg bg-brand-100 py-md active:opacity-70"
+            className="flex-1 flex-row items-center justify-center gap-xs rounded-lg bg-brand-100 py-md active:opacity-70 dark:bg-neutral-800"
           >
             <Ionicons name="copy-outline" size={18} color={palette.brand[700]} />
             <Text variant="body" className="font-semibold text-brand-700">Copiar</Text>

@@ -32,7 +32,7 @@ export const config: AppConfig = {
     clientId: process.env.EXPO_PUBLIC_COGNITO_CLIENT_ID ?? '',
   },
   appVersion: process.env.EXPO_PUBLIC_APP_VERSION ?? '0.0.1',
-  xAuthToken: process.env.EXPO_PUBLIC_X_AUTH_TOKEN ?? 'asdf46asdg16f7h0y',
+  xAuthToken: process.env.EXPO_PUBLIC_X_AUTH_TOKEN ?? '',
   chatUri: process.env.EXPO_PUBLIC_CHAT_URI ?? '',
   supportPhone: process.env.EXPO_PUBLIC_SUPPORT_PHONE ?? '',
   walletProvider: process.env.EXPO_PUBLIC_WALLET_PROVIDER ?? 'meda',

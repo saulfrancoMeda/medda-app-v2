@@ -105,7 +105,7 @@ export function ColonyPicker({ postalCode, value, onSelect, error }: ColonyPicke
           {status.kind === 'ready' ? (
             <FlatList
               data={status.colonies}
-              keyExtractor={(c, i) => `${c.id || c.colony}-${i}`}
+              keyExtractor={(c) => c.id || c.colony}
               keyboardShouldPersistTaps="handled"
               ListEmptyComponent={<Text tone="muted">No hay colonias para este C.P.</Text>}
               renderItem={({ item }) => (

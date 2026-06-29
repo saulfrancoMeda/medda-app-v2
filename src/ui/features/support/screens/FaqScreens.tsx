@@ -52,10 +52,10 @@ export function FaqListScreen({ navigation }: ListProps) {
             >
               <Ionicons name="chatbubbles" size={26} color={palette.neutral[900]} />
               <View className="flex-1">
-                <Text variant="body" className="font-semibold text-ink">
+                <Text variant="body" className="font-semibold" style={{ color: palette.neutral[900] }}>
                   Chatea con nosotros
                 </Text>
-                <Text variant="caption" className="text-ink">
+                <Text variant="caption" style={{ color: palette.neutral[700] }}>
                   Para aclarar tus dudas
                 </Text>
               </View>
@@ -118,10 +118,15 @@ export function FaqListScreen({ navigation }: ListProps) {
 
 type DetailProps = NativeStackScreenProps<FaqStackParamList, 'FaqDetail'>;
 
-const htmlDocument = (body: string, dark: boolean) => `<!DOCTYPE html><html><head>
+const htmlDocument = (body: string, dark: boolean) => {
+  const bg = dark ? palette.neutral[950] : palette.neutral[0];
+  const fg = dark ? palette.neutral[50] : palette.neutral[900];
+  const link = dark ? palette.brand[500] : palette.brand[700];
+  return `<!DOCTYPE html><html><head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>body{font-family:-apple-system,Roboto,sans-serif;font-size:16px;color:${dark ? '#F5F0E8' : '#1B1812'};background-color:${dark ? '#0D0B09' : '#FFFFFF'};padding:16px;line-height:1.5;}a{color:${dark ? '#FCD535' : '#97720A'};}</style>
+<style>body{font-family:-apple-system,Roboto,sans-serif;font-size:16px;color:${fg};background-color:${bg};padding:16px;line-height:1.5;}a{color:${link};}</style>
 </head><body>${body}</body></html>`;
+};
 
 export function FaqDetailScreen({ route }: DetailProps) {
   const { item } = route.params;
@@ -135,7 +140,7 @@ export function FaqDetailScreen({ route }: DetailProps) {
       <WebView
         originWhitelist={['*']}
         source={{ html: htmlDocument(item.response, dark) }}
-        style={{ flex: 1, backgroundColor: dark ? '#0D0B09' : '#FFFFFF' }}
+        style={{ flex: 1, backgroundColor: dark ? palette.neutral[950] : palette.neutral[0] }}
       />
     </View>
   );
