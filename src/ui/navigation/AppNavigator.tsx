@@ -1,6 +1,6 @@
-import { View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
@@ -11,6 +11,7 @@ import { StoreStackNavigator } from '@ui/navigation/StoreStackNavigator';
 import { SalesScreen } from '@ui/features/wallet/screens/SalesScreen';
 import { DrawerContent } from '@ui/navigation/DrawerContent';
 import type { AppDrawerParamList, AppTabsParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 const Tabs = createBottomTabNavigator<AppTabsParamList>();
 const Drawer = createDrawerNavigator<AppDrawerParamList>();
@@ -33,7 +34,7 @@ function MainTabs() {
   const dark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
   const bottomInset = Math.max(insets.bottom, 8);
-  const bg = dark ? '#1B1812' : '#ffffff';
+  const bg = dark ? palette.neutral[900] : palette.neutral[0];
   const borderColor = dark ? '#2A2520' : '#F0EDE8';
 
   return (
@@ -41,9 +42,12 @@ function MainTabs() {
       initialRouteName="Store"
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: '#97720A',
-        tabBarInactiveTintColor: dark ? '#9A9384' : '#9A9384',
+        tabBarActiveTintColor: palette.brand[700],
+        tabBarInactiveTintColor: palette.neutral[400],
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600', marginTop: 2 },
+        tabBarActiveBackgroundColor: 'transparent',
+        tabBarInactiveBackgroundColor: 'transparent',
+        tabBarItemStyle: { overflow: 'hidden' },
         tabBarStyle: {
           height: 64 + bottomInset,
           paddingTop: 10,
@@ -51,15 +55,12 @@ function MainTabs() {
           backgroundColor: bg,
           borderTopWidth: 1,
           borderTopColor: borderColor,
-          elevation: 12,
+          elevation: 8,
           shadowColor: '#000',
           shadowOpacity: 0.06,
           shadowRadius: 8,
           shadowOffset: { width: 0, height: -2 },
         },
-        tabBarBackground: () => (
-          <View style={{ flex: 1, backgroundColor: bg, borderTopWidth: 1, borderTopColor: borderColor }} />
-        ),
         tabBarIcon: ({ color, focused }) => {
           const name = focused
             ? TAB_ICON_ACTIVE[route.name]
@@ -81,7 +82,13 @@ function MainTabs() {
       <Tabs.Screen
         name="Wallet"
         component={WalletStackNavigator}
-        options={{ title: 'Mi Billetera' }}
+        options={({ route }) => {
+          const focused = getFocusedRouteNameFromRoute(route) ?? 'WalletHome';
+          if (focused !== 'WalletHome') {
+            return { title: 'Mi Billetera', tabBarStyle: { display: 'none' } };
+          }
+          return { title: 'Mi Billetera' };
+        }}
         listeners={({ navigation }) => ({
           tabPress: () => { navigation.navigate('Wallet', { screen: 'WalletHome' } as never); },
         })}

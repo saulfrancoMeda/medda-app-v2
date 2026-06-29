@@ -3,12 +3,13 @@ import { ActivityIndicator, Pressable, View, type PressableProps } from 'react-n
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Text } from '@ui/design-system/components/Text';
 import { cn } from '@ui/lib/cn';
+import { palette } from '@ui/design-system/tokens/palette';
 
 const button = cva('flex-row items-center justify-center gap-sm rounded-pill', {
   variants: {
     variant: {
       solid: 'bg-brand-500',
-      soft: 'bg-brand-100',
+      soft: 'bg-brand-100 dark:bg-neutral-800',
       outline: 'border border-brand-500 bg-transparent',
       ghost: 'bg-transparent',
       link: 'bg-transparent px-none',
@@ -22,7 +23,7 @@ const button = cva('flex-row items-center justify-center gap-sm rounded-pill', {
     full: { true: 'w-full' },
   },
   compoundVariants: [
-    { variant: 'solid', disabled: true, class: 'bg-brand-100' },
+    { variant: 'solid', disabled: true, class: 'bg-brand-100 dark:bg-neutral-700' },
     { variant: ['soft', 'outline', 'ghost', 'link'], disabled: true, class: 'opacity-40' },
   ],
   defaultVariants: { variant: 'solid', size: 'md' },
@@ -65,11 +66,15 @@ export const Button = forwardRef<View, ButtonProps>(
         {...rest}
       >
         {loading ? (
-          <ActivityIndicator color={isSolid ? '#1B1812' : '#fcd535'} />
+          <ActivityIndicator color={isSolid ? palette.neutral[900] : palette.brand[500]} />
         ) : (
           <Text
             tone={labelTone(variant, isDisabled)}
-            className={cn('font-semibold', variant === 'link' && 'underline')}
+            className={cn(
+              'font-semibold',
+              variant === 'link' && 'underline',
+              (variant === 'solid' || !variant) && !isDisabled && 'text-neutral-900 dark:text-neutral-900',
+            )}
           >
             {title}
           </Text>

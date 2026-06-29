@@ -7,6 +7,7 @@ import { isCredit, signedAmount } from '@domain/wallet/entities/Movement';
 import { Text } from '@ui/design-system/components';
 import { useToast } from '@ui/providers/ToastProvider';
 import type { WalletStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 const formatDateTime = (iso: string): string => {
   if (!iso) return '';
@@ -23,9 +24,38 @@ function DetailRow({ label, value, mono }: { label: string; value?: string; mono
       <Text variant="caption" tone="muted">
         {label}
       </Text>
-      <Text variant="body" className={mono ? 'flex-1 text-right font-mono' : 'flex-1 text-right'}>
+      <Text
+        variant="body"
+        className={mono ? 'flex-1 text-right font-mono' : 'flex-1 text-right'}
+        style={{ fontVariant: ['tabular-nums'] }}
+      >
         {value}
       </Text>
+    </View>
+  );
+}
+
+const STATUS_MAP: Record<string, { label: string; bg: string; text: string }> = {
+  liquidado: { label: 'Liquidado', bg: palette.success + '20', text: palette.success },
+  completado: { label: 'Completado', bg: palette.success + '20', text: palette.success },
+  exitoso: { label: 'Exitoso', bg: palette.success + '20', text: palette.success },
+  pendiente: { label: 'Pendiente', bg: palette.brand[500] + '30', text: palette.brand[700] },
+  en_proceso: { label: 'En proceso', bg: palette.brand[500] + '30', text: palette.brand[700] },
+  rechazado: { label: 'Rechazado', bg: palette.danger + '18', text: palette.danger },
+  fallido: { label: 'Fallido', bg: palette.danger + '18', text: palette.danger },
+  cancelado: { label: 'Cancelado', bg: palette.neutral[400] + '25', text: palette.neutral[500] },
+};
+
+function StatusBadge({ value }: { value?: string }) {
+  if (!value) return null;
+  const key = value.toLowerCase().replace(/\s+/g, '_');
+  const config = STATUS_MAP[key] ?? { label: value, bg: palette.neutral[400] + '25', text: palette.neutral[500] };
+  return (
+    <View className="flex-row items-center justify-between gap-md border-b border-neutral-100 py-md dark:border-neutral-800">
+      <Text variant="caption" tone="muted">Estatus</Text>
+      <View style={{ backgroundColor: config.bg, borderRadius: 99, paddingHorizontal: 12, paddingVertical: 4 }}>
+        <Text variant="caption" style={{ color: config.text, fontWeight: '700' }}>{config.label}</Text>
+      </View>
     </View>
   );
 }
@@ -53,10 +83,10 @@ export function MovementDetailScreen({ route }: Props) {
           <Ionicons
             name={credit ? 'arrow-down' : 'arrow-up'}
             size={28}
-            color={credit ? '#2E8C6A' : '#97720A'}
+            color={credit ? palette.success : palette.brand[700]}
           />
         </View>
-        <Text variant="display" className={credit ? 'text-success' : undefined}>
+        <Text variant="display" className={credit ? 'text-success' : undefined} style={{ fontVariant: ['tabular-nums'] }}>
           {formatCurrency(signedAmount(movement))}
         </Text>
         <Text variant="body" tone="muted">
@@ -85,7 +115,7 @@ export function MovementDetailScreen({ route }: Props) {
         <DetailRow label="Beneficiario" value={movement.beneficiaryName} />
         <DetailRow label="Correo del beneficiario" value={movement.beneficiaryEmail} />
         <DetailRow label="Concepto" value={movement.comments} />
-        <DetailRow label="Estatus" value={movement.state} />
+        <StatusBadge value={movement.state} />
       </View>
 
       <Pressable
@@ -93,7 +123,7 @@ export function MovementDetailScreen({ route }: Props) {
         accessibilityRole="button"
         className="flex-row items-center justify-center gap-sm py-sm"
       >
-        <Ionicons name="copy-outline" size={18} color="#97720A" />
+        <Ionicons name="copy-outline" size={18} color={palette.brand[700]} />
         <Text variant="body" tone="link" className="font-semibold">
           Copiar no. de transacción
         </Text>

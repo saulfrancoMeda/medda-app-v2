@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { isValidPostalCode, type PostalCodeInfo } from '@domain/beneficiaries/entities/Beneficiary';
 import { Text } from '@ui/design-system/components';
 import { useLookupPostalCode } from '@ui/features/beneficiaries/hooks/useBeneficiaries';
+import { palette } from '@ui/design-system/tokens/palette';
 
 interface ColonyPickerProps {
   readonly postalCode: string;
@@ -65,11 +66,11 @@ export function ColonyPicker({ postalCode, value, onSelect, error }: ColonyPicke
         style={{ height: 56 }}
         className="flex-row items-center gap-sm rounded-md border-2 border-transparent bg-neutral-100 px-md dark:bg-neutral-800"
       >
-        <Ionicons name="location-outline" size={20} color="#9A9384" />
+        <Ionicons name="location-outline" size={20} color={palette.neutral[400]} />
         <Text variant="body" tone={value ? 'default' : 'muted'} className="flex-1">
           {value || (disabled ? 'Captura un C.P. válido primero' : 'Selecciona una colonia')}
         </Text>
-        {!disabled ? <Ionicons name="chevron-down" size={18} color="#9A9384" /> : null}
+        {!disabled ? <Ionicons name="chevron-down" size={18} color={palette.neutral[400]} /> : null}
       </Pressable>
       {error ? (
         <Text variant="caption" tone="danger">
@@ -87,7 +88,7 @@ export function ColonyPicker({ postalCode, value, onSelect, error }: ColonyPicke
           <Text variant="h2">Colonia</Text>
           {status.kind === 'loading' ? (
             <View className="items-center gap-sm py-lg">
-              <ActivityIndicator color="#FCD535" />
+              <ActivityIndicator color={palette.brand[500]} />
               <Text tone="muted">Buscando colonias…</Text>
             </View>
           ) : null}
@@ -104,7 +105,7 @@ export function ColonyPicker({ postalCode, value, onSelect, error }: ColonyPicke
           {status.kind === 'ready' ? (
             <FlatList
               data={status.colonies}
-              keyExtractor={(c, i) => `${c.id || c.colony}-${i}`}
+              keyExtractor={(c) => c.id || c.colony}
               keyboardShouldPersistTaps="handled"
               ListEmptyComponent={<Text tone="muted">No hay colonias para este C.P.</Text>}
               renderItem={({ item }) => (

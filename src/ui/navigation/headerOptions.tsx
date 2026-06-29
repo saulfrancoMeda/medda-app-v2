@@ -6,6 +6,7 @@ import { useColorScheme } from 'nativewind';
 import { unreadCount } from '@domain/notifications/entities/Notification';
 import { useNotifications } from '@ui/features/notifications/hooks/useNotifications';
 import { Text } from '@ui/design-system/components';
+import { palette } from '@ui/design-system/tokens/palette';
 
 function HeaderBackButton({ tint }: { tint: string }) {
   const navigation = useNavigation();
@@ -69,8 +70,8 @@ export function useStackScreenOptions(opts?: { showBell?: boolean }): NativeStac
   const showBell = opts?.showBell === true;
   const { colorScheme } = useColorScheme();
   const dark = colorScheme === 'dark';
-  const tint = dark ? '#FAFAF9' : '#1B1812';
-  const bg = dark ? '#131110' : '#ffffff';
+  const tint = dark ? palette.neutral[50] : palette.neutral[900];
+  const bg = dark ? palette.neutral[950] : palette.neutral[0];
   return {
     headerTintColor: tint,
     headerTitleAlign: 'center',

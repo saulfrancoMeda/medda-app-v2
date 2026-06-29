@@ -3,16 +3,20 @@ import { ActivityIndicator, FlatList, Linking, Pressable, View } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
+import { useColorScheme } from 'nativewind';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { config } from '@config/env';
 import { AppHeader } from '@ui/navigation/AppHeader';
 import { Input, Text } from '@ui/design-system/components';
 import { useFaqs } from '@ui/features/support/hooks/useSupport';
 import type { FaqStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 type ListProps = NativeStackScreenProps<FaqStackParamList, 'FaqList'>;
 
 export function FaqListScreen({ navigation }: ListProps) {
+  const tabBarHeight = useBottomTabBarHeight();
   const faqs = useFaqs();
   const [query, setQuery] = useState('');
 
@@ -26,12 +30,13 @@ export function FaqListScreen({ navigation }: ListProps) {
   }, [faqs.data, query]);
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
+    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950" edges={[]}>
       <AppHeader />
       <FlatList
         data={filtered}
         keyExtractor={(f) => f.id}
         contentContainerClassName="gap-lg p-lg"
+        contentContainerStyle={{ paddingBottom: tabBarHeight }}
         ListHeaderComponent={
           <View className="gap-md pb-sm">
             <Text variant="h1">¿En qué te podemos ayudar?</Text>
@@ -45,16 +50,16 @@ export function FaqListScreen({ navigation }: ListProps) {
               accessibilityRole="button"
               className="flex-row items-center gap-md rounded-card bg-brand-500 p-lg"
             >
-              <Ionicons name="chatbubbles" size={26} color="#1B1812" />
+              <Ionicons name="chatbubbles" size={26} color={palette.neutral[900]} />
               <View className="flex-1">
-                <Text variant="body" className="font-semibold text-ink">
+                <Text variant="body" className="font-semibold" style={{ color: palette.neutral[900] }}>
                   Chatea con nosotros
                 </Text>
-                <Text variant="caption" className="text-ink">
+                <Text variant="caption" style={{ color: palette.neutral[700] }}>
                   Para aclarar tus dudas
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#1B1812" />
+              <Ionicons name="chevron-forward" size={20} color={palette.neutral[900]} />
             </Pressable>
             <Text variant="h2">Preguntas frecuentes</Text>
           </View>
@@ -68,7 +73,7 @@ export function FaqListScreen({ navigation }: ListProps) {
             <Text variant="body" className="flex-1">
               {item.question}
             </Text>
-            <Ionicons name="chevron-forward" size={20} color="#9A9384" />
+            <Ionicons name="chevron-forward" size={20} color={palette.neutral[400]} />
           </Pressable>
         )}
         ListEmptyComponent={
@@ -85,12 +90,12 @@ export function FaqListScreen({ navigation }: ListProps) {
             <Pressable
               onPress={() => navigation.navigate('Clarifications')}
               accessibilityRole="button"
-              className="flex-row items-center justify-between rounded-card bg-brand-50 p-lg"
+              className="flex-row items-center justify-between rounded-card bg-brand-50 p-lg dark:bg-neutral-800 dark:border dark:border-neutral-700"
             >
-              <Text variant="body" className="font-semibold text-brand-700">
+              <Text variant="body" className="font-semibold text-brand-700 dark:text-brand-400">
                 Ver historial de aclaraciones
               </Text>
-              <Ionicons name="chevron-forward" size={20} color="#97720A" />
+              <Ionicons name="chevron-forward" size={20} color={palette.brand[700]} />
             </Pressable>
             {config.supportPhone ? (
               <Text variant="caption" tone="muted" center>
@@ -113,13 +118,20 @@ export function FaqListScreen({ navigation }: ListProps) {
 
 type DetailProps = NativeStackScreenProps<FaqStackParamList, 'FaqDetail'>;
 
-const htmlDocument = (body: string) => `<!DOCTYPE html><html><head>
+const htmlDocument = (body: string, dark: boolean) => {
+  const bg = dark ? palette.neutral[950] : palette.neutral[0];
+  const fg = dark ? palette.neutral[50] : palette.neutral[900];
+  const link = dark ? palette.brand[500] : palette.brand[700];
+  return `<!DOCTYPE html><html><head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>body{font-family:-apple-system,Roboto,sans-serif;font-size:16px;color:#1B1812;padding:16px;line-height:1.5;}</style>
+<style>body{font-family:-apple-system,Roboto,sans-serif;font-size:16px;color:${fg};background-color:${bg};padding:16px;line-height:1.5;}a{color:${link};}</style>
 </head><body>${body}</body></html>`;
+};
 
 export function FaqDetailScreen({ route }: DetailProps) {
   const { item } = route.params;
+  const { colorScheme } = useColorScheme();
+  const dark = colorScheme === 'dark';
   return (
     <View className="flex-1 bg-neutral-0 dark:bg-neutral-950">
       <View className="p-lg">
@@ -127,8 +139,8 @@ export function FaqDetailScreen({ route }: DetailProps) {
       </View>
       <WebView
         originWhitelist={['*']}
-        source={{ html: htmlDocument(item.response) }}
-        style={{ flex: 1, backgroundColor: 'transparent' }}
+        source={{ html: htmlDocument(item.response, dark) }}
+        style={{ flex: 1, backgroundColor: dark ? palette.neutral[950] : palette.neutral[0] }}
       />
     </View>
   );

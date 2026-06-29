@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import type { Bank } from '@domain/wallet/entities/Transfer';
 import { Text } from '@ui/design-system/components';
+import { palette } from '@ui/design-system/tokens/palette';
 import { useSpeiBanks } from '@ui/features/wallet/hooks/useWallet';
 
 interface BankPickerProps {
@@ -39,11 +40,11 @@ export function BankPicker({ value, onSelect }: BankPickerProps) {
         style={{ height: 56 }}
         className="flex-row items-center gap-sm rounded-md border-2 border-transparent bg-neutral-100 px-md dark:bg-neutral-800"
       >
-        <Ionicons name="business-outline" size={20} color="#9A9384" />
+        <Ionicons name="business-outline" size={20} color={palette.neutral[400]} />
         <Text variant="body" tone={value ? 'default' : 'muted'} className="flex-1">
           {value?.name ?? 'Selecciona un banco'}
         </Text>
-        <Ionicons name="chevron-down" size={18} color="#9A9384" />
+        <Ionicons name="chevron-down" size={18} color={palette.neutral[400]} />
       </Pressable>
 
       <Modal visible={open} transparent animationType="slide" onRequestClose={close}>
@@ -58,10 +59,10 @@ export function BankPicker({ value, onSelect }: BankPickerProps) {
             style={{ height: 56 }}
             className="flex-row items-center gap-sm rounded-md bg-neutral-100 px-md dark:bg-neutral-800"
           >
-            <Ionicons name="search-outline" size={20} color="#9A9384" />
+            <Ionicons name="search-outline" size={20} color={palette.neutral[400]} />
             <TextInput
               placeholder="Busca tu banco"
-              placeholderTextColor="#9A9384"
+              placeholderTextColor={palette.neutral[400]}
               value={query}
               onChangeText={setQuery}
               autoFocus

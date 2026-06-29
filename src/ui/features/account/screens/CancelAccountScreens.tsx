@@ -13,6 +13,7 @@ import { useSpeiBanks } from '@ui/features/wallet/hooks/useWallet';
 import { useContainer } from '@ui/providers/ContainerProvider';
 import { useAuth } from '@ui/providers/AuthProvider';
 import type { SectionsStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -72,7 +73,7 @@ export function CancelAccountScreen(_: Props) {
     <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
       <View className="gap-sm rounded-card bg-danger/10 p-lg">
         <View className="flex-row items-center gap-sm">
-          <Ionicons name="warning-outline" size={22} color="#C24A30" />
+          <Ionicons name="warning-outline" size={22} color={palette.danger} />
           <Text variant="body" tone="danger" className="font-semibold">
             Estás por cancelar tu cuenta
           </Text>

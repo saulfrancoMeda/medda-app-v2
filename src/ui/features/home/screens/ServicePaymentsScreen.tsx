@@ -17,6 +17,7 @@ import {
 import { useContainer } from '@ui/providers/ContainerProvider';
 import { useToast } from '@ui/providers/ToastProvider';
 import type { StoreStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 type CatProps = NativeStackScreenProps<StoreStackParamList, 'ServicePayments'>;
 export function ServicePaymentsScreen({ navigation }: CatProps) {
@@ -29,7 +30,7 @@ export function ServicePaymentsScreen({ navigation }: CatProps) {
           Elige uno de los servicios que deseas pagar.
         </Text>
       </View>
-      {categories.isPending ? <ActivityIndicator color="#FCD535" /> : null}
+      {categories.isPending ? <ActivityIndicator color={palette.brand[500]} /> : null}
       {categories.isError ? (
         <Text tone="muted">No se pudieron cargar las categorías.</Text>
       ) : null}
@@ -43,9 +44,9 @@ export function ServicePaymentsScreen({ navigation }: CatProps) {
           >
             <View
               className="h-12 w-12 items-center justify-center rounded-pill"
-              style={{ backgroundColor: (c.color ?? '#97720A') + '22' }}
+              style={{ backgroundColor: (c.color ?? palette.brand[700]) + '22' }}
             >
-              <Ionicons name="flash-outline" size={24} color={c.color ?? '#97720A'} />
+              <Ionicons name="flash-outline" size={24} color={c.color ?? palette.brand[700]} />
             </View>
             <Text variant="caption" center numberOfLines={2}>
               {c.name}
@@ -90,7 +91,7 @@ export function ServiceListScreen({ route, navigation }: ListProps) {
           <Text variant="body" className="flex-1">
             {item.name}
           </Text>
-          <Ionicons name="chevron-forward" size={20} color="#9A9384" />
+          <Ionicons name="chevron-forward" size={20} color={palette.neutral[400]} />
         </Pressable>
       )}
     />

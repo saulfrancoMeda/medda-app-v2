@@ -49,10 +49,10 @@ export class HttpClient {
             : JSON.stringify(options.body);
 
       if (__DEV__ && options.body !== undefined && !isMultipart) {
+        const PII_FIELDS = ['password', 'nip', 'nipSignature', 'cellphone', 'phone',
+          'firstName', 'lastName', 'lastName2', 'email', 'curp', 'rfc', 'birthDate'];
         const redacted = JSON.parse(JSON.stringify(options.body));
-        if (redacted.password) redacted.password = '***';
-        if (redacted.nip) redacted.nip = '***';
-        if (redacted.nipSignature) redacted.nipSignature = '***';
+        for (const f of PII_FIELDS) { if (f in redacted) redacted[f] = '***'; }
         console.log(`[API →] ${endpoint.method} ${endpoint.path}`, JSON.stringify(redacted, null, 2));
       }
 

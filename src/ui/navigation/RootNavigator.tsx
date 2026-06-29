@@ -27,6 +27,7 @@ import { LoadingScreen } from '@ui/features/common/LoadingScreen';
 import { AppNavigator } from '@ui/navigation/AppNavigator';
 import { useStackScreenOptions } from '@ui/navigation/headerOptions';
 import type { AuthStackParamList } from '@ui/navigation/types';
+import { palette } from '@ui/design-system/tokens/palette';
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 
@@ -122,9 +123,9 @@ export function RootNavigator() {
     ...base,
     colors: {
       ...base.colors,
-      background: colorScheme === 'dark' ? '#131110' : '#ffffff',
-      card: colorScheme === 'dark' ? '#131110' : '#ffffff',
-      primary: '#fcd535',
+      background: colorScheme === 'dark' ? palette.neutral[950] : palette.neutral[0],
+      card: colorScheme === 'dark' ? palette.neutral[950] : palette.neutral[0],
+      primary: palette.brand[500],
     },
   };
 

@@ -225,12 +225,6 @@ export class MedaRegistrationGateway implements RegistrationGateway {
       },
     };
 
-    // TEMP debug: log the exact body sent to /public/register/v2 (secrets redacted).
-    console.log(
-      '[REGISTER body]',
-      JSON.stringify({ ...data, password: '***', nip: '***', nipSignature: '***' }),
-    );
-
     if (!hasDocuments) {
       const res = await this.http.request<unknown>(endpoints.register, { body: data });
       return res.ok ? ok(true) : err(toError(res.error));
@@ -263,7 +257,6 @@ export class MedaRegistrationGateway implements RegistrationGateway {
       lastName: draft.lastName,
       lastName2: draft.lastName2,
     };
-    console.log('[BLACK-LIST body]', JSON.stringify(blackListBody, null, 2));
     const res = await this.http.request<{ validationSign?: unknown }>(endpoints.blackListCheck, {
       body: blackListBody,
     });

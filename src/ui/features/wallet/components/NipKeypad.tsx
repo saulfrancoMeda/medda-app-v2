@@ -1,10 +1,17 @@
 import { useEffect, useRef } from 'react';
-import { ActivityIndicator, Pressable, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Text } from '@ui/design-system/components';
+import { palette } from '@ui/design-system/tokens/palette';
 
 export const NIP_LENGTH = 6;
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'] as const;
+
+const styles = StyleSheet.create({
+  dot: { width: 14, height: 14, borderRadius: 7 },
+  dotFilled: { backgroundColor: palette.neutral[900] },
+  dotEmpty: { backgroundColor: 'transparent', borderWidth: 2, borderColor: '#D6D1C7' },
+});
 
 interface NipKeypadProps {
   readonly value: string;
@@ -41,14 +48,12 @@ export function NipKeypad({ value, onChange, onComplete, loading = false, error 
     <View className="gap-lg">
       <View className="h-6 flex-row items-center justify-center gap-md">
         {loading ? (
-          <ActivityIndicator color="#FCD535" />
+          <ActivityIndicator color={palette.brand[500]} />
         ) : (
           Array.from({ length: NIP_LENGTH }, (_, i) => (
             <View
               key={i}
-              className={`h-4 w-4 rounded-full ${
-                i < value.length ? 'bg-brand-500' : 'bg-neutral-200 dark:bg-neutral-700'
-              }`}
+              style={[styles.dot, i < value.length ? styles.dotFilled : styles.dotEmpty]}
             />
           ))
         )}
@@ -74,7 +79,7 @@ export function NipKeypad({ value, onChange, onComplete, loading = false, error 
                   className="h-14 flex-1 items-center justify-center rounded-card bg-neutral-100 dark:bg-neutral-800"
                 >
                   {key === '⌫' ? (
-                    <Ionicons name="backspace-outline" size={22} color="#6C6555" />
+                    <Ionicons name="backspace-outline" size={22} color={palette.neutral[500]} />
                   ) : (
                     <Text variant="h2">{key}</Text>
                   )}
