@@ -1,5 +1,6 @@
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useColorScheme } from 'nativewind';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { fullName } from '@domain/account/entities/Profile';
 import { Text } from '@ui/design-system/components';
@@ -38,6 +39,7 @@ type Props = NativeStackScreenProps<SectionsStackParamList, 'Profile'>;
 
 export function ProfileScreen({ navigation }: Props) {
   const profile = useProfile();
+  const { colorScheme, toggleColorScheme } = useColorScheme();
 
   if (profile.isPending) {
     return (
@@ -96,6 +98,30 @@ export function ProfileScreen({ navigation }: Props) {
         </SectionCard>
       ) : null}
 
+
+      <SectionCard title="Preferencias">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Cambiar a modo ${colorScheme === 'dark' ? 'claro' : 'oscuro'}`}
+          onPress={toggleColorScheme}
+          className="flex-row items-center justify-between py-md"
+        >
+          <View className="flex-row items-center gap-md">
+            <Ionicons
+              name={colorScheme === 'dark' ? 'moon' : 'sunny-outline'}
+              size={20}
+              color={colorScheme === 'dark' ? palette.brand[500] : palette.neutral[500]}
+            />
+            <Text variant="body">Tema de la app</Text>
+          </View>
+          <View className="flex-row items-center gap-xs">
+            <Text variant="caption" tone="muted">
+              {colorScheme === 'dark' ? 'Oscuro' : 'Claro'}
+            </Text>
+            <Ionicons name="chevron-forward" size={16} color={palette.neutral[400]} />
+          </View>
+        </Pressable>
+      </SectionCard>
 
       <Pressable
         accessibilityRole="button"

@@ -71,74 +71,56 @@ export function StoreScreen() {
     <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950" edges={[]}>
       <AppHeader />
 
+      {/* Saldo + acciones fijos — el saludo scrollea con el contenido */}
+      <GoldGradient radius={0} style={styles.hero}>
+        <View style={styles.balanceHeaderRow}>
+          <Text style={styles.caption}>Tu saldo disponible</Text>
+          <View style={styles.mxnBadge}>
+            <Text style={styles.mxnText}>MXN</Text>
+          </View>
+        </View>
+        {loadingBalance ? (
+          <View style={styles.loadingRow}>
+            <ActivityIndicator color={palette.neutral[900]} />
+          </View>
+        ) : (
+          <Text variant="display" style={[styles.ink, styles.amount]}>
+            {balance.data !== undefined ? formatCurrency(balance.data) : '—'}
+          </Text>
+        )}
+        {masked ? <Text style={styles.clabe}>{masked}</Text> : null}
+        <View style={styles.actionsRow}>
+          {([
+            { icon: 'arrow-down' as const, label: 'Abonar', onPress: () => goWallet('CashInMethods') },
+            { icon: 'arrow-up' as const, label: 'Enviar', onPress: () => goWallet('CashOutMethods') },
+            { icon: 'qr-code' as const, label: 'Cobrar', onPress: () => stackNav.navigate('MyQr') },
+            { icon: 'time-outline' as const, label: 'Movim.', onPress: () => goWallet('WalletHome') },
+          ]).map((action) => (
+            <Pressable
+              key={action.label}
+              onPress={action.onPress}
+              style={styles.actionItem}
+              accessibilityRole="button"
+              accessibilityLabel={action.label}
+            >
+              <View style={styles.actionCircle}>
+                <Ionicons name={action.icon} size={22} color={palette.brand[500]} />
+              </View>
+              <Text style={styles.actionLabel}>{action.label}</Text>
+            </Pressable>
+          ))}
+        </View>
+      </GoldGradient>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.scrollContent, { paddingBottom: tabBarHeight }]}
       >
-        {/* ── BALANCE HERO ── */}
-        <GoldGradient
-          radius={0}
-          style={styles.hero}
-        >
-          {/* Greeting */}
-          <View style={styles.greetingRow}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.caption}>Hola de nuevo</Text>
-              <Text variant="h2" style={styles.ink}>{firstName || 'Bienvenido'}</Text>
-            </View>
-            <Pressable
-              style={styles.qrButton}
-              onPress={() => stackNav.navigate('MyQr')}
-              accessibilityRole="button"
-              accessibilityLabel="Mi QR"
-            >
-              <Ionicons name="qr-code" size={20} color={palette.neutral[900]} />
-            </Pressable>
-          </View>
-
-          {/* Balance */}
-          <View style={styles.balanceSection}>
-            <View style={styles.balanceHeaderRow}>
-              <Text style={styles.caption}>Tu saldo disponible</Text>
-              <View style={styles.mxnBadge}>
-                <Text style={styles.mxnText}>MXN</Text>
-              </View>
-            </View>
-            {loadingBalance ? (
-              <View style={styles.loadingRow}>
-                <ActivityIndicator color={palette.neutral[900]} />
-              </View>
-            ) : (
-              <Text variant="display" style={[styles.ink, styles.amount]}>
-                {balance.data !== undefined ? formatCurrency(balance.data) : '—'}
-              </Text>
-            )}
-            {masked ? <Text style={styles.clabe}>{masked}</Text> : null}
-          </View>
-
-          {/* Actions */}
-          <View style={styles.actionsRow}>
-            {([
-              { icon: 'arrow-down' as const, label: 'Abonar', onPress: () => goWallet('CashInMethods') },
-              { icon: 'arrow-up' as const, label: 'Enviar', onPress: () => goWallet('CashOutMethods') },
-              { icon: 'qr-code' as const, label: 'Cobrar', onPress: () => stackNav.navigate('MyQr') },
-              { icon: 'time-outline' as const, label: 'Movim.', onPress: () => goWallet('WalletHome') },
-            ]).map((action) => (
-              <Pressable
-                key={action.label}
-                onPress={action.onPress}
-                style={styles.actionItem}
-                accessibilityRole="button"
-                accessibilityLabel={action.label}
-              >
-                <View style={styles.actionCircle}>
-                  <Ionicons name={action.icon} size={22} color={palette.brand[500]} />
-                </View>
-                <Text style={styles.actionLabel}>{action.label}</Text>
-              </Pressable>
-            ))}
-          </View>
-        </GoldGradient>
+        {/* Saludo — scrollea y desaparece */}
+        <View style={styles.greetingRow}>
+          <Text style={styles.caption}>Hola de nuevo</Text>
+          <Text variant="h2" style={styles.greetingName}>{firstName || 'Bienvenido'}</Text>
+        </View>
 
         {/* ── CARDS ── */}
         <View style={styles.cardsSection}>
@@ -269,17 +251,10 @@ const styles = StyleSheet.create({
   },
   cardsSection: { paddingHorizontal: 16, paddingTop: 16, gap: 12 },
   // Hero internals
-  greetingRow: { flexDirection: 'row', alignItems: 'center' },
+  greetingRow: { flexDirection: 'column', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 4 },
+  greetingName: { color: palette.neutral[900] },
   ink: { color: palette.neutral[900] },
   caption: { color: 'rgba(27,24,18,0.60)', fontSize: 13 },
-  qrButton: {
-    height: 40,
-    width: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(27,24,18,0.10)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   balanceSection: { marginTop: 20 },
   balanceHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   mxnBadge: { backgroundColor: palette.neutral[900], borderRadius: 99, paddingHorizontal: 8, paddingVertical: 2 },

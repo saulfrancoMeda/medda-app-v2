@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { Movement } from '@domain/wallet/entities/Movement';
+import { isCredit, type Movement } from '@domain/wallet/entities/Movement';
 import type { MovementsPage } from '@domain/wallet/ports/WalletRepository';
 import { formatCurrency } from '@domain/shared/money';
 import { AppHeader } from '@ui/navigation/AppHeader';
@@ -67,6 +67,7 @@ export function WalletScreen() {
   const stp = useStpAccount();
   const movementsQuery = useInfiniteMovements(account.data?.id);
   const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState<'all' | 'credit' | 'debit'>('all');
 
   const allMovements = useMemo(
     () => movementsQuery.data?.pages.flatMap((p: MovementsPage) => p.movements) ?? [],
@@ -91,23 +92,143 @@ export function WalletScreen() {
   };
 
   const filteredMovements = useMemo(() => {
-    if (!query.trim()) return allMovements;
+    let base = allMovements;
+    if (filter === 'credit') base = base.filter((m) => isCredit(m));
+    else if (filter === 'debit') base = base.filter((m) => !isCredit(m));
+    if (!query.trim()) return base;
     const q = query.trim().toLowerCase();
-    return allMovements.filter(
+    return base.filter(
       (m) =>
         m.description?.toLowerCase().includes(q) ||
         m.provider?.toLowerCase().includes(q) ||
         m.reference?.toLowerCase().includes(q),
     );
-  }, [allMovements, query]);
+  }, [allMovements, query, filter]);
   const groups = useMemo(() => groupByDate(filteredMovements), [filteredMovements]);
 
   const masked = stp.data?.clabe ? `CLABE ·· ${stp.data.clabe.slice(-4)} · Medá` : '';
   const openDetail = (m: Movement) => navigation.navigate('MovementDetail', { movement: m });
 
+  const FILTER_OPTIONS = [
+    { key: 'all' as const, label: 'Todos' },
+    { key: 'credit' as const, label: 'Abonos' },
+    { key: 'debit' as const, label: 'Retiros' },
+  ];
+
   const listHeader = (
-    <View>
-      {/* Hero card — full-width, scrolls with list */}
+    <View style={styles.subSection}>
+      {/* CLABE + account copy */}
+      <View className="rounded-2xl border border-neutral-200 px-md dark:border-neutral-800">
+        <View className="border-b border-neutral-100 pb-xs pt-md dark:border-neutral-800">
+          <Text variant="caption" className="font-semibold text-neutral-500 dark:text-neutral-400">
+            MI CUENTA
+          </Text>
+        </View>
+        <CopyRow label="CLABE Medá" value={stp.data?.clabe ?? ''} icon="card-outline" />
+        {stp.data?.clabe && account.data?.accountNumber ? (
+          <View className="h-px bg-neutral-100 dark:bg-neutral-800" />
+        ) : null}
+        <CopyRow
+          label="Número de cuenta"
+          value={account.data?.accountNumber ?? ''}
+          icon="wallet-outline"
+        />
+      </View>
+
+      {/* Filter chips */}
+      {!loadingMovements && allMovements.length > 0 ? (
+        <View className="flex-row gap-xs">
+          {FILTER_OPTIONS.map((opt) => (
+            <Pressable
+              key={opt.key}
+              onPress={() => setFilter(opt.key)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: filter === opt.key }}
+              className={`rounded-pill border px-md py-xs ${
+                filter === opt.key
+                  ? 'border-neutral-900 bg-neutral-900 dark:border-neutral-100 dark:bg-neutral-100'
+                  : 'border-neutral-200 bg-transparent dark:border-neutral-700'
+              }`}
+            >
+              <Text
+                variant="caption"
+                className={`font-semibold ${
+                  filter === opt.key
+                    ? 'text-neutral-0 dark:text-neutral-950'
+                    : 'text-neutral-500 dark:text-neutral-400'
+                }`}
+              >
+                {opt.label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
+
+      {/* Search */}
+      {!loadingMovements && !movementsQuery.isError && allMovements.length > 0 ? (
+        <View className="flex-row items-center gap-sm overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50 px-md dark:border-neutral-800 dark:bg-neutral-900">
+          <Ionicons name="search-outline" size={16} color={palette.neutral[400]} />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Buscar movimientos…"
+            placeholderTextColor={palette.neutral[400]}
+            returnKeyType="search"
+            style={{ flex: 1, fontSize: 14, height: 44, color: palette.neutral[900] }}
+          />
+          {query.length > 0 ? (
+            <Pressable onPress={() => setQuery('')} hitSlop={8} accessibilityLabel="Limpiar búsqueda">
+              <Ionicons name="close-circle" size={16} color={palette.neutral[400]} />
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
+
+      {movementsQuery.isError ? (
+        <View className="items-start gap-sm">
+          <Text variant="caption" tone="muted">No pudimos cargar los movimientos.</Text>
+          <Button title="Reintentar" variant="link" onPress={() => void movementsQuery.refetch()} />
+        </View>
+      ) : null}
+
+      {loadingMovements ? (
+        <View className="overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800">
+          <View className="bg-neutral-50 px-md py-xs dark:bg-neutral-900">
+            <View className="h-3 w-12 rounded-sm bg-neutral-200 dark:bg-neutral-700" />
+          </View>
+          <View className="px-md">
+            {Array.from({ length: 3 }, (_, i) => (
+              <View key={i}>
+                {i > 0 ? <View className="h-px bg-neutral-100 dark:bg-neutral-800" /> : null}
+                <MovementRowSkeleton />
+              </View>
+            ))}
+          </View>
+        </View>
+      ) : groups.length > 0 ? (
+        <Text
+          variant="caption"
+          className="font-bold text-neutral-900 dark:text-neutral-100"
+          style={{ letterSpacing: 0.5 }}
+        >
+          MIS MOVIMIENTOS
+        </Text>
+      ) : null}
+    </View>
+  );
+
+  const listFooter = movementsQuery.isFetchingNextPage ? (
+    <View style={{ padding: 16, alignItems: 'center' }}>
+      <ActivityIndicator color={palette.brand[700]} />
+    </View>
+  ) : null;
+
+  return (
+    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950" edges={[]}>
+      <AppHeader />
+
+      {/* Saldo + acciones fijos — no scrollean con la lista */}
       <GoldGradient radius={0} style={styles.hero}>
         <View style={styles.balanceHeaderRow}>
           <Text style={styles.caption}>Tu saldo disponible</Text>
@@ -149,88 +270,6 @@ export function WalletScreen() {
         </View>
       </GoldGradient>
 
-      {/* CLABE + account copy */}
-      <View style={styles.subSection}>
-        <View className="rounded-2xl border border-neutral-200 px-md dark:border-neutral-800">
-          <View className="border-b border-neutral-100 pb-xs pt-md dark:border-neutral-800">
-            <Text variant="caption" className="font-semibold text-neutral-500 dark:text-neutral-400">
-              MI CUENTA
-            </Text>
-          </View>
-          <CopyRow label="CLABE Medá" value={stp.data?.clabe ?? ''} icon="card-outline" />
-          {stp.data?.clabe && account.data?.accountNumber ? (
-            <View className="h-px bg-neutral-100 dark:bg-neutral-800" />
-          ) : null}
-          <CopyRow
-            label="Número de cuenta"
-            value={account.data?.accountNumber ?? ''}
-            icon="wallet-outline"
-          />
-        </View>
-
-        {/* Search */}
-        {!loadingMovements && !movementsQuery.isError && allMovements.length > 0 ? (
-          <View className="flex-row items-center gap-sm overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50 px-md dark:border-neutral-800 dark:bg-neutral-900">
-            <Ionicons name="search-outline" size={16} color={palette.neutral[400]} />
-            <TextInput
-              value={query}
-              onChangeText={setQuery}
-              placeholder="Buscar movimientos…"
-              placeholderTextColor={palette.neutral[400]}
-              returnKeyType="search"
-              style={{ flex: 1, fontSize: 14, height: 44, color: palette.neutral[900] }}
-            />
-            {query.length > 0 ? (
-              <Pressable onPress={() => setQuery('')} hitSlop={8} accessibilityLabel="Limpiar búsqueda">
-                <Ionicons name="close-circle" size={16} color={palette.neutral[400]} />
-              </Pressable>
-            ) : null}
-          </View>
-        ) : null}
-
-        {movementsQuery.isError ? (
-          <View className="items-start gap-sm">
-            <Text variant="caption" tone="muted">No pudimos cargar los movimientos.</Text>
-            <Button title="Reintentar" variant="link" onPress={() => void movementsQuery.refetch()} />
-          </View>
-        ) : null}
-
-        {loadingMovements ? (
-          <View className="overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800">
-            <View className="bg-neutral-50 px-md py-xs dark:bg-neutral-900">
-              <View className="h-3 w-12 rounded-sm bg-neutral-200 dark:bg-neutral-700" />
-            </View>
-            <View className="px-md">
-              {Array.from({ length: 3 }, (_, i) => (
-                <View key={i}>
-                  {i > 0 ? <View className="h-px bg-neutral-100 dark:bg-neutral-800" /> : null}
-                  <MovementRowSkeleton />
-                </View>
-              ))}
-            </View>
-          </View>
-        ) : groups.length > 0 ? (
-          <Text
-            variant="caption"
-            className="font-bold text-neutral-900 dark:text-neutral-100"
-            style={{ letterSpacing: 0.5 }}
-          >
-            MIS MOVIMIENTOS
-          </Text>
-        ) : null}
-      </View>
-    </View>
-  );
-
-  const listFooter = movementsQuery.isFetchingNextPage ? (
-    <View style={{ padding: 16, alignItems: 'center' }}>
-      <ActivityIndicator color={palette.brand[700]} />
-    </View>
-  ) : null;
-
-  return (
-    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950" edges={[]}>
-      <AppHeader />
       <FlatList
         data={groups}
         keyExtractor={(g) => g.label}

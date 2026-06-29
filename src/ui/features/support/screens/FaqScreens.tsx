@@ -3,6 +3,7 @@ import { ActivityIndicator, FlatList, Linking, Pressable, View } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
+import { useColorScheme } from 'nativewind';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { config } from '@config/env';
@@ -89,9 +90,9 @@ export function FaqListScreen({ navigation }: ListProps) {
             <Pressable
               onPress={() => navigation.navigate('Clarifications')}
               accessibilityRole="button"
-              className="flex-row items-center justify-between rounded-card bg-brand-50 p-lg"
+              className="flex-row items-center justify-between rounded-card bg-brand-50 p-lg dark:bg-neutral-800 dark:border dark:border-neutral-700"
             >
-              <Text variant="body" className="font-semibold text-brand-700">
+              <Text variant="body" className="font-semibold text-brand-700 dark:text-brand-400">
                 Ver historial de aclaraciones
               </Text>
               <Ionicons name="chevron-forward" size={20} color={palette.brand[700]} />
@@ -117,13 +118,15 @@ export function FaqListScreen({ navigation }: ListProps) {
 
 type DetailProps = NativeStackScreenProps<FaqStackParamList, 'FaqDetail'>;
 
-const htmlDocument = (body: string) => `<!DOCTYPE html><html><head>
+const htmlDocument = (body: string, dark: boolean) => `<!DOCTYPE html><html><head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>body{font-family:-apple-system,Roboto,sans-serif;font-size:16px;color:#1B1812;padding:16px;line-height:1.5;}</style>
+<style>body{font-family:-apple-system,Roboto,sans-serif;font-size:16px;color:${dark ? '#F5F0E8' : '#1B1812'};background-color:${dark ? '#0D0B09' : '#FFFFFF'};padding:16px;line-height:1.5;}a{color:${dark ? '#FCD535' : '#97720A'};}</style>
 </head><body>${body}</body></html>`;
 
 export function FaqDetailScreen({ route }: DetailProps) {
   const { item } = route.params;
+  const { colorScheme } = useColorScheme();
+  const dark = colorScheme === 'dark';
   return (
     <View className="flex-1 bg-neutral-0 dark:bg-neutral-950">
       <View className="p-lg">
@@ -131,8 +134,8 @@ export function FaqDetailScreen({ route }: DetailProps) {
       </View>
       <WebView
         originWhitelist={['*']}
-        source={{ html: htmlDocument(item.response) }}
-        style={{ flex: 1, backgroundColor: 'transparent' }}
+        source={{ html: htmlDocument(item.response, dark) }}
+        style={{ flex: 1, backgroundColor: dark ? '#0D0B09' : '#FFFFFF' }}
       />
     </View>
   );

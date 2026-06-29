@@ -86,6 +86,11 @@ export function MovementRow({ movement, onPress }: { movement: Movement; onPress
         <Text variant="caption" tone="muted" className="mt-0.5">
           {date}
         </Text>
+        {movement.commission && movement.commission > 0 ? (
+          <Text variant="caption" style={{ color: palette.danger, fontVariant: ['tabular-nums'] }} className="mt-0.5">
+            Comisión -{formatCurrency(movement.commission)}
+          </Text>
+        ) : null}
       </View>
     </Pressable>
   );
@@ -100,12 +105,27 @@ export function MovementGroupCard({
   movements: readonly Movement[];
   onPress: (m: Movement) => void;
 }) {
+  const creditTotal = movements.filter(isCredit).reduce((s, m) => s + Math.abs(m.amount), 0);
+  const debitTotal = movements.filter((m) => !isCredit(m)).reduce((s, m) => s + Math.abs(m.amount), 0);
+
   return (
     <View className="overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800">
-      <View className="bg-neutral-50 px-md py-xs dark:bg-neutral-900">
+      <View className="flex-row items-center justify-between bg-neutral-50 px-md py-xs dark:bg-neutral-900">
         <Text variant="caption" tone="muted" className="font-semibold">
           {label.toUpperCase()}
         </Text>
+        <View className="flex-row gap-sm">
+          {creditTotal > 0 ? (
+            <Text variant="caption" style={{ color: palette.success, fontVariant: ['tabular-nums'] }}>
+              +{formatCurrency(creditTotal)}
+            </Text>
+          ) : null}
+          {debitTotal > 0 ? (
+            <Text variant="caption" tone="muted" style={{ fontVariant: ['tabular-nums'] }}>
+              -{formatCurrency(debitTotal)}
+            </Text>
+          ) : null}
+        </View>
       </View>
       {movements.map((m, i) => (
         <View key={m.id}>

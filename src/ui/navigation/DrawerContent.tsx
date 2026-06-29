@@ -86,23 +86,25 @@ export function DrawerContent(props: DrawerContentComponentProps) {
           </Pressable>
           <View className="items-center gap-md pt-lg">
             <View
-              className="items-center justify-center bg-neutral-0"
               style={{
                 width: 64,
                 height: 64,
                 borderRadius: 32,
                 borderWidth: 4,
                 borderColor: 'rgba(255,255,255,0.9)',
+                backgroundColor: '#FFFFFF',
                 shadowColor: '#000',
                 shadowOpacity: 0.12,
                 shadowRadius: 3,
                 shadowOffset: { width: 0, height: 3 },
                 elevation: 4,
                 overflow: 'hidden',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               {initials ? (
-                <Text variant="display" className="text-brand-700" style={{ fontSize: 24, fontWeight: 'bold' }}>
+                <Text style={{ fontSize: 24, fontWeight: 'bold', color: palette.brand[700] }}>
                   {initials}
                 </Text>
               ) : (

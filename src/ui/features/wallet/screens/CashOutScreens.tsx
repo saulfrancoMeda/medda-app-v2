@@ -5,13 +5,13 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { formatCurrency } from '@domain/shared/money';
-import { findBankByClabe, isValidAmount, isValidClabe, type Bank } from '@domain/wallet/entities/Transfer';
+import { findBankByClabe, isValidClabe, type Bank } from '@domain/wallet/entities/Transfer';
 import { Button, Input, Text } from '@ui/design-system/components';
 import { walletErrorMessage } from '@ui/features/wallet/errorMessages';
 import { useNipAuthorization } from '@ui/features/common/useNipAuthorization';
 import { AmountKeypad, formatAmountDisplay } from '@ui/features/wallet/components/AmountKeypad';
 import { BankPicker } from '@ui/features/wallet/components/BankPicker';
-import { MoneyInput } from '@ui/features/wallet/components/MoneyInput';
+import { MethodRow } from '@ui/features/wallet/components/MethodRow';
 import { NipKeypad } from '@ui/features/wallet/components/NipKeypad';
 import { NipModal } from '@ui/features/wallet/components/NipModal';
 import {
@@ -26,43 +26,6 @@ import type { WalletStackParamList } from '@ui/navigation/types';
 import { palette } from '@ui/design-system/tokens/palette';
 
 type MethodsProps = NativeStackScreenProps<WalletStackParamList, 'CashOutMethods'>;
-
-function MethodRow({
-  icon,
-  iconColor,
-  title,
-  subtitle,
-  onPress,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  iconColor: string;
-  title: string;
-  subtitle?: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      className="flex-row items-center gap-md border-b border-neutral-100 py-lg dark:border-neutral-800"
-    >
-      <View className="h-10 w-10 items-center justify-center rounded-pill bg-neutral-100 dark:bg-neutral-800">
-        <Ionicons name={icon} size={22} color={iconColor} />
-      </View>
-      <View className="flex-1">
-        <Text variant="body" className="font-semibold">
-          {title}
-        </Text>
-        {subtitle ? (
-          <Text variant="caption" tone="muted">
-            {subtitle}
-          </Text>
-        ) : null}
-      </View>
-      <Ionicons name="chevron-forward" size={20} color={palette.neutral[400]} />
-    </Pressable>
-  );
-}
 
 export function CashOutMethodsScreen({ navigation }: MethodsProps) {
   return (
@@ -469,13 +432,21 @@ type MedaAmountProps = NativeStackScreenProps<WalletStackParamList, 'CashOutMeda
 export function CashOutMedaAmountScreen({ route, navigation }: MedaAmountProps) {
   const { resource } = route.params;
   const account = useDefaultAccount();
+  const balance = useBalance(account.data?.id);
   const { walletRepository } = useContainer();
   const toast = useToast();
   const nipAuth = useNipAuthorization(walletErrorMessage);
   const invalidateWallet = useInvalidateWallet();
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState('0');
   const [comment, setComment] = useState('');
-  const valid = isValidAmount(amount) && Boolean(account.data);
+
+  const availableBalance = balance.data ?? 0;
+  const amountNum = parseFloat(amount) || 0;
+  const noFunds = !balance.isPending && Boolean(account.data) && availableBalance === 0;
+  const overBalance = amountNum > availableBalance;
+  const canContinue = amountNum > 0 && !overBalance && !noFunds && Boolean(account.data);
+
+  const onMax = () => setAmount(availableBalance.toFixed(2));
 
   const authorize = (nip: string) => {
     if (!account.data) return;
@@ -484,7 +455,7 @@ export function CashOutMedaAmountScreen({ route, navigation }: MedaAmountProps) 
         walletRepository.transferToUser({
           originAccount: account.data!.id,
           resource,
-          amount: Number(amount).toFixed(2),
+          amount: amountNum.toFixed(2),
           nip,
           comment: comment.trim() || undefined,
         }),
@@ -497,20 +468,75 @@ export function CashOutMedaAmountScreen({ route, navigation }: MedaAmountProps) 
   };
 
   return (
-    <ScrollView className="flex-1 bg-neutral-0 dark:bg-neutral-950" contentContainerClassName="gap-lg p-lg">
-      <Text variant="body" tone="muted">
-        Destinatario: {resource}
-      </Text>
-      <MoneyInput label="Monto" value={amount} onChangeValue={setAmount} />
-      <Input
-        label="Concepto (opcional)"
-        leftIcon="chatbubble-ellipses-outline"
-        placeholder="Ej. Renta, préstamo…"
-        maxLength={25}
-        value={comment}
-        onChangeText={setComment}
-      />
-      <Button title="Enviar" full disabled={!valid} onPress={nipAuth.open} />
+    <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950" edges={['bottom']}>
+      {/* Contexto fijo: destinatario */}
+      <View className="border-b border-neutral-100 px-lg py-sm dark:border-neutral-800">
+        <Text variant="caption" tone="muted">Enviando a usuario Medá</Text>
+        <Text variant="body" className="font-semibold" numberOfLines={1}>{resource}</Text>
+      </View>
+
+      {/* Héroe: monto o estado sin saldo */}
+      <View className="flex-1 items-center justify-center gap-md px-lg">
+        {noFunds ? (
+          <View className="items-center gap-md">
+            <View className="h-16 w-16 items-center justify-center rounded-2xl bg-neutral-100 dark:bg-neutral-800">
+              <Ionicons name="wallet-outline" size={32} color={palette.neutral[400]} />
+            </View>
+            <Text variant="h2" center>Sin saldo disponible</Text>
+            <Text variant="body" tone="muted" center>
+              Necesitas abonar dinero antes de realizar un envío.
+            </Text>
+            <Button
+              title="Abonar dinero"
+              variant="soft"
+              onPress={() => navigation.navigate('CashInMethods')}
+            />
+          </View>
+        ) : (
+          <>
+            <Text style={[styles.amountDisplay, overBalance && styles.amountError]} variant="display">
+              {formatAmountDisplay(amount)}
+            </Text>
+
+            <View className="flex-row items-center gap-sm">
+              <Text variant="caption" tone="muted" style={{ fontVariant: ['tabular-nums'] }}>
+                Disponible: {balance.data !== undefined ? formatCurrency(availableBalance) : '—'}
+              </Text>
+              <Pressable
+                onPress={onMax}
+                accessibilityRole="button"
+                accessibilityLabel="Usar saldo máximo"
+                className="rounded-pill bg-brand-100 px-sm py-xs"
+              >
+                <Text variant="caption" className="font-bold text-brand-700">MAX</Text>
+              </Pressable>
+            </View>
+
+            {overBalance ? (
+              <Text variant="caption" tone="danger" center>
+                El monto supera tu saldo disponible.
+              </Text>
+            ) : null}
+          </>
+        )}
+      </View>
+
+      {/* Concepto + teclado numérico + CTA — solo si hay saldo */}
+      {!noFunds ? (
+        <View style={styles.keypadFooter}>
+          <Input
+            label="Concepto (opcional)"
+            leftIcon="chatbubble-ellipses-outline"
+            placeholder="Ej. Renta, préstamo…"
+            maxLength={25}
+            value={comment}
+            onChangeText={setComment}
+          />
+          <AmountKeypad value={amount} onChange={setAmount} />
+          <Button title="Enviar" full disabled={!canContinue} onPress={nipAuth.open} />
+        </View>
+      ) : null}
+
       <NipModal
         visible={nipAuth.visible}
         loading={nipAuth.loading}
@@ -518,7 +544,7 @@ export function CashOutMedaAmountScreen({ route, navigation }: MedaAmountProps) 
         onSubmit={authorize}
         onClose={nipAuth.close}
       />
-    </ScrollView>
+    </SafeAreaView>
   );
 }
 

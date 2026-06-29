@@ -35,6 +35,31 @@ function DetailRow({ label, value, mono }: { label: string; value?: string; mono
   );
 }
 
+const STATUS_MAP: Record<string, { label: string; bg: string; text: string }> = {
+  liquidado: { label: 'Liquidado', bg: palette.success + '20', text: palette.success },
+  completado: { label: 'Completado', bg: palette.success + '20', text: palette.success },
+  exitoso: { label: 'Exitoso', bg: palette.success + '20', text: palette.success },
+  pendiente: { label: 'Pendiente', bg: palette.brand[500] + '30', text: palette.brand[700] },
+  en_proceso: { label: 'En proceso', bg: palette.brand[500] + '30', text: palette.brand[700] },
+  rechazado: { label: 'Rechazado', bg: palette.danger + '18', text: palette.danger },
+  fallido: { label: 'Fallido', bg: palette.danger + '18', text: palette.danger },
+  cancelado: { label: 'Cancelado', bg: palette.neutral[400] + '25', text: palette.neutral[500] },
+};
+
+function StatusBadge({ value }: { value?: string }) {
+  if (!value) return null;
+  const key = value.toLowerCase().replace(/\s+/g, '_');
+  const config = STATUS_MAP[key] ?? { label: value, bg: palette.neutral[400] + '25', text: palette.neutral[500] };
+  return (
+    <View className="flex-row items-center justify-between gap-md border-b border-neutral-100 py-md dark:border-neutral-800">
+      <Text variant="caption" tone="muted">Estatus</Text>
+      <View style={{ backgroundColor: config.bg, borderRadius: 99, paddingHorizontal: 12, paddingVertical: 4 }}>
+        <Text variant="caption" style={{ color: config.text, fontWeight: '700' }}>{config.label}</Text>
+      </View>
+    </View>
+  );
+}
+
 type Props = NativeStackScreenProps<WalletStackParamList, 'MovementDetail'>;
 
 export function MovementDetailScreen({ route }: Props) {
@@ -90,7 +115,7 @@ export function MovementDetailScreen({ route }: Props) {
         <DetailRow label="Beneficiario" value={movement.beneficiaryName} />
         <DetailRow label="Correo del beneficiario" value={movement.beneficiaryEmail} />
         <DetailRow label="Concepto" value={movement.comments} />
-        <DetailRow label="Estatus" value={movement.state} />
+        <StatusBadge value={movement.state} />
       </View>
 
       <Pressable

@@ -93,7 +93,7 @@ export function AppHeader() {
         >
           <Ionicons name="menu" size={26} color={iconColor} />
         </Pressable>
-        <Logo width={82} height={40} />
+        <Logo width={82} height={40} tint={colorScheme === 'dark' ? '#FFFFFF' : undefined} />
         <Pressable
           hitSlop={10}
           onPress={openNotifications}

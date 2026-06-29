@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Button, GoldGradient, Input, Logo, Text } from '@ui/design-system/components';
+import { Button, Input, Logo, Text } from '@ui/design-system/components';
 import { useAuth } from '@ui/providers/AuthProvider';
-import { useToast } from '@ui/providers/ToastProvider';
 import { lookupErrorMessage } from '@ui/features/auth/authMessages';
 import type { AuthStackParamList } from '@ui/navigation/types';
 import { palette } from '@ui/design-system/tokens/palette';
@@ -15,18 +14,24 @@ const PHONE_LENGTH = 10;
 
 export function LoginPhoneScreen({ navigation }: Props) {
   const { lookupName } = useAuth();
-  const toast = useToast();
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const valid = phone.length === PHONE_LENGTH;
+
+  const onChangePhone = (t: string) => {
+    setPhone(t.replace(/[^0-9]/g, ''));
+    if (error) setError(null);
+  };
 
   const onContinue = async () => {
     if (!valid) return;
     setLoading(true);
+    setError(null);
     const result = await lookupName(phone);
     setLoading(false);
     if (!result.ok) {
-      toast.error(lookupErrorMessage(result.error));
+      setError(lookupErrorMessage(result.error));
       return;
     }
     navigation.navigate('LoginPassword', { phone, name: result.value });
@@ -34,41 +39,36 @@ export function LoginPhoneScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-0 dark:bg-neutral-950">
-      {/* Gold gradient — logo visible arriba, headline display abajo */}
-      <GoldGradient
-        radius={0}
+      {/* Hero oscuro — 50% de la pantalla */}
+      <View
         style={{
-          flex: 1,
-          justifyContent: 'space-between',
-          paddingHorizontal: 24,
-          paddingTop: 28,
-          paddingBottom: 32,
+          height: '50%',
+          backgroundColor: palette.neutral[900],
           borderBottomLeftRadius: 32,
           borderBottomRightRadius: 32,
+          paddingHorizontal: 24,
+          paddingTop: 36,
+          paddingBottom: 36,
+          justifyContent: 'space-between',
         }}
       >
         <View
           style={{
-            backgroundColor: 'white',
-            borderRadius: 16,
-            padding: 10,
+            backgroundColor: '#FFFFFF',
+            borderRadius: 20,
+            padding: 14,
             alignSelf: 'flex-start',
-            shadowColor: '#000',
-            shadowOpacity: 0.10,
-            shadowRadius: 8,
-            shadowOffset: { width: 0, height: 2 },
-            elevation: 3,
           }}
         >
-          <Logo width={52} height={52} />
+          <Logo width={72} height={72} />
         </View>
-        <Text variant="display" style={{ color: palette.neutral[900], lineHeight: 48 }}>
+        <Text variant="display" style={{ color: '#FFFFFF', lineHeight: 52 }}>
           {'Simplifica\ntus finanzas.'}
         </Text>
-      </GoldGradient>
+      </View>
 
-      {/* Form anchored at bottom */}
-      <View className="gap-xl px-lg pb-lg" style={{ paddingTop: 32 }}>
+      {/* Formulario — ocupa el espacio restante */}
+      <View className="flex-1 px-lg" style={{ paddingTop: 28 }}>
         <Input
           label="Número de celular"
           placeholder="10 dígitos"
@@ -76,31 +76,38 @@ export function LoginPhoneScreen({ navigation }: Props) {
           keyboardType="number-pad"
           maxLength={PHONE_LENGTH}
           value={phone}
-          onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, ''))}
+          onChangeText={onChangePhone}
+          error={error ?? undefined}
+        />
+      </View>
+
+      {/* Acciones fijas al pie */}
+      <View className="gap-md px-lg pb-lg" style={{ paddingTop: 12 }}>
+        <Button
+          title="Iniciar sesión"
+          full
+          disabled={!valid}
+          loading={loading}
+          onPress={onContinue}
         />
 
-        <View className="gap-md">
-          <Button
-            title="Iniciar sesión"
-            full
-            disabled={!valid}
-            loading={loading}
-            onPress={onContinue}
-          />
+        {/* Divider + registro */}
+        <View className="flex-row items-center gap-md">
+          <View className="h-px flex-1 bg-neutral-200 dark:bg-neutral-700" />
+          <Text variant="caption" tone="muted">o</Text>
+          <View className="h-px flex-1 bg-neutral-200 dark:bg-neutral-700" />
+        </View>
 
-          <View className="flex-row justify-center gap-xs">
-            <Text variant="body" tone="muted">
-              No tengo cuenta.
+        <View className="flex-row justify-center gap-xs">
+          <Text variant="body" tone="muted">¿Sin cuenta?</Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => navigation.navigate('RegisterPhone')}
+          >
+            <Text variant="body" tone="link" className="font-semibold">
+              Regístrate
             </Text>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => navigation.navigate('RegisterPhone')}
-            >
-              <Text variant="body" tone="link" className="font-semibold">
-                Regístrate
-              </Text>
-            </Pressable>
-          </View>
+          </Pressable>
         </View>
       </View>
     </SafeAreaView>
