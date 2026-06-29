@@ -39,8 +39,10 @@ export const registrationErrorMessage = (e: RegistrationError): string => {
       return 'Código incorrecto. Verifícalo e intenta de nuevo.';
     case 'network':
       return 'Revisa tu conexión a internet e intenta de nuevo.';
-    case 'unknown':
-      return e.message || 'No se pudo completar el registro. Intenta de nuevo.';
+    case 'unknown': {
+      const code = e.message?.match(/^[A-Z]+-\d+$/) ? e.message : 'REG-001';
+      return `No se pudo completar el registro. Si el error persiste, comunícate a soporte con el código: ${code}`;
+    }
   }
 };
 

@@ -12,9 +12,21 @@ import type {
 import type { HttpClient, HttpError } from '@infrastructure/http/HttpClient';
 import { documentDataExtractEndpoint, endpoints } from '@infrastructure/http/endpoints';
 
+const ERROR_CODES: Record<string, string> = {
+  'extra fields': 'REG-002',
+  'this form should not': 'REG-002',
+  'already exists': 'REG-003',
+  'duplicate': 'REG-003',
+};
+
 const toError = (e: HttpError): RegistrationError => {
   if (e.kind === 'network') return { type: 'network' };
-  return { type: 'unknown', message: e.message };
+  const msg = (e.message ?? '').toLowerCase();
+  for (const [pattern, code] of Object.entries(ERROR_CODES)) {
+    if (msg.includes(pattern)) return { type: 'unknown', message: code };
+  }
+  if (__DEV__) console.warn('[REG] backend error:', e.message);
+  return { type: 'unknown', message: 'REG-001' };
 };
 
 const parseCatalog = (value: unknown): CatalogItem[] => {
@@ -181,13 +193,11 @@ export class MedaRegistrationGateway implements RegistrationGateway {
     const hasDocuments = Boolean(draft.documentFrontUri);
     const data: Record<string, unknown> = {
       cellphone: draft.phone,
-      phone: draft.phone,
       firstName: draft.firstName,
       lastName: draft.lastName,
       lastName2: draft.lastName2,
       password: draft.password,
       nip: draft.nip,
-      nipSignature: draft.nip,
       birthDate: draft.birthDate,
       occupation: draft.occupation,
       // Backend ChoiceType uses array_flip(GENRES), so the submit value is the index: 0=Masculino, 1=Femenino.
@@ -215,7 +225,6 @@ export class MedaRegistrationGateway implements RegistrationGateway {
         firstName: b.firstName,
         lastName: b.lastName,
         lastName2: b.lastName2,
-        secondLastName: b.lastName2,
         percent: b.percent,
       })),
       goalsSurvey: draft.transactionalProfile,
