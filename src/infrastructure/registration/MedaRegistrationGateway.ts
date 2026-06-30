@@ -11,12 +11,16 @@ import type {
 } from '@domain/registration/ports/RegistrationGateway';
 import type { HttpClient, HttpError } from '@infrastructure/http/HttpClient';
 import { documentDataExtractEndpoint, endpoints } from '@infrastructure/http/endpoints';
+import { logger } from '@config/logger';
 
 const ERROR_CODES: Record<string, string> = {
   'extra fields': 'REG-002',
   'this form should not': 'REG-002',
   'already exists': 'REG-003',
   'duplicate': 'REG-003',
+  'invalid data': 'REG-004',
+  'object reference': 'REG-005',
+  'armor': 'REG-005',
 };
 
 const toError = (e: HttpError): RegistrationError => {
@@ -25,7 +29,7 @@ const toError = (e: HttpError): RegistrationError => {
   for (const [pattern, code] of Object.entries(ERROR_CODES)) {
     if (msg.includes(pattern)) return { type: 'unknown', message: code };
   }
-  if (__DEV__) console.warn('[REG] backend error:', e.message);
+  logger.warn('[REG] backend error:', e.message);
   return { type: 'unknown', message: 'REG-001' };
 };
 
@@ -193,11 +197,13 @@ export class MedaRegistrationGateway implements RegistrationGateway {
     const hasDocuments = Boolean(draft.documentFrontUri);
     const data: Record<string, unknown> = {
       cellphone: draft.phone,
+      phone: draft.phone,
       firstName: draft.firstName,
       lastName: draft.lastName,
       lastName2: draft.lastName2,
       password: draft.password,
       nip: draft.nip,
+      nipSignature: draft.nip,
       birthDate: draft.birthDate,
       occupation: draft.occupation,
       // Backend ChoiceType uses array_flip(GENRES), so the submit value is the index: 0=Masculino, 1=Femenino.
@@ -225,6 +231,7 @@ export class MedaRegistrationGateway implements RegistrationGateway {
         firstName: b.firstName,
         lastName: b.lastName,
         lastName2: b.lastName2,
+        secondLastName: b.lastName2,
         percent: b.percent,
       })),
       goalsSurvey: draft.transactionalProfile,
@@ -234,6 +241,7 @@ export class MedaRegistrationGateway implements RegistrationGateway {
       },
     };
 
+    logger.warn('[REG] register payload keys:', Object.keys(data).join(', '));
     if (!hasDocuments) {
       const res = await this.http.request<unknown>(endpoints.register, { body: data });
       return res.ok ? ok(true) : err(toError(res.error));
@@ -266,11 +274,14 @@ export class MedaRegistrationGateway implements RegistrationGateway {
       lastName: draft.lastName,
       lastName2: draft.lastName2,
     };
+    logger.warn('[REG] blacklist body:', new URLSearchParams(blackListBody as Record<string, string>).toString());
     const res = await this.http.request<{ validationSign?: unknown }>(endpoints.blackListCheck, {
       body: blackListBody,
+      encoding: 'form',
     });
     if (res.ok) return { ok: true, sign: res.value.validationSign ?? null };
     if (res.error.kind === 'network') return { ok: false, error: { type: 'network' } };
-    return { ok: true, sign: null };
+    logger.warn('[REG] blacklist check failed:', res.error.message);
+    return { ok: false, error: { type: 'unknown', message: 'REG-005' } };
   }
 }
