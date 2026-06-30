@@ -11,10 +11,26 @@ import type {
 } from '@domain/registration/ports/RegistrationGateway';
 import type { HttpClient, HttpError } from '@infrastructure/http/HttpClient';
 import { documentDataExtractEndpoint, endpoints } from '@infrastructure/http/endpoints';
+import { logger } from '@config/logger';
+
+const ERROR_CODES: Record<string, string> = {
+  'extra fields': 'REG-002',
+  'this form should not': 'REG-002',
+  'already exists': 'REG-003',
+  'duplicate': 'REG-003',
+  'invalid data': 'REG-004',
+  'object reference': 'REG-005',
+  'armor': 'REG-005',
+};
 
 const toError = (e: HttpError): RegistrationError => {
   if (e.kind === 'network') return { type: 'network' };
-  return { type: 'unknown', message: e.message };
+  const msg = (e.message ?? '').toLowerCase();
+  for (const [pattern, code] of Object.entries(ERROR_CODES)) {
+    if (msg.includes(pattern)) return { type: 'unknown', message: code };
+  }
+  logger.warn('[REG] backend error:', e.message);
+  return { type: 'unknown', message: 'REG-001' };
 };
 
 const parseCatalog = (value: unknown): CatalogItem[] => {
@@ -225,6 +241,7 @@ export class MedaRegistrationGateway implements RegistrationGateway {
       },
     };
 
+    logger.warn('[REG] register payload keys:', Object.keys(data).join(', '));
     if (!hasDocuments) {
       const res = await this.http.request<unknown>(endpoints.register, { body: data });
       return res.ok ? ok(true) : err(toError(res.error));
@@ -257,11 +274,14 @@ export class MedaRegistrationGateway implements RegistrationGateway {
       lastName: draft.lastName,
       lastName2: draft.lastName2,
     };
+    logger.warn('[REG] blacklist body:', new URLSearchParams(blackListBody as Record<string, string>).toString());
     const res = await this.http.request<{ validationSign?: unknown }>(endpoints.blackListCheck, {
       body: blackListBody,
+      encoding: 'form',
     });
     if (res.ok) return { ok: true, sign: res.value.validationSign ?? null };
     if (res.error.kind === 'network') return { ok: false, error: { type: 'network' } };
-    return { ok: true, sign: null };
+    logger.warn('[REG] blacklist check failed:', res.error.message);
+    return { ok: false, error: { type: 'unknown', message: 'REG-005' } };
   }
 }

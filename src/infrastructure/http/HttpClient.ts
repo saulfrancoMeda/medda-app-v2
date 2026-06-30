@@ -16,6 +16,7 @@ export interface RequestOptions {
   readonly query?: Record<string, string | number | boolean | undefined>;
   readonly body?: unknown;
   readonly silentStatuses?: readonly number[];
+  readonly encoding?: 'json' | 'form';
 }
 
 export class HttpClient {
@@ -30,11 +31,16 @@ export class HttpClient {
   ): Promise<Result<T, HttpError>> {
     const url = this.buildUrl(endpoint.path, options.query);
     const isMultipart = typeof FormData !== 'undefined' && options.body instanceof FormData;
+    const isForm = options.encoding === 'form';
     const headers: Record<string, string> = {
       'X-Auth-Token': config.xAuthToken,
       'X-App-Version': config.appVersion,
     };
-    if (!isMultipart) headers['Content-Type'] = 'application/json';
+    if (isForm) {
+      headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    } else if (!isMultipart) {
+      headers['Content-Type'] = 'application/json';
+    }
     const authValue = await this.getAuthHeader(endpoint.auth);
     if (authValue) {
       headers.Authorization = authValue;
@@ -46,7 +52,9 @@ export class HttpClient {
           ? undefined
           : isMultipart
             ? (options.body as FormData)
-            : JSON.stringify(options.body);
+            : isForm
+              ? new URLSearchParams(options.body as Record<string, string>).toString()
+              : JSON.stringify(options.body);
 
       if (__DEV__ && options.body !== undefined && !isMultipart) {
         const PII_FIELDS = ['password', 'nip', 'nipSignature', 'cellphone', 'phone',
